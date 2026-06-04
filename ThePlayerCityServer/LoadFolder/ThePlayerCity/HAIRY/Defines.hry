@@ -1,0 +1,38 @@
+#include "Shops.hry"
+//====================================================================
+//
+// Defines.hry - GLOBAL CONSTANTS & RULES
+//
+//====================================================================
+DEFINE FAM_OBJ     
+DEFINE FAM_NPC     
+DEFINE FAM_MONSTER
+DEFINE FAM_WEAPON
+DEFINE FAM_ARMOR_GAUNT
+DEFINE FAM_ARMOR_SHIELD
+DEFINE FAM_ARMOR_LEG
+DEFINE FAM_ARMOR_HELM
+DEFINE FAM_ARMOR_PLATE
+DEFINE FAM_ARMOR_TRINKET
+
+// FAM_OBJ     -> Uses TILESET OBJECT
+// FAM_NPC     -> Uses TILESET AVATAR
+// FAM_MONSTER -> Uses TILESET AVATAR
+// FAM_WEAPON  -> Uses TILESET ITEMS
+// FAM_ARMOR   -> Uses TILESET ITEMS
+
+DEFINE TRUE                     1
+DEFINE FALSE                    0
+
+// --- Heartbeat Timers ---
+DEFINE GLOBAL_WORLD_TICK        1000 // 1 second main loop
+DEFINE LOCAL_REGEN_INTERVAL     5000 // 5 second recovery loop
+
+// --- AUTO-REGISTERED ASSETS ---
+DEFINE GLOBAL TILESET_ITEMS 0
+DEFINE GLOBAL TILESET_OBJECTS 0
+DEFINE GLOBAL TILESET_AVATARS 0
+DEFINE GLOBAL TILESET_WORLD 0
+
+#Define PLR_MALE_WARRIOR 0
+#Define PLR_FEMALE_WARRIOR 1

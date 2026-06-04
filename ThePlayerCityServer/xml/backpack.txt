@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<backpack id="1" x="435" y="255">
+  <item name="gold_piece" x="20" y="80" amount="500" isdrag="false"/>
+  <item name="rune_axe" x="40" y="100" isdrag="false"/>
+  <item name="miners_cape" x="100" y="10" isdrag="false"/>
+  <item name="gold_piece" x="60" y="100" amount="250" isdrag="false"/>
+  <item name="gold_piece" x="20" y="80" amount="500" isdrag="false"/>
+  <item name="fire_axe" x="40" y="50" isdrag="false"/>
+  <item name="enchanted_scalemail" x="100" y="30" isdrag="false"/>
+  <item name="chest" x="35" y="80" isdrag="false"/>
+</backpack>

@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<mapitems>
+  <item name="gold_piece" x="408" y="526" amount="10000000" decay="300000"/>
+  <item name="gold_piece" x="408" y="527" amount="1000000" decay="300000"/>
+</mapitems>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<skills>
+  <Combat show="1">
+    <Sword Level="1" exp="0" exptonextlevel="60" learned="0"/>
+    <Axe Level="1" exp="0" exptonextlevel="60" learned="0"/>
+    <Blunt Level="1" exp="0" exptonextlevel="60" learned="0"/>
+    <Polearm Level="1" exp="0" exptonextlevel="60" learned="0"/>
+  </Combat>
+  <Mining show="1">
+    <Digging Level="1" exp="0" exptonextlevel="500" learned="1"/>
+    <Smelting Level="1" exp="0" exptonextlevel="500" learned="1"/>
+    <Forging Level="1" exp="0" exptonextlevel="500" learned="1"/>
+  </Mining>
+</skills>

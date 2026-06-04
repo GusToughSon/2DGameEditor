@@ -1,0 +1,903 @@
+<?xml version="1.0" ?>
+<npcs>
+  <npc>
+    <guard>
+      <id>1</id>
+      <damage min="600" max="1200"/>
+      <health max_hp="2000" regen="0"/>
+    </guard>
+    <elf>
+      <id>2</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </elf>
+    <knight>
+      <id>3</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </knight>
+    <Mesophlan>
+      <id>4</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </Mesophlan>
+    <female_warrior>
+      <id>5</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </female_warrior>
+    <human>
+      <id>6</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </human>
+    <dwarf>
+      <id>7</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </dwarf>
+    <dark_elf>
+      <id>8</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </dark_elf>
+    <shopkeeper>
+      <id>9</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </shopkeeper>
+    <female_citizen>
+      <id>10</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </female_citizen>
+    <male_citizen>
+      <id>11</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </male_citizen>
+    <wizard>
+      <id>12</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </wizard>
+    <child>
+      <id>13</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </child>
+    <puppy>
+      <id>14</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </puppy>
+    <evil_guardian>
+      <id>15</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </evil_guardian>
+    <banker>
+      <id>16</id>
+      <damage min="0" max="0"/>
+      <health max_hp="500" regen="0"/>
+    </banker>
+  </npc>
+  <monster>
+    <spider>
+      <id>0</id>
+      <level>1</level>
+      <stats str="2" dex="2"/>
+      <damage min="1" max="5"/>
+      <health max_hp="15" regen="0"/>
+      <speed move="625" attack="1200"/>
+    </spider>
+    <bat>
+      <id>1</id>
+      <level>1</level>
+      <stats str="4" dex="3"/>
+      <damage min="2" max="6"/>
+      <health max_hp="20" regen="0"/>
+      <speed move="575" attack="1175"/>
+    </bat>
+    <snake>
+      <id>2</id>
+      <level>1</level>
+      <stats str="8" dex="4"/>
+      <damage min="6" max="10"/>
+      <health max_hp="25" regen="0"/>
+      <speed move="600" attack="1150"/>
+    </snake>
+    <goblin>
+      <id>3</id>
+      <level>2</level>
+      <stats str="14" dex="5"/>
+      <damage min="8" max="16"/>
+      <health max_hp="30" regen="0"/>
+      <speed move="600" attack="1125"/>
+    </goblin>
+    <kobold>
+      <id>4</id>
+      <level>2</level>
+      <stats str="16" dex="6"/>
+      <damage min="9" max="18"/>
+      <health max_hp="35" regen="0"/>
+      <speed move="500" attack="1100"/>
+    </kobold>
+    <lizardman>
+      <id>5</id>
+      <level>2</level>
+      <stats str="18" dex="9"/>
+      <damage min="10" max="20"/>
+      <health max_hp="40" regen="0"/>
+      <speed move="400" attack="1075"/>
+    </lizardman>
+    <ice_queen>
+      <id>6</id>
+      <level>75</level>
+      <stats str="100" dex="100"/>
+      <damage min="600" max="1200"/>
+      <health max_hp="5500" regen="0"/>
+      <speed move="170" attack="1200"/>
+      <element type="water" min="50" max="50"/>
+    </ice_queen>
+    <hobgoblin>
+      <id>7</id>
+      <level>3</level>
+      <stats str="22" dex="11"/>
+      <damage min="14" max="28"/>
+      <health max_hp="50" regen="0"/>
+      <speed move="500" attack="1025"/>
+    </hobgoblin>
+    <ice_sicklar>
+      <id>8</id>
+      <level>24</level>
+      <stats str="75" dex="70"/>
+      <damage min="180" max="350"/>
+      <health max_hp="2200" regen="0"/>
+      <speed move="400" attack="900"/>
+      <element type="water" min="50" max="50"/>
+    </ice_sicklar>
+    <spider_queen>
+      <id>9</id>
+      <level>3</level>
+      <stats str="26" dex="13"/>
+      <damage min="18" max="36"/>
+      <health max_hp="100" regen="0"/>
+      <speed move="500" attack="975"/>
+    </spider_queen>
+    <skeleton>
+      <id>10</id>
+      <level>4</level>
+      <stats str="28" dex="14"/>
+      <damage min="20" max="40"/>
+      <health max_hp="150" regen="0"/>
+      <speed move="475" attack="950"/>
+    </skeleton>
+    <orc>
+      <id>11</id>
+      <level>4</level>
+      <stats str="30" dex="15"/>
+      <damage min="22" max="44"/>
+      <health max_hp="200" regen="0"/>
+      <speed move="450" attack="925"/>
+    </orc>
+    <thunder_troll>
+      <id>12</id>
+      <level>24</level>
+      <stats str="80" dex="70"/>
+      <damage min="180" max="360"/>
+      <health max_hp="2800" regen="0"/>
+      <speed move="700" attack="1000"/>
+      <element type="air" min="50" max="50"/>
+    </thunder_troll>
+    <werewolf>
+      <id>13</id>
+      <level>5</level>
+      <stats str="32" dex="20"/>
+      <damage min="26" max="52"/>
+      <health max_hp="300" regen="0"/>
+      <speed move="400" attack="890"/>
+    </werewolf>
+    <amazon>
+      <id>14</id>
+      <level>5</level>
+      <stats str="34" dex="22"/>
+      <damage min="28" max="56"/>
+      <health max_hp="350" regen="0"/>
+      <speed move="600" attack="880"/>
+    </amazon>
+    <zombie>
+      <id>15</id>
+      <level>6</level>
+      <stats str="36" dex="24"/>
+      <damage min="30" max="60"/>
+      <health max_hp="400" regen="0"/>
+      <speed move="575" attack="870"/>
+    </zombie>
+    <thief>
+      <id>16</id>
+      <level>6</level>
+      <stats str="38" dex="26"/>
+      <damage min="32" max="64"/>
+      <health max_hp="450" regen="0"/>
+      <speed move="550" attack="860"/>
+    </thief>
+    <fighter>
+      <id>17</id>
+      <level>7</level>
+      <stats str="40" dex="28"/>
+      <damage min="34" max="68"/>
+      <health max_hp="500" regen="0"/>
+      <speed move="525" attack="850"/>
+    </fighter>
+    <minotaur>
+      <id>18</id>
+      <level>7</level>
+      <stats str="42" dex="30"/>
+      <damage min="36" max="72"/>
+      <health max_hp="550" regen="0"/>
+      <speed move="500" attack="840"/>
+    </minotaur>
+    <skeleton_warrior>
+      <id>19</id>
+      <level>8</level>
+      <stats str="44" dex="32"/>
+      <damage min="38" max="76"/>
+      <health max_hp="600" regen="0"/>
+      <speed move="475" attack="830"/>
+    </skeleton_warrior>
+    <dark_mage>
+      <id>20</id>
+      <level>8</level>
+      <stats str="46" dex="34"/>
+      <damage min="40" max="80"/>
+      <health max_hp="700" regen="0"/>
+      <speed move="500" attack="750"/>
+      <element type="fire" min="50" max="50"/>
+    </dark_mage>
+    <minotaur_berserker>
+      <id>21</id>
+      <level>10</level>
+      <stats str="48" dex="36"/>
+      <damage min="44" max="88"/>
+      <health max_hp="800" regen="0"/>
+      <speed move="425" attack="810"/>
+    </minotaur_berserker>
+    <werewolf_lord>
+      <id>22</id>
+      <level>10</level>
+      <stats str="50" dex="38"/>
+      <damage min="48" max="96"/>
+      <health max_hp="900" regen="0"/>
+      <speed move="375" attack="800"/>
+    </werewolf_lord>
+    <orc_assasin>
+      <id>23</id>
+      <level>10</level>
+      <stats str="54" dex="40"/>
+      <damage min="52" max="104"/>
+      <health max_hp="1000" regen="0"/>
+      <speed move="500" attack="790"/>
+    </orc_assasin>
+    <mummy>
+      <id>24</id>
+      <level>10</level>
+      <stats str="58" dex="42"/>
+      <damage min="56" max="112"/>
+      <health max_hp="1200" regen="0"/>
+      <speed move="550" attack="780"/>
+    </mummy>
+    <wraith>
+      <id>25</id>
+      <level>11</level>
+      <stats str="64" dex="44"/>
+      <damage min="60" max="120"/>
+      <health max_hp="1400" regen="0"/>
+      <speed move="575" attack="770"/>
+    </wraith>
+    <taurus>
+      <id>26</id>
+      <level>12</level>
+      <stats str="67" dex="48"/>
+      <damage min="64" max="128"/>
+      <health max_hp="1600" regen="0"/>
+      <speed move="600" attack="760"/>
+    </taurus>
+    <minotaur_lord>
+      <id>27</id>
+      <level>13</level>
+      <stats str="72" dex="54"/>
+      <damage min="70" max="140"/>
+      <health max_hp="1700" regen="0"/>
+      <speed move="500" attack="750"/>
+    </minotaur_lord>
+    <griffin>
+      <id>28</id>
+      <level>14</level>
+      <stats str="76" dex="58"/>
+      <damage min="80" max="160"/>
+      <health max_hp="1800" regen="0"/>
+      <speed move="600" attack="800"/>
+    </griffin>
+    <giant>
+      <id>29</id>
+      <level>15</level>
+      <stats str="80" dex="62"/>
+      <damage min="90" max="180"/>
+      <health max_hp="2000" regen="0"/>
+      <speed move="700" attack="900"/>
+    </giant>
+    <ettin>
+      <id>30</id>
+      <level>16</level>
+      <stats str="84" dex="66"/>
+      <damage min="100" max="200"/>
+      <health max_hp="2250" regen="0"/>
+      <speed move="725" attack="1000"/>
+    </ettin>
+    <ogre>
+      <id>31</id>
+      <level>17</level>
+      <stats str="86" dex="70"/>
+      <damage min="125" max="250"/>
+      <health max_hp="2400" regen="0"/>
+      <speed move="740" attack="1050"/>
+    </ogre>
+    <giant_lord>
+      <id>32</id>
+      <level>20</level>
+      <stats str="88" dex="74"/>
+      <damage min="150" max="300"/>
+      <health max_hp="2500" regen="0"/>
+      <speed move="750" attack="1100"/>
+    </giant_lord>
+    <cyclops>
+      <id>33</id>
+      <level>24</level>
+      <stats str="86" dex="75"/>
+      <damage min="175" max="350"/>
+      <health max_hp="2600" regen="0"/>
+      <speed move="760" attack="1150"/>
+    </cyclops>
+    <golem>
+      <id>34</id>
+      <level>28</level>
+      <stats str="88" dex="80"/>
+      <damage min="200" max="400"/>
+      <health max_hp="2750" regen="0"/>
+      <speed move="775" attack="1200"/>
+    </golem>
+    <lich>
+      <id>35</id>
+      <level>36</level>
+      <stats str="95" dex="95"/>
+      <damage min="250" max="500"/>
+      <health max_hp="2850" regen="0"/>
+      <speed move="800" attack="1000"/>
+    </lich>
+    <bully>
+      <id>36</id>
+      <level>52</level>
+      <stats str="95" dex="95"/>
+      <damage min="350" max="700"/>
+      <health max_hp="3000" regen="0"/>
+      <speed move="250" attack="700"/>
+    </bully>
+    <szgilid_soldier>
+      <id>37</id>
+      <level>13</level>
+      <stats str="70" dex="38"/>
+      <damage min="75" max="150"/>
+      <health max_hp="1900" regen="0"/>
+      <speed move="500" attack="750"/>
+    </szgilid_soldier>
+    <troglodyte>
+      <id>38</id>
+      <level>11</level>
+      <stats str="64" dex="33"/>
+      <damage min="60" max="120"/>
+      <health max_hp="1400" regen="0"/>
+      <speed move="600" attack="725"/>
+    </troglodyte>
+    <ice_spawn>
+      <id>39</id>
+      <level>70</level>
+      <stats str="95" dex="90"/>
+      <damage min="500" max="1000"/>
+      <health max_hp="7000" regen="0"/>
+      <speed move="160" attack="400"/>
+      <element type="water" min="50" max="50"/>
+    </ice_spawn>
+    <fire_balor>
+      <id>40</id>
+      <level>100</level>
+      <stats str="100" dex="100"/>
+      <damage min="1000" max="2000"/>
+      <health max_hp="10000" regen="0"/>
+      <speed move="125" attack="350"/>
+      <element type="fire" min="50" max="50"/>
+    </fire_balor>
+    <thunder_sicklar>
+      <id>41</id>
+      <level>20</level>
+      <stats str="76" dex="72"/>
+      <damage min="150" max="300"/>
+      <health max_hp="2550" regen="0"/>
+      <speed move="500" attack="700"/>
+      <element type="air" min="50" max="50"/>
+    </thunder_sicklar>
+    <earth_balor>
+      <id>42</id>
+      <level>100</level>
+      <stats str="100" dex="100"/>
+      <damage min="1000" max="2000"/>
+      <health max_hp="10000" regen="0"/>
+      <speed move="125" attack="350"/>
+      <element type="earth" min="50" max="50"/>
+    </earth_balor>
+    <ice_balor>
+      <id>43</id>
+      <level>100</level>
+      <stats str="100" dex="100"/>
+      <damage min="1000" max="2000"/>
+      <health max_hp="10000" regen="0"/>
+      <speed move="125" attack="350"/>
+      <element type="water" min="50" max="50"/>
+    </ice_balor>
+    <grobla>
+      <id>44</id>
+      <level>40</level>
+      <stats str="68" dex="36"/>
+      <damage min="70" max="140"/>
+      <health max_hp="1700" regen="0"/>
+      <speed move="500" attack="725"/>
+    </grobla>
+    <szgilid_worker>
+      <id>45</id>
+      <level>9</level>
+      <stats str="50" dex="38"/>
+      <damage min="50" max="100"/>
+      <health max_hp="1000" regen="0"/>
+      <speed move="650" attack="800"/>
+    </szgilid_worker>
+    <desert_balor>
+      <id>46</id>
+      <level>100</level>
+      <stats str="100" dex="100"/>
+      <damage min="1000" max="2000"/>
+      <health max_hp="10000" regen="0"/>
+      <speed move="125" attack="350"/>
+    </desert_balor>
+    <genie>
+      <id>47</id>
+      <level>10</level>
+      <stats str="50" dex="38"/>
+      <damage min="50" max="100"/>
+      <health max_hp="1200" regen="0"/>
+      <speed move="400" attack="600"/>
+    </genie>
+    <genie>
+      <id>48</id>
+      <level>13</level>
+      <stats str="72" dex="54"/>
+      <damage min="75" max="150"/>
+      <health max_hp="1700" regen="0"/>
+      <speed move="425" attack="700"/>
+      <element type="air" min="50" max="50"/>
+    </genie>
+    <ghost>
+      <id>49</id>
+      <level>16</level>
+      <stats str="70" dex="64"/>
+      <damage min="100" max="200"/>
+      <health max_hp="2250" regen="0"/>
+      <speed move="450" attack="800"/>
+      <element type="air" min="50" max="50"/>
+    </ghost>
+    <beholder>
+      <id>50</id>
+      <level>16</level>
+      <stats str="80" dex="64"/>
+      <damage min="110" max="220"/>
+      <health max_hp="2000" regen="0"/>
+      <speed move="500" attack="900"/>
+      <element type="air" min="50" max="50"/>
+    </beholder>
+    <beholder_queen>
+      <id>51</id>
+      <level>18</level>
+      <stats str="75" dex="65"/>
+      <damage min="125" max="250"/>
+      <health max_hp="2400" regen="0"/>
+      <speed move="450" attack="1000"/>
+      <element type="air" min="50" max="50"/>
+    </beholder_queen>
+    <black_dragon>
+      <id>52</id>
+      <level>70</level>
+      <stats str="80" dex="70"/>
+      <damage min="300" max="600"/>
+      <health max_hp="3500" regen="0"/>
+      <speed move="210" attack="1100"/>
+      <element type="air" min="50" max="50"/>
+    </black_dragon>
+    <floating_horror>
+      <id>53</id>
+      <level>80</level>
+      <stats str="90" dex="80"/>
+      <damage min="400" max="800"/>
+      <health max_hp="4000" regen="0"/>
+      <speed move="400" attack="1200"/>
+      <element type="air" min="50" max="50"/>
+    </floating_horror>
+    <fire_sicklar>
+      <id>54</id>
+      <level>60</level>
+      <stats str="60" dex="60"/>
+      <damage min="150" max="300"/>
+      <health max_hp="2200" regen="0"/>
+      <speed move="400" attack="750"/>
+      <element type="fire" min="50" max="50"/>
+    </fire_sicklar>
+    <winter_wolf>
+      <id>55</id>
+      <level>20</level>
+      <stats str="35" dex="30"/>
+      <damage min="25" max="50"/>
+      <health max_hp="350" regen="0"/>
+      <speed move="300" attack="500"/>
+      <element type="water" min="50" max="50"/>
+    </winter_wolf>
+    <ice_elemental>
+      <id>56</id>
+      <level>10</level>
+      <stats str="50" dex="40"/>
+      <damage min="50" max="100"/>
+      <health max_hp="1200" regen="0"/>
+      <speed move="700" attack="600"/>
+      <element type="water" min="50" max="50"/>
+    </ice_elemental>
+    <frost_goblin>
+      <id>57</id>
+      <level>40</level>
+      <stats str="60" dex="50"/>
+      <damage min="75" max="150"/>
+      <health max_hp="1750" regen="0"/>
+      <speed move="550" attack="650"/>
+      <element type="water" min="50" max="50"/>
+    </frost_goblin>
+    <snow_elemental>
+      <id>58</id>
+      <level>50</level>
+      <stats str="70" dex="60"/>
+      <damage min="100" max="200"/>
+      <health max_hp="2000" regen="0"/>
+      <speed move="650" attack="700"/>
+      <element type="water" min="50" max="50"/>
+    </snow_elemental>
+    <ice_golem>
+      <id>59</id>
+      <level>60</level>
+      <stats str="75" dex="65"/>
+      <damage min="150" max="300"/>
+      <health max_hp="2500" regen="0"/>
+      <speed move="775" attack="800"/>
+      <element type="water" min="50" max="50"/>
+    </ice_golem>
+    <frost_troll>
+      <id>60</id>
+      <level>70</level>
+      <stats str="80" dex="70"/>
+      <damage min="200" max="400"/>
+      <health max_hp="3000" regen="0"/>
+      <speed move="600" attack="1000"/>
+      <element type="water" min="50" max="50"/>
+    </frost_troll>
+    <blue_dragon>
+      <id>61</id>
+      <level>80</level>
+      <stats str="85" dex="75"/>
+      <damage min="250" max="500"/>
+      <health max_hp="3250" regen="0"/>
+      <speed move="200" attack="1200"/>
+      <element type="water" min="50" max="50"/>
+    </blue_dragon>
+    <ice_devil>
+      <id>62</id>
+      <level>85</level>
+      <stats str="90" dex="80"/>
+      <damage min="300" max="600"/>
+      <health max_hp="4000" regen="0"/>
+      <speed move="175" attack="800"/>
+      <element type="water" min="50" max="50"/>
+    </ice_devil>
+    <ice_dragon>
+      <id>63</id>
+      <level>90</level>
+      <stats str="95" dex="85"/>
+      <damage min="400" max="800"/>
+      <health max_hp="5000" regen="0"/>
+      <speed move="900" attack="1000"/>
+      <element type="water" min="50" max="50"/>
+    </ice_dragon>
+    <hydra>
+      <id>64</id>
+      <level>95</level>
+      <stats str="100" dex="100"/>
+      <damage min="400" max="800"/>
+      <health max_hp="15000" regen="0"/>
+      <speed move="800" attack="200"/>
+      <element type="air" min="50" max="50"/>
+    </hydra>
+    <crystal_phantom>
+      <id>65</id>
+      <level>100</level>
+      <stats str="100" dex="100"/>
+      <damage min="1200" max="2600"/>
+      <health max_hp="8000" regen="0"/>
+      <speed move="200" attack="600"/>
+    </crystal_phantom>
+    <earth_spawn>
+      <id>66</id>
+      <level>90</level>
+      <stats str="90" dex="90"/>
+      <damage min="500" max="1000"/>
+      <health max_hp="8000" regen="0"/>
+      <speed move="160" attack="400"/>
+      <element type="earth" min="50" max="50"/>
+    </earth_spawn>
+    <thunder_spawn>
+      <id>67</id>
+      <level>90</level>
+      <stats str="90" dex="90"/>
+      <damage min="500" max="1000"/>
+      <health max_hp="8000" regen="0"/>
+      <speed move="160" attack="400"/>
+      <element type="air" min="50" max="50"/>
+    </thunder_spawn>
+    <earth_sicklar>
+      <id>68</id>
+      <level>40</level>
+      <stats str="70" dex="60"/>
+      <damage min="100" max="200"/>
+      <health max_hp="1750" regen="0"/>
+      <speed move="550" attack="775"/>
+      <element type="earth" min="50" max="50"/>
+    </earth_sicklar>
+    <behemoth>
+      <id>69</id>
+      <level>50</level>
+      <stats str="74" dex="70"/>
+      <damage min="85" max="170"/>
+      <health max_hp="1900" regen="0"/>
+      <speed move="650" attack="850"/>
+    </behemoth>
+    <silver_dragon>
+      <id>70</id>
+      <level>100</level>
+      <stats str="100" dex="100"/>
+      <damage min="800" max="1500"/>
+      <health max_hp="6000" regen="0"/>
+      <speed move="150" attack="800"/>
+    </silver_dragon>
+    <golden_dragon>
+      <id>71</id>
+      <level>100</level>
+      <stats str="100" dex="100"/>
+      <damage min="1000" max="2000"/>
+      <health max_hp="7500" regen="0"/>
+      <speed move="150" attack="700"/>
+    </golden_dragon>
+    <eyeball>
+      <id>72</id>
+      <level>75</level>
+      <stats str="80" dex="70"/>
+      <damage min="200" max="400"/>
+      <health max_hp="3000" regen="0"/>
+      <speed move="350" attack="1000"/>
+      <element type="air" min="50" max="50"/>
+    </eyeball>
+    <harpy>
+      <id>73</id>
+      <level>20</level>
+      <stats str="50" dex="40"/>
+      <damage min="50" max="100"/>
+      <health max_hp="1000" regen="0"/>
+      <speed move="650" attack="750"/>
+      <element type="earth" min="50" max="50"/>
+    </harpy>
+    <earth_elemental>
+      <id>74</id>
+      <level>10</level>
+      <stats str="55" dex="45"/>
+      <damage min="75" max="150"/>
+      <health max_hp="1200" regen="0"/>
+      <speed move="700" attack="700"/>
+      <element type="earth" min="50" max="50"/>
+    </earth_elemental>
+    <shambling_mound>
+      <id>75</id>
+      <level>40</level>
+      <stats str="60" dex="50"/>
+      <damage min="125" max="250"/>
+      <health max_hp="1750" regen="0"/>
+      <speed move="650" attack="800"/>
+      <element type="earth" min="50" max="50"/>
+    </shambling_mound>
+    <entling>
+      <id>76</id>
+      <level>50</level>
+      <stats str="70" dex="60"/>
+      <damage min="150" max="300"/>
+      <health max_hp="2000" regen="0"/>
+      <speed move="700" attack="850"/>
+      <element type="earth" min="50" max="50"/>
+    </entling>
+    <cave_troll>
+      <id>77</id>
+      <level>55</level>
+      <stats str="75" dex="65"/>
+      <damage min="180" max="360"/>
+      <health max_hp="2250" regen="0"/>
+      <speed move="750" attack="875"/>
+      <element type="earth" min="50" max="50"/>
+    </cave_troll>
+    <forest_troll>
+      <id>78</id>
+      <level>60</level>
+      <stats str="80" dex="70"/>
+      <damage min="200" max="400"/>
+      <health max_hp="2500" regen="0"/>
+      <speed move="800" attack="900"/>
+      <element type="earth" min="50" max="50"/>
+    </forest_troll>
+    <ent>
+      <id>79</id>
+      <level>70</level>
+      <stats str="85" dex="75"/>
+      <damage min="300" max="600"/>
+      <health max_hp="2900" regen="0"/>
+      <speed move="850" attack="1100"/>
+      <element type="earth" min="50" max="50"/>
+    </ent>
+    <green_dragon>
+      <id>80</id>
+      <level>80</level>
+      <stats str="90" dex="80"/>
+      <damage min="400" max="800"/>
+      <health max_hp="99999" regen="0"/>
+      <speed move="200" attack="1300"/>
+      <element type="earth" min="50" max="50"/>
+    </green_dragon>
+    <desert_dragon>
+      <id>81</id>
+      <level>95</level>
+      <stats str="100" dex="100"/>
+      <damage min="600" max="1200"/>
+      <health max_hp="10000" regen="0"/>
+      <speed move="220" attack="1200"/>
+    </desert_dragon>
+    <fire_elemental>
+      <id>82</id>
+      <level>10</level>
+      <stats str="50" dex="40"/>
+      <damage min="50" max="100"/>
+      <health max_hp="1200" regen="0"/>
+      <speed move="700" attack="550"/>
+      <element type="fire" min="50" max="50"/>
+    </fire_elemental>
+    <nightmare>
+      <id>83</id>
+      <level>30</level>
+      <stats str="65" dex="55"/>
+      <damage min="100" max="200"/>
+      <health max_hp="1600" regen="0"/>
+      <speed move="500" attack="600"/>
+      <element type="fire" min="50" max="50"/>
+    </nightmare>
+    <imp>
+      <id>84</id>
+      <level>50</level>
+      <stats str="70" dex="60"/>
+      <damage min="125" max="250"/>
+      <health max_hp="2000" regen="0"/>
+      <speed move="450" attack="700"/>
+      <element type="fire" min="50" max="50"/>
+    </imp>
+    <minion>
+      <id>85</id>
+      <level>60</level>
+      <stats str="70" dex="65"/>
+      <damage min="200" max="400"/>
+      <health max_hp="2500" regen="0"/>
+      <speed move="550" attack="800"/>
+      <element type="fire" min="50" max="50"/>
+    </minion>
+    <demon>
+      <id>86</id>
+      <level>70</level>
+      <stats str="80" dex="70"/>
+      <damage min="300" max="600"/>
+      <health max_hp="3000" regen="0"/>
+      <speed move="575" attack="1000"/>
+      <element type="fire" min="50" max="50"/>
+    </demon>
+    <red_dragon>
+      <id>87</id>
+      <level>80</level>
+      <stats str="90" dex="80"/>
+      <damage min="400" max="800"/>
+      <health max_hp="4000" regen="0"/>
+      <speed move="175" attack="1400"/>
+      <element type="fire" min="50" max="50"/>
+    </red_dragon>
+    <hellspawn>
+      <id>88</id>
+      <level>90</level>
+      <stats str="95" dex="90"/>
+      <damage min="500" max="1000"/>
+      <health max_hp="8000" regen="0"/>
+      <speed move="160" attack="400"/>
+      <element type="fire" min="50" max="50"/>
+    </hellspawn>
+    <thunder_balor>
+      <id>89</id>
+      <level>100</level>
+      <stats str="100" dex="100"/>
+      <damage min="1000" max="2000"/>
+      <health max_hp="10000" regen="0"/>
+      <speed move="125" attack="350"/>
+      <element type="air" min="50" max="50"/>
+    </thunder_balor>
+    <fire_dragon>
+      <id>90</id>
+      <level>75</level>
+      <stats str="100" dex="100"/>
+      <damage min="600" max="1200"/>
+      <health max_hp="5500" regen="0"/>
+      <speed move="170" attack="1200"/>
+      <element type="fire" min="50" max="50"/>
+    </fire_dragon>
+    <fireball>
+      <id>91</id>
+      <level>52</level>
+      <stats str="90" dex="84"/>
+      <damage min="350" max="700"/>
+      <health max_hp="3500" regen="0"/>
+      <speed move="300" attack="1300"/>
+      <element type="fire" min="50" max="50"/>
+    </fireball>
+    <desert_goblin>
+      <id>92</id>
+      <level>20</level>
+      <stats str="50" dex="40"/>
+      <damage min="50" max="100"/>
+      <health max_hp="1000" regen="0"/>
+      <speed move="550" attack="650"/>
+    </desert_goblin>
+    <sand_elemental>
+      <id>93</id>
+      <level>30</level>
+      <stats str="60" dex="50"/>
+      <damage min="75" max="150"/>
+      <health max_hp="1500" regen="0"/>
+      <speed move="650" attack="700"/>
+    </sand_elemental>
+    <dune_sicklar>
+      <id>94</id>
+      <level>50</level>
+      <stats str="70" dex="60"/>
+      <damage min="100" max="200"/>
+      <health max_hp="2000" regen="0"/>
+      <speed move="550" attack="775"/>
+    </dune_sicklar>
+    <dune_troll>
+      <id>95</id>
+      <level>70</level>
+      <stats str="80" dex="70"/>
+      <damage min="200" max="400"/>
+      <health max_hp="3000" regen="0"/>
+      <speed move="600" attack="1000"/>
+    </dune_troll>
+  </monster>
+</npcs>

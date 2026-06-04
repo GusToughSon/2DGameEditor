@@ -1,0 +1,171 @@
+//==============================================================================
+// PLAYER.HRY - MASTER PLAYER LOGIC
+//==============================================================================
+// Any #Define PLR_ variables here will automatically sync to Defines.hry
+//==============================================================================
+
+#Define PLR_MALE_WARRIOR     0
+#Define PLR_FEMALE_WARRIOR   1
+
+DEFINE PLAYERSTART 375 400 // Start location of a Player entitiy
+
+DEFINE FAM_OBJ                    // The logic family (determines folder and editor behavior)
+DEFINE LOCAL_HEALTH          100  // Initial Health Points for this instance
+DEFINE LOCAL_STRENGTH        10   // Physical power / Carry capacity
+DEFINE LOCAL_IS_USEABLE      1    // Interaction toggle (0 = static, 1 = interactive)
+DEFINE LOCAL_ATTACK_TICK     0    // Attack speed (0 = null/none, >0 = ms between hits)
+// DEFINE LOCAL_REGEN_INTERVAL 5000 // (Optional) Recovery speed in ms. Enable to trigger regen loops.
+
+DEFINE HasClicked            0    // Tracks how many times a player interacts with this
+DEFINE IsActivated           0    // Logical toggle (e.g. 0=Closed, 1=Open)
+
+DEFINE TILESET OBJECT            // Visual Asset Source (FAM_OBJ requires OBJECT tileset)
+DEFINE GRAPHIC 0, 0              // X, Y coordinate of the tile in the tileset
+DEFINE SOLID TRUE                // Physical state (TRUE = impassable, FALSE = walkthrough)
+
+// --- Syntax QuickRef ---
+// Math: Health += 10 | Health Plus 10
+// Choices: DEFINE IsActivated 0 | DEFINE HasClicked 0
+
+Object "My_Template_Object"
+{
+    OnUse
+    {
+        // Triggered when a player Double-Clicks this object.
+        Print "You triggered the Interaction Hook!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        // Triggered when a player Right-Clicks / Examines this object.
+        Print "It is a perfectly formed Template Object.\n"
+    }
+
+    OnNew
+    {
+        // Fires ONCE when this object is first created in the world.
+    }
+
+    OnSpawn
+    {
+        // Fires every time this object enters the world (map load/spawn).
+    }
+
+    OnDeath
+    {
+        // Fires when Health reaches 0. Ideal for drops or removal.
+        Print "The object has been destroyed!\n"
+    }
+
+    OnTalk
+    {
+        // Fires when a player initiates dialogue with this entity.
+    }
+
+    OnTouch
+    {
+        // Fires when a player or entity steps onto this object's tile.
+    }
+
+    OnEnterContainer
+    {
+        // Fires when this object is picked up / put into a bag.
+    }
+
+    OnRemoveFromContainer
+    {
+        // Fires when this object is taken out of a bag/container.
+    }
+
+    OnEquip
+    {
+        // Fires when this item is worn or held in an equipment slot.
+    }
+
+    OnUnEquip
+    {
+        // Fires when this item is removed from an equipment slot.
+    }
+
+    OnDrop
+    {
+        // Fires when this object is dropped onto the ground.
+    }
+
+    OnDrag
+    {
+        // Fires when a player clicks and drags this object UI.
+    }
+
+    OnMove
+    {
+        // Fires every time this object changes position in the world.
+    }
+
+    OnCollide
+    {
+        // Fires when a movement action results in a collision.
+    }
+
+    OnHit
+    {
+        // Fires when this object takes damage from an external source.
+    }
+
+    OnCombat
+    {
+        // Fires when this object enters the combat state.
+    }
+
+    OnAnimate
+    {
+        // Custom driver for sprite animations.
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+        // Periodic logic driven by LOCAL_ATTACK_TICK (0 = disabled).
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+        // Server-wide heartbeat pulse (Synchronized across all objects).
+    }
+}
+
+// *****************************************************************
+//   ENGINE COMMAND REFERENCE
+// *****************************************************************
+//
+// --- Object Lifecycle ---
+//   Create <type>              Create a new object in the world
+//   Destroy <object>            Remove object from world permanently
+//   Respawn <object>            Bring a dead creature back to life
+//   Kill <object>               Instantly kill a creature
+//   Resurrect <object>          Revive a dead player
+//
+// --- Health & Status ---
+//   Heal <target> <amount>      Restore health points
+//   GiveHealth <target> <amt>   Same as Heal
+//   GiveMana <target> <amount>  Restore mana points
+//   Poison <target> <level>     Apply poison effect
+//   Cure <target>               Remove poison
+//   Stasis <object> TRUE/FALSE  Freeze/unfreeze (cannot move)
+//
+// --- Movement & World ---
+//   Teleport <who> <map> <x> <y>   Move to coordinates
+//   Walk <object> <direction>       Force walk a direction
+//   Follow <object> <target>        Follow another object
+//   Flee <object>                   Run away from combat
+//   Sleep <ticks>                   Pause script execution
+//   GetDistance <a> <b>              Returns distance between
+//   CheckLineOfSight <a> <b>        Can A see B?
+//
+// --- Communication ---
+//   Print "text\n"              Display text to player
+//   Say 'text'                  Speak above head (visible)
+//   Whisper <target> 'text'     Private message
+//   Broadcast 'text'            Send to all players
+//   GetName <object>            Returns the object's name
+//

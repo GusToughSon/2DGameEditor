@@ -1,0 +1,110 @@
+//====================================================================
+//
+// Green Triddle - AUTHENTIC SCRAPED DATA
+//
+//====================================================================
+
+DEFINE FAM_MONSTER                    // The logic family
+DEFINE LOCAL_HEALTH          150  // HP
+DEFINE LOCAL_STRENGTH        10   // Str
+DEFINE LOCAL_IS_USEABLE      1    // Interactive
+DEFINE NPC_LEVEL          15
+DEFINE NPC_MIN_DMG        17
+DEFINE NPC_MAX_DMG        35
+DEFINE NPC_ATK_SPEED      800
+DEFINE LOCAL_ATTACK_TICK     800
+// DEFINE LOCAL_REGEN_INTERVAL 5000
+
+DEFINE HasClicked            0
+DEFINE IsActivated           0
+
+DEFINE TILESET AVATAR
+DEFINE GRAPHIC 656, 640
+DEFINE SOLID TRUE
+
+Object "Green_Triddle"
+{
+    OnUse
+    {
+        Print "You used Green Triddle!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        Print "It is a Green Triddle.\n"
+    }
+
+    OnNew
+    {
+    }
+
+    OnSpawn
+    {
+    }
+
+    OnDeath
+    {
+        Print "The Green Triddle is gone!\n"
+    }
+
+    OnTalk
+    {
+    }
+
+    OnTouch
+    {
+    }
+
+    OnEnterContainer
+    {
+    }
+
+    OnRemoveFromContainer
+    {
+    }
+
+    OnEquip
+    {
+    }
+
+    OnUnEquip
+    {
+    }
+
+    OnDrop
+    {
+    }
+
+    OnDrag
+    {
+    }
+
+    OnMove
+    {
+    }
+
+    OnCollide
+    {
+    }
+
+    OnHit
+    {
+    }
+
+    OnCombat
+    {
+    }
+
+    OnAnimate
+    {
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+    }
+}

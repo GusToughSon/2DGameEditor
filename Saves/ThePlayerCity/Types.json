@@ -1,0 +1,32 @@
+{
+    "101": {
+        "name": "Lava",
+        "family": "Default",
+        "animation": {
+            "mode": "Cycle",
+            "speed": 800,
+            "frames": 2,
+            "random_speed": false,
+            "frame_sequence": [
+                [
+                    3,
+                    0,
+                    "World"
+                ],
+                [
+                    11,
+                    0,
+                    "World"
+                ]
+            ]
+        },
+        "tileset": "World",
+        "tile_coords": [
+            3,
+            0
+        ],
+        "properties": {
+            "is_dummy": true
+        }
+    }
+}

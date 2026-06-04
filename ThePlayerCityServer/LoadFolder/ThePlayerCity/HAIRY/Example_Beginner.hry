@@ -1,0 +1,32 @@
+//==============================================================================
+//   EXAMPLE_BEGINNER.HRY - YOUR FIRST SCRIPT
+//==============================================================================
+// This script shows you how to use the DEFINEs from Defines.hry
+// and basic logic functions like If, Else, and Print.
+//==============================================================================
+
+// --- 1. LOCAL DATA ---
+// These variables belong ONLY to this specific object.
+DEFINE UseCount      0
+
+// (Example script - add logic below)
+Object "Beginner_Item"
+{
+    OnUse
+    {
+        UseCount += 1
+        Print "You have used this object "
+        Print UseCount
+        Print " times.\n"
+
+        // Example using Logic Constants from Defines.hry
+        If (G_TALKED_TO_KING == TRUE)
+        {
+            Print "The King said you were coming! Welcome traveler.\n"
+        }
+        Else
+        {
+            Print "Go find the King first!\n"
+        }
+    }
+}

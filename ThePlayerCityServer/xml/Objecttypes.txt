@@ -1,0 +1,247 @@
+<?xml version="1.0" ?>
+<objects>
+  <door>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="static" id="0"/>
+  </door>
+  <teleport>
+    <flags family="misc" type="teleport" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="1" speed="300"/>
+  </teleport>
+  <spawnteleport>
+    <flags family="misc" type="spawnteleport" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="2" speed="300"/>
+  </spawnteleport>
+  <spawn>
+    <flags family="misc" type="spawn" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="3" speed="300"/>
+  </spawn>
+  <magical_door>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="4" speed="300"/>
+  </magical_door>
+  <forge>
+    <flags family="misc" type="forge" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="5" speed="300"/>
+  </forge>
+  <anvil>
+    <flags family="misc" type="anvil" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="6"/>
+  </anvil>
+  <sword_of_darkness>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="7" speed="300"/>
+  </sword_of_darkness>
+  <magic_chainmail>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="8" speed="300"/>
+  </magic_chainmail>
+  <sign>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="9"/>
+  </sign>
+  <ladder_up>
+    <flags family="misc" type="teleport" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="10"/>
+  </ladder_up>
+  <ladder_down>
+    <flags family="misc" type="teleport" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="11"/>
+  </ladder_down>
+  <sewer>
+    <flags family="misc" type="teleport" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="12"/>
+  </sewer>
+  <rune_gauntlets>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="13" speed="300"/>
+  </rune_gauntlets>
+  <rune_leggings>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="14" speed="300"/>
+  </rune_leggings>
+  <rune_shield>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="15" speed="300"/>
+  </rune_shield>
+  <rune_platemail_armor>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="16" speed="300"/>
+  </rune_platemail_armor>
+  <rune_helmet>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="17" speed="300"/>
+  </rune_helmet>
+  <rune_axe>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="ping-pong" id="18" speed="300"/>
+  </rune_axe>
+  <torch_west_off>
+    <flags family="misc" type="none" blockmove="0" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="static" id="19"/>
+  </torch_west_off>
+  <torch_west_on>
+    <flags family="misc" type="none" blockmove="0" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="random" id="20" speed="300"/>
+  </torch_west_on>
+  <torch_east_off>
+    <flags family="misc" type="none" blockmove="0" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="static" id="21"/>
+  </torch_east_off>
+  <torch_east_on>
+    <flags family="misc" type="none" blockmove="0" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="random" id="22" speed="300"/>
+  </torch_east_on>
+  <brazier_off>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="static" id="23"/>
+  </brazier_off>
+  <brazier_on>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="random" id="24" speed="300"/>
+  </brazier_on>
+  <massive_teleport1>
+    <flags family="misc" type="teleport" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="25" speed="300"/>
+  </massive_teleport1>
+  <massive_teleport2>
+    <flags family="misc" type="teleport" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="26" speed="300"/>
+  </massive_teleport2>
+  <lightsource_off>
+    <flags family="misc" type="none" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="27"/>
+  </lightsource_off>
+  <lightsource_on>
+    <flags family="misc" type="none" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="28" speed="300"/>
+  </lightsource_on>
+  <criminal_spawn>
+    <flags family="misc" type="none" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="29" speed="300"/>
+  </criminal_spawn>
+  <warrior_statue1>
+    <flags family="misc" type="none" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="30"/>
+  </warrior_statue1>
+  <warrior_statue2>
+    <flags family="misc" type="none" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="31"/>
+  </warrior_statue2>
+  <horse_statue_right1>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="32"/>
+  </horse_statue_right1>
+  <horse_statue_right2>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="33" speed="300"/>
+  </horse_statue_right2>
+  <horse_statue_left1>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="34"/>
+  </horse_statue_left1>
+  <horse_statue_left2>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="35"/>
+  </horse_statue_left2>
+  <dragon_statue_left1>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="36"/>
+  </dragon_statue_left1>
+  <dragon_statue_left2>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="37"/>
+  </dragon_statue_left2>
+  <dragon_statue_right1>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="38"/>
+  </dragon_statue_right1>
+  <dragon_statue_right2>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="39"/>
+  </dragon_statue_right2>
+  <lamp>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="random" id="40" speed="300"/>
+  </lamp>
+  <fireplace_off>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="static" id="41"/>
+  </fireplace_off>
+  <fireplace_on>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="random" id="42" speed="300"/>
+  </fireplace_on>
+  <oven_off>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="static" id="43"/>
+  </oven_off>
+  <oven_on>
+    <flags family="misc" type="none" blockmove="1" blocksight="1" unk1="1" unk2="0"/>
+    <anim type="random" id="44" speed="300"/>
+  </oven_on>
+  <massive_teleport3>
+    <flags family="misc" type="teleport" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="45" speed="300"/>
+  </massive_teleport3>
+  <massive_teleport4>
+    <flags family="misc" type="teleport" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="46" speed="300"/>
+  </massive_teleport4>
+  <small_szgilird_larva>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="random" id="47" speed="300"/>
+  </small_szgilird_larva>
+  <pyramid_enterance>
+    <flags family="misc" type="teleport" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="48"/>
+  </pyramid_enterance>
+  <warrior_statue3>
+    <flags family="misc" type="none" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="49"/>
+  </warrior_statue3>
+  <warrior_statue4>
+    <flags family="misc" type="none" blockmove="1" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="50"/>
+  </warrior_statue4>
+  <horse_statue_right3>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="51"/>
+  </horse_statue_right3>
+  <horse_statue_right4>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="52"/>
+  </horse_statue_right4>
+  <horse_statue_left3>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="53"/>
+  </horse_statue_left3>
+  <horse_statue_left4>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="54"/>
+  </horse_statue_left4>
+  <dragon_statue_left3>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="55"/>
+  </dragon_statue_left3>
+  <dragon_statue_left4>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="56"/>
+  </dragon_statue_left4>
+  <dragon_statue_right3>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="57"/>
+  </dragon_statue_right3>
+  <dragon_statue_right4>
+    <flags family="misc" type="none" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="58"/>
+  </dragon_statue_right4>
+  <cave_entrance1>
+    <flags family="misc" type="teleport" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="59"/>
+  </cave_entrance1>
+  <cave_entrance2>
+    <flags family="misc" type="teleport" blockmove="0" blocksight="0" unk1="1" unk2="0"/>
+    <anim type="static" id="60"/>
+  </cave_entrance2>
+</objects>

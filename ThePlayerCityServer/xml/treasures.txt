@@ -1,0 +1,879 @@
+<?xml version="1.0" ?>
+<treasures>
+  <spider>
+    <drop item="spider_leg" min="1" max="5" rate="100000"/>
+  </spider>
+  <bat>
+    <drop item="bat_wing" min="1" max="3" rate="100000"/>
+  </bat>
+  <snake>
+    <drop item="snake_tong" min="1" max="2" rate="100000"/>
+  </snake>
+  <goblin>
+    <drop item="goblin_ear" min="1" max="2" rate="100000"/>
+    <drop item="minor_healing_potion" min="1" max="2" rate="10000"/>
+  </goblin>
+  <kobold>
+    <drop item="gold_piece" min="9" max="18" rate="100000"/>
+    <drop item="short_spear" rate="1000"/>
+    <drop item="spear" rate="750"/>
+    <drop item="pitchfork" rate="500"/>
+    <drop item="scythe" rate="300"/>
+    <drop item="military_fork" rate="200"/>
+    <drop item="lance" rate="200"/>
+    <drop item="spectum" rate="100"/>
+    <drop item="ranseur" rate="50"/>
+    <drop item="studded_leather_armor" rate="3000"/>
+  </kobold>
+  <lizardman>
+    <drop item="gold_piece" min="10" max="20" rate="100000"/>
+    <drop item="hammer" rate="1000"/>
+    <drop item="nun-chaku" rate="750"/>
+    <drop item="three-section_staff" rate="500"/>
+    <drop item="ball_and_chain" rate="300"/>
+    <drop item="hammer_pick" rate="200"/>
+    <drop item="chain_coif" rate="3000"/>
+  </lizardman>
+  <ice_queen>
+    <drop item="gold_piece" min="700" max="1400" rate="100000"/>
+    <drop item="holy_sword" rate="2"/>
+    <drop item="holy_axe" rate="2"/>
+    <drop item="holy_war_club" rate="2"/>
+    <drop item="holy_pitchfork" rate="2"/>
+    <drop item="rune_amulet" rate="2"/>
+  </ice_queen>
+  <hobgoblin>
+    <drop item="gold_piece" min="14" max="28" rate="100000"/>
+    <drop item="goblin_ear" min="1" max="2" rate="10000"/>
+    <drop item="tomahawk" rate="1000"/>
+    <drop item="hand_axe" rate="750"/>
+    <drop item="cleaver" rate="500"/>
+    <drop item="bearded_axe" rate="200"/>
+    <drop item="crescent_axe" rate="300"/>
+    <drop item="targe" rate="3000"/>
+  </hobgoblin>
+  <ice_sicklar>
+    <drop item="gold_piece" min="180" max="350" rate="100000"/>
+    <drop item="sapphire_platemail" rate="8"/>
+  </ice_sicklar>
+  <spider_queen>
+    <drop item="spider_leg" min="8" max="16" rate="100000"/>
+    <drop item="cracked_gem" min="2" max="4" rate="10000"/>
+    <drop item="gem" min="2" max="4" rate="10000"/>
+    <drop item="jewel" min="2" max="4" rate="10000"/>
+  </spider_queen>
+  <skeleton>
+    <drop item="gold_piece" min="20" max="40" rate="100000"/>
+    <drop item="human_bone" min="1" max="3" rate="20000"/>
+    <drop item="short_sword" rate="1000"/>
+    <drop item="scimitar" rate="750"/>
+    <drop item="stiletto" rate="500"/>
+    <drop item="broad_sword" rate="300"/>
+    <drop item="sabre" rate="200"/>
+    <drop item="platemail_leggings" rate="3000"/>
+  </skeleton>
+  <orc>
+    <drop item="gold_piece" min="22" max="44" rate="100000"/>
+    <drop item="triple-ball_flail" rate="50"/>
+    <drop item="double-ball_flail" rate="75"/>
+    <drop item="morningstar" rate="100"/>
+    <drop item="gothic_mace" rate="150"/>
+    <drop item="flanged_mace" rate="200"/>
+    <drop item="gothic_mace" rate="300"/>
+    <drop item="gauntlets" rate="3000"/>
+  </orc>
+  <thunder_troll>
+    <drop item="gold_piece" min="180" max="360" rate="100000"/>
+    <drop item="thunder_dagger" rate="4"/>
+    <drop item="leggings_of_despair" rate="8"/>
+    <drop item="leggings_of_thunder" rate="8"/>
+    <drop item="magic_platemail_leggings" rate="200"/>
+    <drop item="thunder_ring" rate="8"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+  </thunder_troll>
+  <werewolf>
+    <drop item="gold_piece" min="26" max="52" rate="100000"/>
+    <drop item="bearded_axe" rate="1000"/>
+    <drop item="crescent_axe" rate="750"/>
+    <drop item="berserker_axe" rate="500"/>
+    <drop item="golden_axe" rate="300"/>
+    <drop item="war_axe" rate="200"/>
+    <drop item="werewolf_fang" min="1" max="2" rate="1000"/>
+    <drop item="war_axe" rate="3000"/>
+  </werewolf>
+  <amazon>
+    <drop item="gold_piece" min="28" max="56" rate="100000"/>
+    <drop item="guisarme" rate="1000"/>
+    <drop item="massive_spectum" rate="750"/>
+    <drop item="mystic_guisarme" rate="500"/>
+    <drop item="spiked_trident" rate="300"/>
+    <drop item="bearded_staff" rate="200"/>
+    <drop item="voulge" rate="3000"/>
+  </amazon>
+  <zombie>
+    <drop item="gold_piece" min="30" max="60" rate="100000"/>
+    <drop item="golden_bastard_sword" rate="1000"/>
+    <drop item="giant_sword" rate="500"/>
+    <drop item="golden_axe" rate="1000"/>
+    <drop item="double_axe" rate="500"/>
+    <drop item="scepter" rate="1000"/>
+    <drop item="war_flail" rate="500"/>
+    <drop item="golden_fork" rate="1000"/>
+    <drop item="spiked_trident" rate="500"/>
+    <drop item="morningstar" rate="3000"/>
+  </zombie>
+  <thief>
+    <drop item="gold_piece" min="32" max="64" rate="100000"/>
+    <drop item="scimitar" rate="1000"/>
+    <drop item="sai" rate="750"/>
+    <drop item="bastard_sword" rate="500"/>
+    <drop item="golden_sai" rate="300"/>
+    <drop item="platemail_armor" rate="100"/>
+    <drop item="troglothian_helmet" rate="100"/>
+    <drop item="heater_shield" rate="100"/>
+    <drop item="lesser_amulet_of_wisdom" rate="4"/>
+    <drop item="lesser_ring_of_power" rate="4"/>
+  </thief>
+  <fighter>
+    <drop item="gold_piece" min="34" max="68" rate="100000"/>
+    <drop item="lesser_ring_of_agility" rate="4"/>
+    <drop item="lesser_amulet_of_life" rate="4"/>
+    <drop item="falchion" rate="200"/>
+    <drop item="giant_sword" rate="100"/>
+    <drop item="enchanted_leather_armor" rate="100"/>
+    <drop item="enchanted_leather_cap" rate="100"/>
+    <drop item="enchanted_kite_shield" rate="100"/>
+    <drop item="magic_leather_leggings" rate="100"/>
+    <drop item="magic_leather_gloves" rate="100"/>
+  </fighter>
+  <minotaur>
+    <drop item="gold_piece" min="36" max="72" rate="100000"/>
+    <drop item="pike" rate="1000"/>
+    <drop item="bardiche" rate="750"/>
+    <drop item="voulge" rate="500"/>
+    <drop item="naginata" rate="300"/>
+    <drop item="quarterstaff" rate="200"/>
+    <drop item="minotaur_horn" min="1" max="2" rate="1000"/>
+    <drop item="enchanted_armet" rate="500"/>
+  </minotaur>
+  <skeleton_warrior>
+    <drop item="gold_piece" min="38" max="76" rate="100000"/>
+    <drop item="enchanted_studded_leather" rate="200"/>
+    <drop item="enchanted_skullcap" rate="200"/>
+    <drop item="magic_wooden_kite_shield" rate="200"/>
+    <drop item="magic_studded_leggings" rate="200"/>
+    <drop item="magic_studded_gloves" rate="200"/>
+    <drop item="serrated_sword" rate="100"/>
+    <drop item="mystic_sword" rate="100"/>
+    <drop item="crystal_sabre" rate="50"/>
+    <drop item="crystal_blade" rate="25"/>
+  </skeleton_warrior>
+  <dark_mage>
+    <drop item="gold_piece" min="75" max="150" rate="100000"/>
+    <drop item="ruby_gauntlets" rate="8"/>
+    <drop item="magic_chain_gloves" rate="200"/>
+    <drop item="ruby_amulet" rate="4"/>
+    <drop item="magical_healing_potion" min="1" max="2" rate="3000"/>
+  </dark_mage>
+  <minotaur_berserker>
+    <drop item="gold_piece" min="44" max="88" rate="100000"/>
+    <drop item="double-ball_flail" rate="1000"/>
+    <drop item="triple-ball_flail" rate="750"/>
+    <drop item="scepter" rate="500"/>
+    <drop item="war_club" rate="300"/>
+    <drop item="minotaur_horn" min="1" max="2" rate="1000"/>
+    <drop item="lesser_ring_of_life" rate="4"/>
+    <drop item="lesser_amulet_of_speed" rate="4"/>
+    <drop item="bone_armor" rate="500"/>
+    <drop item="enchanted_ringmail_armor" rate="500"/>
+  </minotaur_berserker>
+  <werewolf_lord>
+    <drop item="gold_piece" min="48" max="96" rate="100000"/>
+    <drop item="enchanted_spear" rate="50"/>
+    <drop item="mystic_staff" rate="75"/>
+    <drop item="minotaur_staff" rate="100"/>
+    <drop item="bearded_staff" rate="200"/>
+    <drop item="spiked_trident" rate="300"/>
+    <drop item="mystic_guisarme" rate="300"/>
+    <drop item="magic_gauntlets" rate="25"/>
+    <drop item="magic_chain_gloves" rate="500"/>
+    <drop item="minotaur_horn" min="1" max="2" rate="1000"/>
+  </werewolf_lord>
+  <orc_assasin>
+    <drop item="gold_piece" min="52" max="104" rate="100000"/>
+    <drop item="tabar" rate="50"/>
+    <drop item="double_axe" rate="75"/>
+    <drop item="war_axe" rate="100"/>
+    <drop item="golden_axe" rate="100"/>
+    <drop item="berserker_axe" rate="200"/>
+    <drop item="magic_platemail_leggings" rate="25"/>
+    <drop item="magic_chainmail_leggings" rate="50"/>
+    <drop item="magic_studded_leggings" rate="100"/>
+    <drop item="magic_chainmail_leggings" rate="500"/>
+  </orc_assasin>
+  <mummy>
+    <drop item="gold_piece" min="56" max="112" rate="100000"/>
+    <drop item="enchanted_hammer" rate="50"/>
+    <drop item="power_hammer" rate="75"/>
+    <drop item="sledgehammer" rate="100"/>
+    <drop item="enchanted_heater_shield" rate="25"/>
+    <drop item="enchanted_spiked_shield" rate="50"/>
+    <drop item="enchanted_targe" rate="75"/>
+    <drop item="magic_large_kite_shield" rate="100"/>
+    <drop item="magic_wooden_kite_shield" rate="200"/>
+    <drop item="magic_large_kite_shield" rate="500"/>
+  </mummy>
+  <wraith>
+    <drop item="gold_piece" min="60" max="120" rate="100000"/>
+    <drop item="magic_platemail_armor" rate="50"/>
+    <drop item="magic_troglothian_helmet" rate="50"/>
+    <drop item="enchanted_heater_shield" rate="50"/>
+    <drop item="magic_platemail_leggings" rate="50"/>
+    <drop item="magic_gauntlets" rate="50"/>
+    <drop item="lesser_ring_of_wisdom" rate="4"/>
+    <drop item="lesser_amulet_of_power" rate="4"/>
+    <drop item="enchanted_spear" rate="300"/>
+  </wraith>
+  <taurus>
+    <drop item="gold_piece" min="64" max="128" rate="100000"/>
+    <drop item="magical_healing_potion" min="2" max="5" rate="1000"/>
+    <drop item="enchanted_stiletto" rate="50"/>
+    <drop item="crystal_blade" rate="50"/>
+    <drop item="crystal_sabre" rate="100"/>
+    <drop item="magic_troglothian_helmet" rate="25"/>
+    <drop item="enchanted_ribbed_helmet" rate="50"/>
+    <drop item="enchanted_fancy_helmet" rate="75"/>
+    <drop item="cutlass_of_ire" rate="50"/>
+    <drop item="enchanted_short_sword" rate="50"/>
+  </taurus>
+  <minotaur_lord>
+    <drop item="gold_piece" min="70" max="140" rate="100000"/>
+    <drop item="minotaur_horn" min="1" max="2" rate="1000"/>
+    <drop item="enchanted_cleaver" rate="50"/>
+    <drop item="battle_axe" rate="75"/>
+    <drop item="tabar" rate="100"/>
+    <drop item="magic_platemail_armor" rate="25"/>
+    <drop item="enchanted_chain_hauberk" rate="50"/>
+    <drop item="enchanted_ringmail_armor" rate="75"/>
+    <drop item="enchanted_scalemail" rate="100"/>
+    <drop item="enchanted_cleaver" rate="300"/>
+  </minotaur_lord>
+  <griffin>
+    <drop item="gold_piece" min="80" max="160" rate="100000"/>
+    <drop item="roon_club" rate="10"/>
+    <drop item="enchanted_power_hammer" rate="25"/>
+    <drop item="enchanted_sledgehammer" rate="25"/>
+    <drop item="enchanted_war_hammer" rate="25"/>
+    <drop item="enchanted_war_club" rate="50"/>
+    <drop item="enchanted_hammer_pick" rate="50"/>
+    <drop item="enchanted_flail" rate="75"/>
+    <drop item="helm_of_enlightenment" rate="10"/>
+    <drop item="enchanted_hammer" rate="100"/>
+  </griffin>
+  <giant>
+    <drop item="gold_piece" min="90" max="180" rate="100000"/>
+    <drop item="roon_blade" rate="10"/>
+    <drop item="enchanted_bastard_sword" rate="25"/>
+    <drop item="sword_of_agony" rate="25"/>
+    <drop item="blade_of_searing" rate="25"/>
+    <drop item="enchanted_falchion" rate="50"/>
+    <drop item="sylvan_blade" rate="50"/>
+    <drop item="enchanted_backsword" rate="75"/>
+    <drop item="armor_of_health" rate="10"/>
+    <drop item="poison_dagger" rate="100"/>
+  </giant>
+  <ettin>
+    <drop item="gold_piece" min="100" max="200" rate="100000"/>
+    <drop item="roon_axe" rate="10"/>
+    <drop item="enchanted_double_axe" rate="25"/>
+    <drop item="enchanted_battle_axe" rate="25"/>
+    <drop item="enchanted_tabar" rate="30"/>
+    <drop item="enchanted_berserker_axe" rate="40"/>
+    <drop item="enchanted_war_axe" rate="70"/>
+    <drop item="magic_hatchet" rate="75"/>
+    <drop item="protect_shield" rate="10"/>
+    <drop item="enchanted_cleaver" rate="100"/>
+  </ettin>
+  <ogre>
+    <drop item="gold_piece" min="125" max="250" rate="100000"/>
+    <drop item="roon_fork" rate="10"/>
+    <drop item="enchanted_spiked_trident" rate="25"/>
+    <drop item="enchanted_spectum" rate="25"/>
+    <drop item="magic_guisarme" rate="25"/>
+    <drop item="enchanted_guisarme" rate="50"/>
+    <drop item="enchanted_naginata" rate="100"/>
+    <drop item="enchanted_voulge" rate="100"/>
+    <drop item="boots_of_speed" rate="10"/>
+    <drop item="enchanted_bardiche" rate="200"/>
+  </ogre>
+  <giant_lord>
+    <drop item="gold_piece" min="150" max="300" rate="100000"/>
+    <drop item="roon_gauntlets" rate="25"/>
+    <drop item="boots_of_haste" rate="10"/>
+    <drop item="amulet_of_speed" rate="4"/>
+    <drop item="ring_of_agility" rate="4"/>
+    <drop item="magic_gauntlets" rate="100"/>
+    <drop item="enchanted_flail" rate="30"/>
+    <drop item="enchanted_hammer_pick" rate="50"/>
+    <drop item="gauntlets_of_power" rate="10"/>
+    <drop item="enchanted_war_hammer" rate="200"/>
+  </giant_lord>
+  <cyclops>
+    <drop item="gold_piece" min="175" max="350" rate="100000"/>
+    <drop item="roon_leggings" rate="25"/>
+    <drop item="gauntlets_of_ogre_power" rate="10"/>
+    <drop item="ring_of_power" rate="4"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+    <drop item="magic_platemail_leggings" rate="100"/>
+    <drop item="amulet_of_power" rate="4"/>
+    <drop item="enchanted_sledgehammer" rate="100"/>
+    <drop item="enchanted_power_hammer" rate="100"/>
+    <drop item="roon_club" rate="25"/>
+  </cyclops>
+  <golem>
+    <drop item="gold_piece" min="200" max="400" rate="100000"/>
+    <drop item="roon_shield" rate="25"/>
+    <drop item="shield_of_protection" rate="10"/>
+    <drop item="magic_large_kite_shield" rate="400"/>
+    <drop item="enchanted_targe" rate="300"/>
+    <drop item="enchanted_spiked_shield" rate="200"/>
+    <drop item="enchanted_heater_shield" rate="100"/>
+    <drop item="enchanted_battle_axe" rate="100"/>
+    <drop item="enchanted_double_axe" rate="100"/>
+    <drop item="roon_axe" rate="25"/>
+  </golem>
+  <lich>
+    <drop item="gold_piece" min="250" max="500" rate="100000"/>
+    <drop item="roon_helmet" rate="5000"/>
+    <drop item="helmet_of_knowledge" rate="5000"/>
+    <drop item="amulet_of_wisdom" rate="5000"/>
+    <drop item="ring_of_wisdom" rate="5000"/>
+    <drop item="enchanted_fancy_helmet" rate="200"/>
+    <drop item="enchanted_ribbed_helmet" rate="200"/>
+    <drop item="enchanted_spectum" rate="100"/>
+    <drop item="enchanted_spiked_trident" rate="100"/>
+    <drop item="roon_fork" rate="25"/>
+  </lich>
+  <bully>
+    <drop item="gold_piece" min="350" max="700" rate="100000"/>
+    <drop item="roon_platemail" rate="50"/>
+    <drop item="armor_of_great_health" rate="10"/>
+    <drop item="amulet_of_life" rate="4"/>
+    <drop item="ring_of_life" rate="4"/>
+    <drop item="enchanted_scalemail" rate="200"/>
+    <drop item="magic_platemail_armor" rate="100"/>
+    <drop item="sword_of_agony" rate="100"/>
+    <drop item="enchanted_bastard_sword" rate="100"/>
+    <drop item="roon_blade" rate="25"/>
+  </bully>
+  <szgilid_soldier>
+    <drop item="gold_piece" min="75" max="150" rate="100000"/>
+    <drop item="amulet_of_minor_protection" rate="1000"/>
+    <drop item="amulet_of_protection" rate="1000"/>
+    <drop item="greater_amulet_of_wisdom" rate="1000"/>
+    <drop item="greater_amulet_of_life" rate="1000"/>
+    <drop item="greater_amulet_of_speed" rate="1000"/>
+    <drop item="greater_amulet_of_power" rate="1000"/>
+  </szgilid_soldier>
+  <troglodyte>
+    <drop item="gold_piece" min="60" max="120" rate="100000"/>
+    <drop item="amulet_of_wisdom" rate="1000"/>
+    <drop item="amulet_of_life" rate="1000"/>
+    <drop item="amulet_of_speed" rate="1000"/>
+    <drop item="amulet_of_power" rate="1000"/>
+  </troglodyte>
+  <ice_spawn>
+    <drop item="gold_piece" min="500" max="1000" rate="100000"/>
+    <drop item="frost_platemail" rate="0"/>
+    <drop item="frost_blade" rate="50"/>
+    <drop item="holy_platemail" rate="45"/>
+    <drop item="magic_platemail_armor" rate="200"/>
+    <drop item="holy_ring" rate="2"/>
+    <drop item="rune_leggings" rate="2"/>
+    <drop item="enchanted_scalemail" rate="200"/>
+    <drop item="Hope_Sword" rate="2"/>
+  </ice_spawn>
+  <fire_balor>
+    <drop item="gold_piece" min="1000" max="2000" rate="100000"/>
+    <drop item="rune_hammer" rate="2"/>
+    <drop item="rune_dagger" rate="2"/>
+    <drop item="holy_axe" rate="2"/>
+    <drop item="galdruil_axe" rate="2"/>
+  </fire_balor>
+  <thunder_sicklar>
+    <drop item="gold_piece" min="150" max="300" rate="100000"/>
+    <drop item="thunder_dagger" rate="4"/>
+    <drop item="amethyst_platemail" rate="100000"/>
+    <drop item="amethyst_ring" rate="100000"/>
+    <drop item="enchanted_scalemail" rate="200"/>
+  </thunder_sicklar>
+  <earth_balor>
+    <drop item="gold_piece" min="1000" max="2000" rate="100000"/>
+    <drop item="rune_axe" rate="2"/>
+    <drop item="rune_blade" rate="2"/>
+    <drop item="hammer_of_darkness" rate="2"/>
+    <drop item="holy_war_club" rate="9999"/>
+  </earth_balor>
+  <ice_balor>
+    <drop item="gold_piece" min="1000" max="2000" rate="100000"/>
+    <drop item="rune_trident" rate="2"/>
+    <drop item="rune_axe" rate="2"/>
+    <drop item="holy_pitchfork" rate="2"/>
+    <drop item="ranseur_of_darkness" rate="2"/>
+  </ice_balor>
+  <grobla>
+    <drop item="gold_piece" min="70" max="140" rate="100000"/>
+    <drop item="ring_of_wisdom" rate="20"/>
+    <drop item="ring_of_life" rate="20"/>
+    <drop item="ring_of_agility" rate="20"/>
+    <drop item="ring_of_power" rate="20"/>
+  </grobla>
+  <szgilid_worker>
+    <drop item="gold_piece" min="50" max="100" rate="100000"/>
+    <drop item="greater_ring_of_wisdom" rate="1000"/>
+    <drop item="greater_ring_of_life" rate="1000"/>
+    <drop item="greater_ring_of_agility" rate="1000"/>
+    <drop item="greater_ring_of_power" rate="1000"/>
+  </szgilid_worker>
+  <desert_balor>
+    <drop item="gold_piece" min="1000" max="2000" rate="100000"/>
+    <drop item="rune_dagger" rate="2"/>
+    <drop item="rune_trident" rate="2"/>
+    <drop item="staff_of_power" rate="2"/>
+    <drop item="superior_staff" rate="2"/>
+  </desert_balor>
+  <genie>
+    <drop item="gold_piece" min="50" max="100" rate="100000"/>
+  </genie>
+  <genie>
+    <drop item="gold_piece" min="75" max="150" rate="100000"/>
+    <drop item="amethyst_leggings" rate="8"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+    <drop item="despair_dagger" rate="4"/>
+    <drop item="magic_platemail_leggings" rate="200"/>
+  </genie>
+  <ghost>
+    <drop item="gold_piece" min="100" max="200" rate="100000"/>
+    <drop item="amethyst_gauntlets" rate="1000"/>
+    <drop item="amethyst_amulet" rate="1000"/>
+    <drop item="magic_chain_gloves" rate="200"/>
+    <drop item="magic_gauntlets" rate="200"/>
+  </ghost>
+  <beholder>
+    <drop item="gold_piece" min="110" max="220" rate="100000"/>
+    <drop item="despair_dagger" rate="4"/>
+    <drop item="amethyst_helmet" rate="1000"/>
+    <drop item="amethyst_ring" rate="1000"/>
+    <drop item="beholder_eye" min="1" max="2" rate="3000"/>
+    <drop item="enchanted_ribbed_helmet" rate="200"/>
+    <drop item="magic_troglothian_helmet" rate="200"/>
+  </beholder>
+  <beholder_queen>
+    <drop item="gold_piece" min="125" max="250" rate="100000"/>
+    <drop item="thunder_dagger" rate="4"/>
+    <drop item="amethyst_shield" rate="1000"/>
+    <drop item="amethyst_amulet" rate="1000"/>
+    <drop item="enchanted_spiked_shield" rate="200"/>
+    <drop item="enchanted_heater_shield" rate="200"/>
+    <drop item="beholder_eye" min="1" max="2" rate="3000"/>
+  </beholder_queen>
+  <black_dragon>
+    <drop item="gold_piece" min="200" max="400" rate="100000"/>
+    <drop item="helmet_of_thunder" rate="8"/>
+    <drop item="helmet_of_despair" rate="8"/>
+    <drop item="air_stone_armor" rate="1000"/>
+    <drop item="black_dragonscale" min="2" max="5" rate="300"/>
+    <drop item="thunder_sword" rate="8"/>
+    <drop item="black_dragonfang_necklace" rate="8"/>
+    <drop item="black_dragoneye_ring" rate="8"/>
+  </black_dragon>
+  <floating_horror>
+    <drop item="gold_piece" min="300" max="600" rate="100000"/>
+    <drop item="shield_of_despair" rate="8"/>
+    <drop item="shield_of_thunder" rate="8"/>
+    <drop item="thunder_axe" rate="8"/>
+    <drop item="amulet_of_despair" rate="8"/>
+    <drop item="enchanted_heater_shield" rate="200"/>
+    <drop item="enchanted_spiked_shield" rate="200"/>
+  </floating_horror>
+  <fire_sicklar>
+    <drop item="gold_piece" min="150" max="300" rate="100000"/>
+    <drop item="dagger_of_darkness" rate="4"/>
+    <drop item="ruby_platemail" rate="1000"/>
+    <drop item="ruby_ring" rate="1000"/>
+    <drop item="enchanted_scalemail" rate="200"/>
+    <drop item="magic_platemail_armor" rate="200"/>
+  </fire_sicklar>
+  <winter_wolf>
+    <drop item="gold_piece" min="25" max="50" rate="100000"/>
+    <drop item="bluemir" min="1" max="3" rate="1000"/>
+    <drop item="grelmelr" min="1" max="3" rate="750"/>
+    <drop item="emeraldine" min="1" max="3" rate="500"/>
+  </winter_wolf>
+  <ice_elemental>
+    <drop item="gold_piece" min="50" max="100" rate="100000"/>
+    <drop item="sapphire_leggings" rate="1000"/>
+    <drop item="sapphire_amulet" rate="1000"/>
+    <drop item="magic_platemail_leggings" rate="100"/>
+    <drop item="magic_chainmail_leggings" rate="100"/>
+  </ice_elemental>
+  <frost_goblin>
+    <drop item="gold_piece" min="75" max="150" rate="100000"/>
+    <drop item="sapphire_gauntlets" rate=""/>
+    <drop item="sapphire_ring" rate="3"/>
+    <drop item="magic_gauntlets" rate="100"/>
+    <drop item="magic_chain_gloves" rate="200"/>
+  </frost_goblin>
+  <snow_elemental>
+    <drop item="gold_piece" min="100" max="200" rate="100000"/>
+    <drop item="sapphire_helm" rate="8"/>
+    <drop item="sapphire_amulet" rate="3"/>
+    <drop item="magic_troglothian_helmet" rate="100"/>
+    <drop item="enchanted_ribbed_helmet" rate="200"/>
+  </snow_elemental>
+  <ice_golem>
+    <drop item="gold_piece" min="150" max="300" rate="100000"/>
+    <drop item="sapphire_shield" rate="8"/>
+    <drop item="frost_dagger" rate="6"/>
+    <drop item="sapphire_ring" rate="3"/>
+    <drop item="enchanted_heater_shield" rate="100"/>
+    <drop item="enchanted_spiked_shield" rate="200"/>
+  </ice_golem>
+  <frost_troll>
+    <drop item="gold_piece" min="200" max="400" rate="100000"/>
+    <drop item="holy_dagger" rate="4"/>
+    <drop item="frost_leggings" rate="5000"/>
+    <drop item="holy_leggings" rate="5000"/>
+    <drop item="frost_ring" rate="5000"/>
+    <drop item="magic_platemail_leggings" rate="100"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+  </frost_troll>
+  <blue_dragon>
+    <drop item="gold_piece" min="250" max="500" rate="100000"/>
+    <drop item="frost_gauntlets" rate="5000"/>
+    <drop item="holy_gauntlets" min="1" max="4" rate="5000"/>
+    <drop item="frost_axe" rate="8"/>
+    <drop item="blue_dragonfang_necklace" rate="5000"/>
+    <drop item="blue_dragoneye_ring" rate="5000"/>
+    <drop item="blue_dragonscale" min="2" max="5" rate="2500"/>
+    <drop item="water_stone_armor" rate="5000"/>
+    <drop item="magic_gauntlets" rate="200"/>
+  </blue_dragon>
+  <ice_devil>
+    <drop item="gold_piece" min="300" max="600" rate="100000"/>
+    <drop item="frost_helmet" rate="50"/>
+    <drop item="holy_helmet" rate="50"/>
+    <drop item="frost_voulge" rate="8"/>
+    <drop item="amulet_of_falling_rain" rate="5000"/>
+    <drop item="magic_troglothian_helmet" rate="200"/>
+    <drop item="enchanted_ribbed_helmet" rate="200"/>
+  </ice_devil>
+  <ice_dragon>
+    <drop item="gold_piece" min="400" max="800" rate="100000"/>
+    <drop item="frost_shield" rate="45"/>
+    <drop item="holy_shield" rate="10"/>
+    <drop item="frost_flail" rate="8"/>
+    <drop item="holy_amulet" rate="51"/>
+    <drop item="enchanted_heater_shield" rate="200"/>
+    <drop item="enchanted_spiked_shield" rate="200"/>
+  </ice_dragon>
+  <hydra>
+    <drop item="gold_piece" min="400" max="800" rate="100000"/>
+    <drop item="mighty_holy_sword" rate="100000"/>
+    <drop item="mighty_sword_of_darkness" rate="100000"/>
+    <drop item="holy_pitchfork_of_wisdom" rate="100000"/>
+    <drop item="dark_ranseur_of_wisdom" rate="100000"/>
+    <drop item="staff_of_power" rate="100000"/>
+    <drop item="superior_staff" rate="100000"/>
+  </hydra>
+  <crystal_phantom>
+    <drop item="gold_piece" min="1200" max="2600" rate="100000"/>
+    <drop item="crystal_platemail" rate="2"/>
+    <drop item="crystal_helmet" rate="2"/>
+    <drop item="crystal_shield" rate="2"/>
+    <drop item="crystal_leggings" rate="2"/>
+    <drop item="crystal_ring" rate="2"/>
+    <drop item="crystal_gauntlets" rate="2"/>
+    <drop item="crystal_amulet" rate="2"/>
+  </crystal_phantom>
+  <earth_spawn>
+    <drop item="gold_piece" min="450" max="900" rate="100000"/>
+    <drop item="earth_axe" rate="1000"/>
+    <drop item="armor_of_earth" rate="9999"/>
+    <drop item="platemail_of_hope" rate="9999"/>
+    <drop item="magic_platemail_armor" rate="99"/>
+    <drop item="amulet_of_hope" rate="9999"/>
+    <drop item="axe_of_hope" rate="9999"/>
+    <drop item="rune_helmet" rate="5000"/>
+    <drop item="enchanted_scalemail" rate="200"/>
+  </earth_spawn>
+  <thunder_spawn>
+    <drop item="gold_piece" min="500" max="1000" rate="100000"/>
+    <drop item="hammer_of_lightning" rate="23"/>
+    <drop item="platemail_of_despair" rate="22"/>
+    <drop item="platemail_of_thunder" rate="11"/>
+    <drop item="amulet_of_storms" rate="23"/>
+    <drop item="magic_platemail_armor" rate="200"/>
+    <drop item="despair_axe" rate="6"/>
+    <drop item="rune_shield" rate="32"/>
+  </thunder_spawn>
+  <earth_sicklar>
+    <drop item="gold_piece" min="75" max="150" rate="100000"/>
+    <drop item="emerald_helmet" rate="8"/>
+    <drop item="emerald_ring" rate="4"/>
+    <drop item="earth_dagger" rate="4"/>
+    <drop item="enchanted_ribbed_helmet" rate="200"/>
+    <drop item="magic_troglothian_helmet" rate="200"/>
+  </earth_sicklar>
+  <behemoth>
+    <drop item="gold_piece" min="85" max="170" rate="100000"/>
+    <drop item="magic_troglothian_helmet" rate="20"/>
+    <drop item="enchanted_ribbed_helmet" rate="25"/>
+    <drop item="enchanted_fancy_helmet" rate="50"/>
+    <drop item="enchanted_armet" rate="50"/>
+    <drop item="enchanted_ringmail_armor" rate="100"/>
+    <drop item="enchanted_armet" rate="100"/>
+    <drop item="roon_rings" rate="25"/>
+    <drop item="roon_amulet" rate="25"/>
+    <drop item="amulet_of_protection" rate="4"/>
+  </behemoth>
+  <silver_dragon>
+    <drop item="gold_piece" min="800" max="1500" rate="100000"/>
+    <drop item="earth_hammer_of_health" rate="10"/>
+    <drop item="agile_frost_axe" rate="10"/>
+    <drop item="galdruil_axe_of_agility" rate="10000"/>
+    <drop item="holy_war_club_of_welfare" rate="10000"/>
+    <drop item="holy_pitchfork_of_wisdom" rate="10000"/>
+    <drop item="mighty_sword_of_darkness" rate="10000"/>
+    <drop item="silver_dragonfang_necklace" rate="10000"/>
+    <drop item="silver_dragoneye_ring" rate="10000"/>
+    <drop item="silver_dragonscale" min="10000" max="50000" rate="300000"/>
+    <drop item="silver_dragontail_spear" rate="6000000"/>
+  </silver_dragon>
+  <golden_dragon>
+    <drop item="gold_piece" min="1000" max="2000" rate="100000"/>
+    <drop item="thunder_trident_of_wisdom" rate="15"/>
+    <drop item="keen_fire_sword" rate="15"/>
+    <drop item="holy_axe_of_dexterity" rate="15"/>
+    <drop item="dark_hammer_of_health" rate="15"/>
+    <drop item="dark_ranseur_of_wisdom" rate="15"/>
+    <drop item="mighty_holy_sword" rate="15"/>
+    <drop item="golden_dragonfang_necklace" rate="15"/>
+    <drop item="golden_dragoneye_ring" rate="15"/>
+    <drop item="golden_dragonscale" min="1" max="5" rate="300000"/>
+  </golden_dragon>
+  <eyeball>
+    <drop item="gold_piece" min="200" max="400" rate="100000"/>
+    <drop item="thunder_trident" rate="8"/>
+    <drop item="gauntlets_of_thunder" rate="8"/>
+    <drop item="gauntlets_of_despair" rate="8"/>
+    <drop item="ring_of_despair" rate="8"/>
+    <drop item="magic_gauntlets" rate="200"/>
+    <drop item="magic_chain_gloves" rate="200"/>
+  </eyeball>
+  <harpy>
+    <drop item="gold_piece" min="40" max="80" rate="100000"/>
+    <drop item="emerald_leggings" rate="8"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+    <drop item="magic_platemail_leggings" rate="200"/>
+  </harpy>
+  <earth_elemental>
+    <drop item="gold_piece" min="50" max="100" rate="100000"/>
+    <drop item="emerald_gauntlets" rate="8"/>
+    <drop item="magic_chain_gloves" rate="200"/>
+    <drop item="emerald_amulet" rate="8"/>
+    <drop item="magic_gauntlets" rate="200"/>
+    <drop item="earth_dagger" rate="4"/>
+  </earth_elemental>
+  <shambling_mound>
+    <drop item="gold_piece" min="75" max="150" rate="100000"/>
+    <drop item="holy_dagger" rate="4"/>
+    <drop item="emerald_shield" rate="8"/>
+    <drop item="enchanted_spiked_shield" rate="200"/>
+    <drop item="emerald_amulet" rate="4"/>
+    <drop item="enchanted_heater_shield" rate="200"/>
+  </shambling_mound>
+  <entling>
+    <drop item="gold_piece" min="100" max="200" rate="100000"/>
+    <drop item="emerald_platemail" rate="5000"/>
+    <drop item="enchanted_scalemail" rate="200"/>
+    <drop item="emerald_ring" rate="5000"/>
+    <drop item="earth_dagger" rate="4"/>
+    <drop item="magic_platemail_armor" rate="200"/>
+  </entling>
+  <cave_troll>
+    <drop item="gold_piece" min="125" max="250" rate="100000"/>
+    <drop item="leggins_of_earth" rate="5000"/>
+    <drop item="leggings_of_hope" rate="5000"/>
+    <drop item="ring_of_the_earth" rate="5000"/>
+    <drop item="holy_dagger" rate="4"/>
+    <drop item="magic_platemail_leggings" rate="200"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+  </cave_troll>
+  <forest_troll>
+    <drop item="gold_piece" min="150" max="300" rate="100000"/>
+    <drop item="gauntlets_of_earth" rate="5000"/>
+    <drop item="gauntlets_of_hope" rate="5000"/>
+    <drop item="hammer_of_earth" rate="8"/>
+    <drop item="magic_gauntlets" rate="200"/>
+    <drop item="ring_of_hope" rate="5000"/>
+    <drop item="magic_chain_gloves" rate="200"/>
+  </forest_troll>
+  <ent>
+    <drop item="gold_piece" min="250" max="500" rate="100000"/>
+    <drop item="helmet_of_earth" rate="5000"/>
+    <drop item="helmet_of_hope" rate="5000"/>
+    <drop item="amulet_of_the_earth" rate="5000"/>
+    <drop item="corseque_of_earth" rate="8"/>
+    <drop item="magic_troglothian_helmet" rate="200"/>
+    <drop item="enchanted_ribbed_helmet" rate="200"/>
+  </ent>
+  <green_dragon>
+    <drop item="gold_piece" min="300" max="600" rate="100000"/>
+    <drop item="shield_of_earth" rate="5000"/>
+    <drop item="shield_of_hope" rate="5000"/>
+    <drop item="green_dragonscale" min="2" max="5" rate="300"/>
+    <drop item="eartholda" rate="8"/>
+    <drop item="earth_stone_armor" rate="5000"/>
+    <drop item="green_dragonfang_necklace" rate="5000"/>
+    <drop item="green_dragoneye_ring" rate="5000"/>
+    <drop item="enchanted_heater_shield" rate="200"/>
+  </green_dragon>
+  <desert_dragon>
+    <drop item="gold_piece" min="700" max="1400" rate="100000"/>
+    <drop item="shield_of_protection" rate="20"/>
+    <drop item="staff_of_power" rate="20"/>
+    <drop item="superior_staff" rate="20"/>
+    <drop item="armor_of_great_health" rate="20"/>
+    <drop item="helmet_of_knowledge" rate="20"/>
+    <drop item="boots_of_haste" rate="20"/>
+    <drop item="gauntlets_of_ogre_power" rate="20"/>
+    <drop item="rune_ring" rate="5000"/>
+  </desert_dragon>
+  <fire_elemental>
+    <drop item="gold_piece" min="50" max="100" rate="100000"/>
+    <drop item="ruby_leggings" rate="8"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+    <drop item="magic_platemail_leggings" rate="200"/>
+  </fire_elemental>
+  <nightmare>
+    <drop item="gold_piece" min="100" max="200" rate="100000"/>
+    <drop item="ruby_helmet" min="5" max="10" rate="100000"/>
+    <drop item="ruby_ring" min="5" max="10" rate="1100000"/>
+    <drop item="enchanted_ribbed_helmet" rate="200"/>
+    <drop item="dagger_of_darkness" rate="4"/>
+    <drop item="magic_troglothian_helmet" rate="200"/>
+  </nightmare>
+  <imp>
+    <drop item="gold_piece" min="125" max="250" rate="100000"/>
+    <drop item="ruby_shield" rate="100000"/>
+    <drop item="fire_dagger" rate="4"/>
+    <drop item="ruby_amulet" rate="4"/>
+    <drop item="enchanted_spiked_shield" rate="200"/>
+    <drop item="enchanted_heater_shield" rate="200"/>
+  </imp>
+  <minion>
+    <drop item="gold_piece" min="200" max="400" rate="100000"/>
+    <drop item="fire_dagger" rate="4"/>
+    <drop item="fire_leggings" rate="8"/>
+    <drop item="leggings_of_darkness" rate="8"/>
+    <drop item="ring_of_lava" rate="4"/>
+    <drop item="magic_platemail_leggings" rate="200"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+  </minion>
+  <demon>
+    <drop item="gold_piece" min="300" max="600" rate="100000"/>
+    <drop item="fire_sword" rate="8"/>
+    <drop item="fire_gauntlets" rate="100000"/>
+    <drop item="gauntlets_of_darkness" rate="5000"/>
+    <drop item="magic_gauntlets" rate="200"/>
+    <drop item="ring_of_darkness" rate="5000"/>
+    <drop item="magic_chain_gloves" rate="200"/>
+  </demon>
+  <red_dragon>
+    <drop item="gold_piece" min="400" max="800" rate="100000"/>
+    <drop item="fire_hammer" rate="8"/>
+    <drop item="shield_of_darkness" rate="10000"/>
+    <drop item="fire_shield" rate="8"/>
+    <drop item="red_dragonfang_necklace" rate="20"/>
+    <drop item="red_dragoneye_ring" rate="10000"/>
+    <drop item="red_dragonscale" min="2" max="5" rate="300"/>
+    <drop item="fire_stone_armor" rate="8"/>
+    <drop item="enchanted_heater_shield" rate="200"/>
+  </red_dragon>
+  <hellspawn>
+    <drop item="gold_piece" min="500" max="1000" rate="100000"/>
+    <drop item="fire_spear" rate="2000"/>
+    <drop item="fire_platemail_armor" rate="8"/>
+    <drop item="platemail_of_darkness" rate="5000"/>
+    <drop item="magic_platemail_armor" rate="200"/>
+    <drop item="rune_platemail_armor" rate="5000"/>
+    <drop item="enchanted_scalemail" rate="200"/>
+    <drop item="despair_sword" rate="5000"/>
+  </hellspawn>
+  <thunder_balor>
+    <drop item="gold_piece" min="1000" max="2000" rate="100000"/>
+    <drop item="rune_blade" rate="10"/>
+    <drop item="rune_hammer" rate="10"/>
+    <drop item="holy_sword" rate="10000"/>
+    <drop item="sword_of_darkness" rate="10"/>
+  </thunder_balor>
+  <fire_dragon>
+    <drop item="gold_piece" min="500" max="1000" rate="100000"/>
+    <drop item="sword_of_darkness" rate="6"/>
+    <drop item="galdruil_axe" rate="6"/>
+    <drop item="hammer_of_darkness" rate="200"/>
+    <drop item="ranseur_of_darkness" rate="6"/>
+    <drop item="amulet_of_darkness" rate="5000"/>
+    <drop item="rune_gauntlets" rate="5000"/>
+  </fire_dragon>
+  <fireball>
+    <drop item="gold_piece" min="350" max="700" rate="100000"/>
+    <drop item="fire_axe" rate="10000"/>
+    <drop item="fire_helmet" rate="10000"/>
+    <drop item="helmet_of_darkness" rate="5000"/>
+    <drop item="amulet_of_raging_fire" rate="8"/>
+    <drop item="magic_troglothian_helmet" rate="200"/>
+    <drop item="enchanted_ribbed_helmet" rate="200"/>
+  </fireball>
+  <desert_goblin>
+    <drop item="gold_piece" min="50" max="100" rate="100000"/>
+    <drop item="gauntlets_of_ogre_power" rate="5000"/>
+    <drop item="greater_ring_of_power" rate="8"/>
+    <drop item="greater_amulet_of_power" rate="5000"/>
+    <drop item="miners_gloves" rate="5000"/>
+    <drop item="miners_shield" rate="5000"/>
+    <drop item="magic_gauntlets" rate="200"/>
+    <drop item="magic_chain_gloves" rate="200"/>
+  </desert_goblin>
+  <sand_elemental>
+    <drop item="gold_piece" min="75" max="150" rate="100000"/>
+    <drop item="boots_of_haste" rate="5000"/>
+    <drop item="greater_ring_of_agility" rate="5000"/>
+    <drop item="greater_amulet_of_speed" rate="5000"/>
+    <drop item="miners_boots" rate="5000"/>
+    <drop item="miners_staff" rate="2"/>
+    <drop item="magic_platemail_leggings" rate="200"/>
+    <drop item="magic_chainmail_leggings" rate="200"/>
+  </sand_elemental>
+  <dune_sicklar>
+    <drop item="gold_piece" min="100" max="200" rate="100000"/>
+    <drop item="helmet_of_knowledge" rate="8"/>
+    <drop item="greater_ring_of_wisdom" rate="8"/>
+    <drop item="greater_amulet_of_wisdom" rate="8"/>
+    <drop item="miners_cap" rate="20"/>
+    <drop item="miners_shield" rate="100"/>
+    <drop item="enchanted_heater_shield" rate="200"/>
+    <drop item="enchanted_spiked_shield" rate="200"/>
+  </dune_sicklar>
+  <dune_troll>
+    <drop item="gold_piece" min="200" max="400" rate="100000"/>
+    <drop item="armor_of_great_health" rate="5000"/>
+    <drop item="miners_cape" rate="5000"/>
+    <drop item="greater_ring_of_life" rate="5000"/>
+    <drop item="greater_amulet_of_life" rate="5000"/>
+    <drop item="miners_staff" rate="5000"/>
+    <drop item="magic_platemail_armor" rate="200"/>
+    <drop item="enchanted_scalemail" rate="200"/>
+  </dune_troll>
+</treasures>

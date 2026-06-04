@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<slots>
+  <weapon x="751" y="120"/>
+  <plate x="713" y="108"/>
+  <helmet x="713" y="70"/>
+  <shield x="675" y="120"/>
+  <gauntlets x="675" y="81"/>
+  <leggings x="713" y="168"/>
+  <ring x="675" y="156"/>
+  <ring x="751" y="156"/>
+  <amulet x="751" y="81"/>
+  <belt x="713" y="136"/>
+</slots>
