@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# --- Game Data Loading ---
+# --- Game Data Loading ----
 
 class HryParser:
     @staticmethod
