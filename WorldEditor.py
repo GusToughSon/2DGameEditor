@@ -35,6 +35,7 @@ class WorldEditor:
         self.selected_tile_id = 0
         
         self.history = []            # Stack for Undo
+        self.current_stroke_tiles = [] # Track TILE modifications during a stroke
         self.mouse_img = self._load_mouse_img()
         self.is_panning = False
         self.last_grid_pos = None    # For stroke detection
@@ -148,6 +149,7 @@ class WorldEditor:
         # Interactions
         self.canvas.bind("<Button-1>", self.on_click)
         self.canvas.bind("<B1-Motion>", self.on_click)
+        self.canvas.bind("<ButtonRelease-1>", self.end_stroke)
         self.canvas.bind("<Button-3>", self.start_pan)
         self.canvas.bind("<B3-Motion>", self.do_pan)
         self.canvas.bind("<MouseWheel>", self.on_zoom)
@@ -361,10 +363,30 @@ class WorldEditor:
 
     def undo(self):
         if not self.history: return
-        self.world_data["grid"] = self.history.pop()
-        self.photo_cache.clear()
+        action = self.history.pop()
+        if isinstance(action, tuple) and action[0] == "TILE":
+            for target_cid, prev_data in action[1]:
+                chunk = self.chunks.get(target_cid)
+                if chunk:
+                    chunk["data"] = prev_data
+                    if target_cid in self.chunk_cache:
+                        del self.chunk_cache[target_cid]
+                    to_del = [k for k in self.photo_cache.keys() if k[0] == target_cid]
+                    for k in to_del: del self.photo_cache[k]
+                    self.save_manager.save_chunks(self.chunks, [target_cid])
+        else:
+            grid_data = action[1] if isinstance(action, tuple) else action
+            self.world_data["grid"] = grid_data
+            self.photo_cache.clear()
+            
         self._draw_canvas()
         print("[DEBUG] Undo performed.")
+
+    def end_stroke(self, event=None):
+        if hasattr(self, "current_stroke_tiles") and self.current_stroke_tiles:
+            self.history.append(("TILE", self.current_stroke_tiles))
+            if len(self.history) > 50: self.history.pop(0)
+            self.current_stroke_tiles = []
 
     def _on_alt_click(self, event):
         """ Quick-switch to Sampler behavior. """
@@ -443,8 +465,10 @@ class WorldEditor:
         pos = (ccol, crow)
         if event.type == tk.EventType.ButtonPress:
             import copy
-            self.history.append(copy.deepcopy(grid))
-            if len(self.history) > 50: self.history.pop(0)
+            self.current_stroke_tiles = []
+            if self.mode != "TILE":
+                self.history.append(("CHUNK", copy.deepcopy(grid)))
+                if len(self.history) > 50: self.history.pop(0)
             self.last_grid_pos = pos
         elif pos == self.last_grid_pos:
             return # Don't repeat on same cell during motion
@@ -472,6 +496,11 @@ class WorldEditor:
             chunk = self.chunks.get(target_cid)
             if not chunk or chunk.get("locked"):
                 return # Can't touch locked chunks!
+                
+            # Record chunk state for undo before we modify it
+            import copy
+            if not any(cid == target_cid for cid, _ in self.current_stroke_tiles):
+                self.current_stroke_tiles.append((target_cid, copy.deepcopy(chunk["data"])))
                 
             # Get submodule coordinates (0 to CHUNK_SIZE-1)
             sm_x = int((world_x - ccol) * config.CHUNK_SIZE)
