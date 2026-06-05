@@ -24,7 +24,7 @@ if %errorlevel% neq 0 (
 
 :: 0. Dependency Check
 echo [DEBUG] Verifying build environment...
-    %PYTHON_CMD% -m pip install --upgrade pip nuitka pyinstaller zstandard
+    %PYTHON_CMD% -m pip install --upgrade pip nuitka pyinstaller zstandard Pillow pystray
     if %errorlevel% neq 0 ( echo [ERROR] Dependency install failed. & pause & exit /b 1 )
 :: 1. Auto-Increment Version
 for /f "tokens=*" %%v in ('%PYTHON_CMD% increment_version.py') do set APP_VER=%%v
