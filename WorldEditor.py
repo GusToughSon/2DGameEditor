@@ -10,6 +10,10 @@ from tkinter import messagebox, simpledialog, ttk
 import os
 import config
 from PIL import Image, ImageTk, ImageDraw
+try:
+    NEAREST_FILTER = Image.Resampling.NEAREST
+except AttributeError:
+    NEAREST_FILTER = Image.NEAREST
 from EditorComponents import center_window, TilesetPalette
 import ScriptParser
 
@@ -94,7 +98,7 @@ class WorldEditor:
         path = os.path.join(self.save_manager.pool_root, "..", "Assets", "MouseImage.png")
         if os.path.exists(path):
             img = Image.open(path).convert("RGBA")
-            img = img.resize((24, 24), Image.NEAREST)
+            img = img.resize((24, 24), NEAREST_FILTER)
             return ImageTk.PhotoImage(img)
         return None
 
