@@ -933,6 +933,7 @@ class GameEditor:
             self.root.destroy()
 
 if __name__ == "__main__":
+    app = None
     try:
         root = tk.Tk()
         app = GameEditor(root)
@@ -940,7 +941,8 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n[DEBUG] Interrupted by user. Shutting down gracefully...")
         # If the app was initialized, we should try to clean up
-        if 'app' in locals():
+        if app is not None:
             app.on_app_close()
         else:
             sys.exit(0)
+

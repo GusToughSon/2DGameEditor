@@ -40,3 +40,5 @@ UI_GRID_GAP = 3           # The space (in pixels) between images in the editor g
 
 # PERSISTENCE
 LAST_PROJECT = "ThePlayerCity"
+PROJECT_EXT = ".sav"
+
