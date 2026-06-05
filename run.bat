@@ -44,6 +44,17 @@ exit /B 1
 echo [INFO] Python Interpreter mounted: '!PYTHON_BIN!'
 !PYTHON_BIN! --version
 
+:: Check if requirements are installed, if not install them
+echo [INFO] Checking dependencies...
+!PYTHON_BIN! -c "import PIL, pystray" >nul 2>&1
+if !ERRORLEVEL! NEQ 0 (
+    echo [INFO] Installing missing dependencies (Pillow, pystray)...
+    !PYTHON_BIN! -m pip install Pillow pystray
+    if !ERRORLEVEL! NEQ 0 (
+        echo [ERROR] Failed to install dependencies. The application might fail to start.
+    )
+)
+
 :: 4. Execution & Handoff
 echo [INFO] Terminating existing instances...
 :: We target only windows with the specific '[Active Engine]' tag to avoid closing the IDE or AI.
