@@ -216,6 +216,27 @@ class WorldEditor:
                 self.pan_y = (win_h / 2) - (p["y"] * self.zoom)
                 self._draw_canvas()
             return
+        elif mode == "RENAME_CHUNK":
+            self.save_manager.mark_dirty()
+            self.chunk_cache.clear()
+            self.photo_cache.clear()
+            self._draw_canvas()
+            return
+        elif mode == "REMOVE_CHUNK":
+            self.save_manager.mark_dirty()
+            grid = self.world_data.get("grid", [])
+            for r in range(len(grid)):
+                for c in range(len(grid[r])):
+                    val = grid[r][c]
+                    val_str = f"C_{val}" if isinstance(val, (int, float)) or (isinstance(val, str) and val.isdigit()) else val
+                    if val_str == asset_id:
+                        grid[r][c] = 0
+            if self.selected_chunk_id == asset_id:
+                self.selected_chunk_id = "C_0"
+            self.chunk_cache.clear()
+            self.photo_cache.clear()
+            self._draw_canvas()
+            return
 
         self.mode = mode
         self.mode_var.set(mode) # Sync toolbar radiobuttons
@@ -302,9 +323,10 @@ class WorldEditor:
                         
                     # Show Index if zoomed in
                     if self.zoom >= 0.4:
+                        display_name = self.chunks.get(cid, {}).get("name", cid)
                         self.canvas.create_text(x + chunk_px/2, y + chunk_px/2, 
-                                              text=str(cid), fill="white", 
-                                              font=("Arial", int(14 * self.zoom), "bold"),
+                                              text=str(display_name), fill="white", 
+                                              font=("Arial", int(12 * self.zoom), "bold"),
                                               stipple="gray50", tags="chunk")
             print(f"[DEBUG] _draw_canvas: Finished. Draw Count: {draw_count}")
 

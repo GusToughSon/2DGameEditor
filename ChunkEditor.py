@@ -165,7 +165,14 @@ class ChunkEditor:
         self.library_win.geometry(f"293x750+{bx - 310}+{by}")
         self.library_win.attributes("-topmost", True)
         self.library_win.configure(bg=config.COLOR_BG)
-        tk.Label(self.library_win, text="CHUNK LIBRARY", bg="#222", fg="yellow", font=("Arial", 8, "bold")).pack(fill="x")
+        
+        # Header with "new chunk" button
+        header_f = tk.Frame(self.library_win, bg="#222")
+        header_f.pack(fill="x")
+        tk.Label(header_f, text="CHUNK LIBRARY", bg="#222", fg="yellow", font=("Arial", 8, "bold")).pack(side="left", padx=5)
+        new_btn = tk.Button(header_f, text="➕ New", command=self._create_new_chunk, bg="#10b981", fg="white", bd=0, padx=5, font=("Arial", 8, "bold"))
+        new_btn.pack(side="right", padx=5, pady=2)
+
         self.chunk_palette = TilesetPalette(self.library_win, ts_path, self.tile_size, self._on_chunk_nav_selected, locked=True)
         self.chunk_palette.set_chunks(self.chunks)
         self.chunk_palette.set_mode("CHUNK")
@@ -595,7 +602,47 @@ class ChunkEditor:
             return tk_img
         except: return None
 
+    def _create_new_chunk(self):
+        cids = set(int(cid[2:]) for cid in self.chunks.keys() if cid.startswith("C_") and cid[2:].isdigit())
+        new_idx = 0
+        while new_idx in cids:
+            new_idx += 1
+        new_cid = f"C_{new_idx}"
+        
+        self.chunks[new_cid] = {
+            "name": new_cid,
+            "data": {
+                "ground": [[0]*16 for _ in range(16)],
+                "objects": [[0]*16 for _ in range(16)]
+            }
+        }
+        
+        self.chunk_palette.set_chunks(self.chunks)
+        self._select_chunk(new_cid)
+
     def _on_chunk_nav_selected(self, cid, mode):
+        if mode == "NEW_CHUNK":
+            self._create_new_chunk()
+            return
+        if mode == "RENAME_CHUNK":
+            if cid == self.selected_chunk_id:
+                display_name = self.chunks.get(cid, {}).get("name", cid)
+                self.status_label.config(text=f"Editing {display_name} ({cid})")
+                self.win.title(f"Chunk Editor - {display_name} ({cid})")
+            return
+        if mode == "REMOVE_CHUNK":
+            if cid == self.selected_chunk_id:
+                keys = sorted(self.chunks.keys(), key=lambda x: int(x.split('_')[1]) if '_' in x else 0)
+                if keys:
+                    self._select_chunk(keys[0])
+                else:
+                    self.selected_chunk_id = None
+                    self.canvas.delete("all")
+                    self.status_label.config(text="No Chunks Available")
+                    self.win.title("Chunk Editor - No Chunk")
+            else:
+                self.chunk_palette.set_chunks(self.chunks)
+            return
         if cid == self.selected_chunk_id: return
         self._select_chunk(cid)
 

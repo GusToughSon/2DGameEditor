@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox, simpledialog
 import os
 import config
 import math
@@ -285,6 +285,7 @@ class TilesetPalette:
         self.ent.bind("<Return>", lambda e: self.on_search(self.ent.get()))
         
         self.canvas.bind("<Button-1>", self.on_click)
+        self.canvas.bind("<Button-3>", self.on_right_click)
         self.canvas.bind("<MouseWheel>", self.on_wheel)
         self.frame.bind("<Configure>", self.update_visible)
         self.canvas.bind("<Configure>", self.update_visible)
@@ -487,7 +488,7 @@ class TilesetPalette:
 
     def _update_visible_chunks(self, event=None):
         full_ids = self._get_full_ids()
-        if not full_ids: return
+        total_items = len(full_ids) + 1
         
         # Absolute Purge: Remove everything before virtualization
         self.canvas.delete("all")
@@ -499,7 +500,7 @@ class TilesetPalette:
         if cw < 50: cw = 200 
         
         cols = max(1, cw // (sz + gap))
-        rows_total = math.ceil(len(full_ids) / cols)
+        rows_total = math.ceil(total_items / cols)
         total_h = rows_total * (sz + gap) + 40
         
         new_sr = (0, 0, cw, total_h)
@@ -513,18 +514,24 @@ class TilesetPalette:
         row_end = min(rows_total, int(v_end // (sz + gap)) + 1)
         
         idx_start = row_start * cols
-        idx_end = min(len(full_ids), row_end * cols)
+        idx_end = min(total_items, row_end * cols)
         
         for i in range(idx_start, idx_end):
-            cid = full_ids[i]
             r, c = i // cols, i % cols
             x, y = c * (sz + gap) + 10, r * (sz + gap) + 10
-            
-            p = self._get_chunk_photo(cid, sz)
-            if p:
-                self.canvas.create_image(x, y, image=p, anchor="nw", tags=(cid, "chunk_thumb"))
-                self.persist_refs.append(p)
-                self.canvas.create_text(x+2, y+2, text=str(cid), fill="yellow", font=("Arial", 7), anchor="nw", tags="chunk_label")
+            if i < len(full_ids):
+                cid = full_ids[i]
+                p = self._get_chunk_photo(cid, sz)
+                if p:
+                    self.canvas.create_image(x, y, image=p, anchor="nw", tags=(cid, "chunk_thumb"))
+                    self.persist_refs.append(p)
+                    display_name = self.chunks_data.get(cid, {}).get("name", cid)
+                    if len(display_name) > 10:
+                        display_name = display_name[:8] + ".."
+                    self.canvas.create_text(x+2, y+2, text=str(display_name), fill="yellow", font=("Arial", 7), anchor="nw", tags="chunk_label")
+            else:
+                self.canvas.create_rectangle(x, y, x + sz, y + sz, fill="#1e1e24", outline="#444", width=2, tags=("NEW_CHUNK_BUTTON", "chunk_thumb"))
+                self.canvas.create_text(x + sz//2, y + sz//2, text="+", fill="#10b981", font=("Arial", 18, "bold"), anchor="center", tags="new_chunk_plus")
         self.draw_selection()
 
     def _update_visible_tiles(self, event=None):
@@ -731,3 +738,54 @@ class TilesetPalette:
                 self.selected_id = cid
                 self.draw_selection()
                 if self.callback: self.callback(self.selected_id, "CHUNK")
+            elif idx == len(full_ids):
+                if self.callback: self.callback(None, "NEW_CHUNK")
+
+    def on_right_click(self, event):
+        if self.mode != "CHUNK": return
+        vx, vy = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+        sz = self.chunk_zoom
+        gap = 4
+        cw = self.frame.winfo_width()
+        if cw < 50: cw = 200 
+        cols = max(1, cw // (sz + gap))
+        
+        grid_c = int((vx - 10) // (sz + gap))
+        grid_r = int((vy - 10) // (sz + gap))
+        
+        if grid_c < 0 or grid_c >= cols: return
+        
+        idx = grid_r * cols + grid_c
+        full_ids = self._get_full_ids()
+        
+        if 0 <= idx < len(full_ids):
+            cid = full_ids[idx]
+            self.show_context_menu(event, cid)
+
+    def show_context_menu(self, event, cid):
+        menu = tk.Menu(self.parent, tearoff=0)
+        menu.add_command(label="✏️ Rename Chunk", command=lambda: self.trigger_rename(cid))
+        menu.add_command(label="🗑️ Remove Chunk", command=lambda: self.trigger_remove(cid))
+        menu.post(event.x_root, event.y_root)
+
+    def trigger_rename(self, cid):
+        current_name = self.chunks_data.get(cid, {}).get("name", cid)
+        new_name = simpledialog.askstring("Rename Chunk", f"Enter new visual name for {cid}:", initialvalue=current_name, parent=self.parent)
+        if new_name is not None:
+            if cid in self.chunks_data:
+                self.chunks_data[cid]["name"] = new_name
+            self.render_view()
+            if self.callback:
+                self.callback(cid, "RENAME_CHUNK")
+
+    def trigger_remove(self, cid):
+        ans1 = messagebox.askyesno("Confirm Delete (Level 1)", f"Are you sure you want to delete chunk '{cid}'?", parent=self.parent)
+        if not ans1: return
+        ans2 = messagebox.askyesno("Confirm Delete (Level 2) - WARNING", f"WARNING: Deleting '{cid}' is permanent and will clear it from the world grid. Proceed?", parent=self.parent)
+        if not ans2: return
+        
+        if cid in self.chunks_data:
+            del self.chunks_data[cid]
+        self.render_view()
+        if self.callback:
+            self.callback(cid, "REMOVE_CHUNK")
