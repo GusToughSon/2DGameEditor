@@ -324,6 +324,8 @@ class WorldEditor:
                     # Show Index if zoomed in
                     if self.zoom >= 0.4:
                         display_name = self.chunks.get(cid, {}).get("name", cid)
+                        if display_name.startswith("C_") and display_name[2:].isdigit():
+                            display_name = display_name[2:]
                         self.canvas.create_text(x + chunk_px/2, y + chunk_px/2, 
                                               text=str(display_name), fill="white", 
                                               font=("Arial", int(12 * self.zoom), "bold"),

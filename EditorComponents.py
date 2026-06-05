@@ -526,6 +526,8 @@ class TilesetPalette:
                     self.canvas.create_image(x, y, image=p, anchor="nw", tags=(cid, "chunk_thumb"))
                     self.persist_refs.append(p)
                     display_name = self.chunks_data.get(cid, {}).get("name", cid)
+                    if display_name.startswith("C_") and display_name[2:].isdigit():
+                        display_name = display_name[2:]
                     if len(display_name) > 10:
                         display_name = display_name[:8] + ".."
                     self.canvas.create_text(x+2, y+2, text=str(display_name), fill="yellow", font=("Arial", 7), anchor="nw", tags="chunk_label")
@@ -770,18 +772,47 @@ class TilesetPalette:
 
     def trigger_rename(self, cid):
         current_name = self.chunks_data.get(cid, {}).get("name", cid)
-        new_name = simpledialog.askstring("Rename Chunk", f"Enter new visual name for {cid}:", initialvalue=current_name, parent=self.parent)
-        if new_name is not None:
-            if cid in self.chunks_data:
-                self.chunks_data[cid]["name"] = new_name
-            self.render_view()
-            if self.callback:
-                self.callback(cid, "RENAME_CHUNK")
+        while True:
+            new_name = simpledialog.askstring("Rename Chunk", f"Enter new visual name for {cid}:", initialvalue=current_name, parent=self.parent)
+            if new_name is None:
+                return
+            new_name = new_name.strip()
+            if not new_name:
+                return
+            
+            idx_num = cid[2:] if (cid.startswith("C_") and cid[2:].isdigit()) else cid
+            normalized_proposed = f"C_{idx_num}" if new_name == idx_num else new_name
+            
+            existing = False
+            for other_cid, other_data in self.chunks_data.items():
+                if other_cid == cid:
+                    continue
+                o_name = other_data.get("name", other_cid)
+                o_idx_num = other_cid[2:] if (other_cid.startswith("C_") and other_cid[2:].isdigit()) else other_cid
+                o_normalized = f"C_{o_idx_num}" if o_name == o_idx_num else o_name
+                
+                if normalized_proposed == o_normalized:
+                    existing = True
+                    break
+                    
+            if existing:
+                messagebox.showerror("Error", "A chunk with this name already exists.", parent=self.parent)
+            else:
+                if cid in self.chunks_data:
+                    self.chunks_data[cid]["name"] = new_name
+                self.render_view()
+                if self.callback:
+                    self.callback(cid, "RENAME_CHUNK")
+                break
 
     def trigger_remove(self, cid):
-        ans1 = messagebox.askyesno("Confirm Delete (Level 1)", f"Are you sure you want to delete chunk '{cid}'?", parent=self.parent)
+        display_name = self.chunks_data.get(cid, {}).get("name", cid)
+        if display_name.startswith("C_") and display_name[2:].isdigit():
+            display_name = display_name[2:]
+            
+        ans1 = messagebox.askyesno("Confirm Delete (Level 1)", f"Are you sure you want to delete chunk '{display_name}'?", parent=self.parent)
         if not ans1: return
-        ans2 = messagebox.askyesno("Confirm Delete (Level 2) - WARNING", f"WARNING: Deleting '{cid}' is permanent and will clear it from the world grid. Proceed?", parent=self.parent)
+        ans2 = messagebox.askyesno("Confirm Delete (Level 2) - WARNING", f"WARNING: Deleting '{display_name}' is permanent and will clear it from the world grid. Proceed?", parent=self.parent)
         if not ans2: return
         
         if cid in self.chunks_data:

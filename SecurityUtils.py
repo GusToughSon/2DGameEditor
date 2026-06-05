@@ -27,9 +27,14 @@ def changeChecksum(file_path):
         return False, str(e)
 
 def get_file_hash(file_path):
-    """ Returns the SHA256 mash of a file for verification. """
-    sha256_hash = hashlib.sha256()
-    with open(file_path,"rb") as f:
-        for byte_block in iter(lambda: f.read(4096),b""):
-            sha256_hash.update(byte_block)
-    return sha256_hash.hexdigest()
+    """ Returns the SHA256 hash of a file for verification. """
+    if not os.path.exists(file_path):
+        return None
+    try:
+        sha256_hash = hashlib.sha256()
+        with open(file_path,"rb") as f:
+            for byte_block in iter(lambda: f.read(4096),b""):
+                sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()
+    except Exception:
+        return None

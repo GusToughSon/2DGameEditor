@@ -116,6 +116,14 @@ class ChunkEditor:
         tk.Button(nav_f, text="◀ Prev", command=self._prev_chunk, bg="#333", fg="white", bd=0, padx=10).pack(side="left", padx=2)
         tk.Button(nav_f, text="Next ▶", command=self._next_chunk, bg="#333", fg="white", bd=0, padx=10).pack(side="left", padx=2)
 
+        name_f = tk.Frame(self.toolbar, bg="#111")
+        name_f.pack(side="left", padx=20)
+        self.name_entry = tk.Entry(name_f, bg="#222", fg="white", insertbackground="white", bd=0, width=15, font=("Arial", 9))
+        self.name_entry.pack(side="left", padx=2, ipady=2)
+        self.name_entry.bind("<FocusOut>", self._on_name_entry_focus_out)
+        self.name_entry.bind("<KeyRelease>", self._on_name_entry_key_release)
+        self.name_entry.bind("<Return>", lambda e: self.win.focus())
+
         act_f = tk.Frame(self.toolbar, bg="#111")
         act_f.pack(side="right", padx=10)
         
@@ -239,13 +247,100 @@ class ChunkEditor:
         self.win.update() 
         self.render()
         self.chunk_palette.select_id(cid, "CHUNK")
-        self.status_label.config(text=f"Editing {cid}")
-        self.win.title(f"Chunk Editor - {cid}")
+        display_name = self.chunks.get(cid, {}).get("name", cid)
+        if display_name.startswith("C_") and display_name[2:].isdigit():
+            display_name = display_name[2:]
+        self.status_label.config(text=f"Editing {display_name}")
+        self.win.title(f"Chunk Editor - {display_name}")
+        
+        if hasattr(self, 'name_entry'):
+            self.name_entry.delete(0, tk.END)
+            self.name_entry.insert(0, display_name)
+
+    def _on_name_entry_focus_out(self, event=None):
+        if not self.selected_chunk_id: return
+        new_name = self.name_entry.get().strip()
+        if not new_name: return
+        
+        current_name = self.chunks.get(self.selected_chunk_id, {}).get("name", self.selected_chunk_id)
+        
+        idx_str = self.selected_chunk_id
+        if idx_str.startswith("C_") and idx_str[2:].isdigit():
+            idx_num = idx_str[2:]
+        else:
+            idx_num = idx_str
+            
+        if new_name == idx_num:
+            name_to_store = f"C_{idx_num}"
+        else:
+            name_to_store = new_name
+            
+        existing = False
+        for other_cid, other_data in self.chunks.items():
+            if other_cid == self.selected_chunk_id:
+                continue
+            o_name = other_data.get("name", other_cid)
+            o_idx_num = other_cid[2:] if (other_cid.startswith("C_") and other_cid[2:].isdigit()) else other_cid
+            o_normalized = f"C_{o_idx_num}" if o_name == o_idx_num else o_name
+            
+            if name_to_store == o_normalized:
+                existing = True
+                break
+                
+        if existing:
+            messagebox.showerror("Error", "A chunk with this name already exists.", parent=self.win)
+            def refocus():
+                if self.win.winfo_exists() and hasattr(self, 'name_entry'):
+                    self.name_entry.focus_set()
+                    self.name_entry.select_range(0, tk.END)
+            self.win.after(50, refocus)
+            return
+            
+        if current_name != name_to_store:
+            self.chunks[self.selected_chunk_id]["name"] = name_to_store
+            self.chunk_palette.set_chunks(self.chunks)
+            self._select_chunk(self.selected_chunk_id)
+
+    def _on_name_entry_key_release(self, event=None):
+        if not self.selected_chunk_id: return
+        typed_name = self.name_entry.get().strip()
+        if not typed_name: return
+        
+        idx_str = self.selected_chunk_id
+        if idx_str.startswith("C_") and idx_str[2:].isdigit():
+            idx_num = idx_str[2:]
+        else:
+            idx_num = idx_str
+            
+        if typed_name == idx_num:
+            name_to_store = f"C_{idx_num}"
+        else:
+            name_to_store = typed_name
+            
+        existing = False
+        for other_cid, other_data in self.chunks.items():
+            if other_cid == self.selected_chunk_id:
+                continue
+            o_name = other_data.get("name", other_cid)
+            o_idx_num = other_cid[2:] if (other_cid.startswith("C_") and other_cid[2:].isdigit()) else other_cid
+            o_normalized = f"C_{o_idx_num}" if o_name == o_idx_num else o_name
+            
+            if name_to_store == o_normalized:
+                existing = True
+                break
+                
+        if existing:
+            self.status_label.config(text="RENAME (try some capitals)", fg="red")
+        else:
+            display_name = self.chunks.get(self.selected_chunk_id, {}).get("name", self.selected_chunk_id)
+            if display_name.startswith("C_") and display_name[2:].isdigit():
+                display_name = display_name[2:]
+            self.status_label.config(text=f"Editing {display_name}", fg="#888")
 
     def _next_chunk(self):
         print("[TRACE-NAV] Moving to NEXT chunk.")
         if not self.selected_chunk_id: return
-        keys = sorted(self.chunks.keys(), key=lambda x: int(x.split('_')[1]) if '_' in x else 0)
+        keys = sorted(self.chunks.keys(), key=lambda x: (0, int(x[2:])) if x.startswith("C_") and x[2:].isdigit() else (0, int(x)) if x.isdigit() else (1, x))
         try:
             cur_idx = keys.index(self.selected_chunk_id)
             next_idx = (cur_idx + 1) % len(keys)
@@ -255,7 +350,7 @@ class ChunkEditor:
     def _prev_chunk(self):
         print("[TRACE-NAV] Moving to PREVIOUS chunk.")
         if not self.selected_chunk_id: return
-        keys = sorted(self.chunks.keys(), key=lambda x: int(x.split('_')[1]) if '_' in x else 0)
+        keys = sorted(self.chunks.keys(), key=lambda x: (0, int(x[2:])) if x.startswith("C_") and x[2:].isdigit() else (0, int(x)) if x.isdigit() else (1, x))
         try:
             cur_idx = keys.index(self.selected_chunk_id)
             prev_idx = (cur_idx - 1) % len(keys)
@@ -531,12 +626,14 @@ class ChunkEditor:
         if mode == "RENAME_CHUNK":
             if cid == self.selected_chunk_id:
                 display_name = self.chunks.get(cid, {}).get("name", cid)
-                self.status_label.config(text=f"Editing {display_name} ({cid})")
-                self.win.title(f"Chunk Editor - {display_name} ({cid})")
+                if display_name.startswith("C_") and display_name[2:].isdigit():
+                    display_name = display_name[2:]
+                self.status_label.config(text=f"Editing {display_name}")
+                self.win.title(f"Chunk Editor - {display_name}")
             return
         if mode == "REMOVE_CHUNK":
             if cid == self.selected_chunk_id:
-                keys = sorted(self.chunks.keys(), key=lambda x: int(x.split('_')[1]) if '_' in x else 0)
+                keys = sorted(self.chunks.keys(), key=lambda x: (0, int(x[2:])) if x.startswith("C_") and x[2:].isdigit() else (0, int(x)) if x.isdigit() else (1, x))
                 if keys:
                     self._select_chunk(keys[0])
                 else:
@@ -555,7 +652,14 @@ class ChunkEditor:
         self.status_label.config(text=f"Paint Brush: Tile {tid}")
 
     def _setup_shortcuts(self):
-        self.win.bind("<Control-z>", lambda e: self.handle_undo())
-        self.win.bind("<Control-y>", lambda e: self.handle_redo())
-        self.win.bind("<Escape>", lambda e: self.set_tool("PENCIL"))
-        self.win.bind("<Control-s>", lambda e: self._save_all_async())
+        self.win.bind("<Button-1>", lambda e: self.win.focus() if hasattr(self, 'name_entry') and e.widget != self.name_entry else None, add="+")
+        
+        def guard(func, *args, **kwargs):
+            if hasattr(self, 'name_entry') and self.win.focus_get() == self.name_entry:
+                return
+            func(*args, **kwargs)
+
+        self.win.bind("<Control-z>", lambda e: guard(self.handle_undo))
+        self.win.bind("<Control-y>", lambda e: guard(self.handle_redo))
+        self.win.bind("<Escape>", lambda e: guard(self.set_tool, "PENCIL"))
+        self.win.bind("<Control-s>", lambda e: guard(self._save_all_async))
