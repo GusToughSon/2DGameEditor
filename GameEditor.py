@@ -22,6 +22,7 @@ import Hairy
 from EditorComponents import GameStatusBar, show_about_dialog, LoginNotification
 from TilesetSelector import TilesetSelector
 import WorldEditor
+import AnimationEditor
 import ChunkEditor
 import SkillEditor
 import ShopEditor

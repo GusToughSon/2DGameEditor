@@ -320,15 +320,16 @@ class TilesetPalette:
         if self.mode == "TILE":
             ds = 2 # Display Scale
             sz = self.tile_size * ds
-            gap = 2
+            gap = 0
+            if not self.orig_img: return
+            cols = self.orig_img.width // self.tile_size
         else:
             sz = self.chunk_zoom
             gap = 4
+            cw = self.frame.winfo_width()
+            if cw < 50: cw = 200
+            cols = max(1, cw // (sz + gap))
 
-        cw = self.frame.winfo_width()
-        if cw < 50: cw = 200
-        cols = max(1, cw // (sz + gap))
-        
         row = idx // cols
         target_y = row * (sz + gap)
         
@@ -473,14 +474,14 @@ class TilesetPalette:
         self.draw_selection()
     def update_visible(self, event=None):
         """ The Core Virtualization Engine: Optimized for 4000+ items. """
+        if self.mode == "TILE":
+            return # No virtualization/grid layout needed for continuous tileset image
         if hasattr(self, "_updating_visible") and self._updating_visible: return
         self._updating_visible = True
         
         try:
             if self.mode == "CHUNK":
                 self._update_visible_chunks()
-            else:
-                self._update_visible_tiles()
         finally:
             self._updating_visible = False
 
@@ -658,16 +659,18 @@ class TilesetPalette:
 
         if self.mode == "TILE":
             if not self.orig_img: return
+            try:
+                sel_id = int(self.selected_id)
+            except (ValueError, TypeError):
+                return
+            
             ds = 2
             sz = self.tile_size * ds
-            gap = 2
-            cw = self.frame.winfo_width()
-            if cw < 50: cw = 200 
-            cols = max(1, cw // (sz + gap))
+            cols = self.orig_img.width // self.tile_size
             
-            grid_c = self.selected_id % cols
-            grid_r = self.selected_id // cols
-            x, y = grid_c * (sz + gap) + 5, grid_r * (sz + gap) + 5
+            grid_c = sel_id % cols
+            grid_r = sel_id // cols
+            x, y = grid_c * sz, grid_r * sz
             self.canvas.create_rectangle(x, y, x + sz, y + sz, outline="yellow", width=2, tags="selection_rect")
         else:
             full_ids = self._get_full_ids()
@@ -692,13 +695,10 @@ class TilesetPalette:
             if not self.orig_img: return
             ds = 2
             sz = self.tile_size * ds
-            gap = 2
-            cw = self.frame.winfo_width()
-            if cw < 50: cw = 200 
-            cols = max(1, cw // (sz + gap))
+            cols = self.orig_img.width // self.tile_size
             
-            grid_c = int((vx - 5) // (sz + gap))
-            grid_r = int((vy - 5) // (sz + gap))
+            grid_c = int(vx // sz)
+            grid_r = int(vy // sz)
             
             if grid_c < 0 or grid_c >= cols: return
             
