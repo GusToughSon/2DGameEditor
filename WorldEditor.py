@@ -36,6 +36,7 @@ class WorldEditor:
         
         self.history = []            # Stack for Undo
         self.current_stroke_tiles = [] # Track TILE modifications during a stroke
+        self.redo_stack = []         # Stack for Redo
         self.mouse_img = self._load_mouse_img()
         self.is_panning = False
         self.last_grid_pos = None    # For stroke detection
@@ -80,6 +81,7 @@ class WorldEditor:
     def _setup_shortcuts(self):
         self.win.bind("<Control-s>", lambda e: self.save_project_all())
         self.win.bind("<Control-z>", lambda e: self.undo())
+        self.win.bind("<Control-y>", lambda e: self.redo())
         self.win.bind("<Alt-Button-1>", self._on_alt_click)
 
     def _load_tileset(self):
@@ -363,27 +365,61 @@ class WorldEditor:
 
     def undo(self):
         if not self.history: return
+        import copy
         action = self.history.pop()
+        
         if isinstance(action, tuple) and action[0] == "TILE":
+            redo_tiles = []
             for target_cid, prev_data in action[1]:
                 chunk = self.chunks.get(target_cid)
                 if chunk:
+                    redo_tiles.append((target_cid, copy.deepcopy(chunk["data"])))
                     chunk["data"] = prev_data
                     if target_cid in self.chunk_cache:
                         del self.chunk_cache[target_cid]
                     to_del = [k for k in self.photo_cache.keys() if k[0] == target_cid]
                     for k in to_del: del self.photo_cache[k]
                     self.save_manager.save_chunks(self.chunks, [target_cid])
+            self.redo_stack.append(("TILE", redo_tiles))
         else:
             grid_data = action[1] if isinstance(action, tuple) else action
+            self.redo_stack.append(("CHUNK", copy.deepcopy(self.world_data["grid"])))
             self.world_data["grid"] = grid_data
             self.photo_cache.clear()
             
         self._draw_canvas()
         print("[DEBUG] Undo performed.")
 
+    def redo(self):
+        if not self.redo_stack: return
+        import copy
+        action = self.redo_stack.pop()
+        
+        if isinstance(action, tuple) and action[0] == "TILE":
+            undo_tiles = []
+            for target_cid, next_data in action[1]:
+                chunk = self.chunks.get(target_cid)
+                if chunk:
+                    undo_tiles.append((target_cid, copy.deepcopy(chunk["data"])))
+                    chunk["data"] = next_data
+                    if target_cid in self.chunk_cache:
+                        del self.chunk_cache[target_cid]
+                    to_del = [k for k in self.photo_cache.keys() if k[0] == target_cid]
+                    for k in to_del: del self.photo_cache[k]
+                    self.save_manager.save_chunks(self.chunks, [target_cid])
+            self.history.append(("TILE", undo_tiles))
+        else:
+            grid_data = action[1] if isinstance(action, tuple) else action
+            self.history.append(("CHUNK", copy.deepcopy(self.world_data["grid"])))
+            self.world_data["grid"] = grid_data
+            self.photo_cache.clear()
+            
+        self._draw_canvas()
+        print("[DEBUG] Redo performed.")
+
     def end_stroke(self, event=None):
         if hasattr(self, "current_stroke_tiles") and self.current_stroke_tiles:
+            self.redo_stack.clear()
             self.history.append(("TILE", self.current_stroke_tiles))
             if len(self.history) > 50: self.history.pop(0)
             self.current_stroke_tiles = []
@@ -418,7 +454,8 @@ class WorldEditor:
         
         # Save Undo State
         import copy
-        self.history.append(copy.deepcopy(grid))
+        self.redo_stack.clear()
+        self.history.append(("CHUNK", copy.deepcopy(grid)))
         if len(self.history) > 50: self.history.pop(0)
 
         # Get Viewport Bounds
@@ -465,6 +502,7 @@ class WorldEditor:
         pos = (ccol, crow)
         if event.type == tk.EventType.ButtonPress:
             import copy
+            self.redo_stack.clear()
             self.current_stroke_tiles = []
             if self.mode != "TILE":
                 self.history.append(("CHUNK", copy.deepcopy(grid)))
