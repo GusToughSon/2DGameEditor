@@ -1,3 +1,11 @@
 {
-    "python.defaultInterpreterPath": "C:\\Users\\gooro\\AppData\\Local\\Python\\bin\\python.exe"
+    "python.defaultInterpreterPath": "C:\\Users\\gooro\\AppData\\Local\\Python\\bin\\python.exe",
+    "python.analysis.extraPaths": [
+        "C:\\Users\\gooro\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages",
+        "C:\\Users\\gooro\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib"
+    ],
+    "python.autoComplete.extraPaths": [
+        "C:\\Users\\gooro\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages",
+        "C:\\Users\\gooro\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib"
+    ]
 }
