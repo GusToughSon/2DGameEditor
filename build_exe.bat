@@ -18,7 +18,7 @@ if %errorlevel% neq 0 (
     py --version >nul 2>&1
     if %errorlevel% neq 0 (
         :: Fallback to common user path or fail
-        set PYTHON_CMD="C:\Users\gooro\AppData\Local\Python\bin\python.exe"
+        set PYTHON_CMD="C:\Users\gooro\AppData\Local\Python\pythoncore-3.14-64\python.exe"
     )
 )
 
