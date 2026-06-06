@@ -311,7 +311,12 @@ class ChunkEditor:
         if current_name != name_to_store:
             self.chunks[self.selected_chunk_id]["name"] = name_to_store
             self.chunk_palette.set_chunks(self.chunks)
-            self._select_chunk(self.selected_chunk_id)
+            self.chunk_palette.select_id(self.selected_chunk_id, "CHUNK")
+            display_name = name_to_store
+            if display_name.startswith("C_") and display_name[2:].isdigit():
+                display_name = display_name[2:]
+            self.status_label.config(text=f"Editing {display_name}")
+            self.win.title(f"Chunk Editor - {display_name}")
 
     def _on_name_entry_key_release(self, event=None):
         if not self.selected_chunk_id: return
