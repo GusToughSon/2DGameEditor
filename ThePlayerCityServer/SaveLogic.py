@@ -24,7 +24,11 @@ class SaveLogic:
         self.io_lock = threading.Lock() # Global lock for file operations
         
         # Ensure temporary pool exists — anchored to script directory, not CWD
-        self._script_dir = os.path.dirname(os.path.abspath(__file__))
+        import sys
+        if getattr(sys, 'frozen', False):
+            self._script_dir = os.path.dirname(sys.executable)
+        else:
+            self._script_dir = os.path.dirname(os.path.abspath(__file__))
         self.pool_root = os.path.join(self._script_dir, "EditingPool")
         os.makedirs(self.pool_root, exist_ok=True)
         self._hide_folder(self.pool_root)
