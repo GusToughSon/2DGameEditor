@@ -114,7 +114,7 @@ class WorldEditor:
         mode_f.pack(side="left", padx=20)
         
         self.mode_var = tk.StringVar(value=self.mode)
-        tools = [("Chunk", "CHUNK"), ("Tile", "TILE"), ("Points", "POINT"), ("Sampler", "DROP"), ("Bucket", "FILL")]
+        tools = [("Chunk", "CHUNK"), ("Tile", "TILE"), ("Objects", "OBJECT"), ("Points", "POINT"), ("Sampler", "DROP"), ("Bucket", "FILL")]
         for text, val in tools:
             tk.Radiobutton(mode_f, text=text, variable=self.mode_var, value=val, 
                           command=self._update_mode, bg=config.COLOR_BG).pack(side="left")
@@ -141,6 +141,19 @@ class WorldEditor:
         self.tileset_palette.set_chunks(self.chunks)
         self.tileset_palette.set_points(self.world_data.get("points", []))
         self.tileset_palette.set_mode(self.mode)
+        
+        # Pre-load objects and items tilesets to cache them in background at startup
+        obj_path = os.path.join(self.save_manager.project_path, "TILESET", "OBJECTS_TILESET.png")
+        items_path = os.path.join(self.save_manager.project_path, "TILESET", "ITEMS_TILESET.png")
+        if os.path.exists(obj_path):
+            orig_mode = self.tileset_palette.mode
+            self.tileset_palette.set_mode("OBJECT", render=False)
+            self.tileset_palette.load_tileset(obj_path)
+            if os.path.exists(items_path):
+                self.tileset_palette.set_mode("ITEMS", render=False)
+                self.tileset_palette.load_tileset(items_path)
+            self.tileset_palette.set_mode(orig_mode, render=True)
+            self.tileset_palette.load_tileset(ts_path)
         
         # --- HOT-SWITCH TRIPLE CLICK ---
         self.tileset_palette.canvas.bind("<Triple-Button-1>", self._on_chunk_pal_triple_click)
@@ -207,10 +220,6 @@ class WorldEditor:
             points = self.world_data.get("points", [])
             if 0 <= idx < len(points):
                 p = points[idx]
-                # Center camera on P (World -> Screen)
-                # target_x = pan_x + p.x * zoom
-                # We want: 0 + win_w/2 = pan_x + p.x * zoom
-                # pan_x = win_w/2 - p.x * zoom
                 win_w, win_h = self.win.winfo_width(), self.win.winfo_height()
                 self.pan_x = (win_w / 2) - (p["x"] * self.zoom)
                 self.pan_y = (win_h / 2) - (p["y"] * self.zoom)
@@ -238,21 +247,60 @@ class WorldEditor:
             self._draw_canvas()
             return
 
-        self.mode = mode
-        self.mode_var.set(mode) # Sync toolbar radiobuttons
-        self.canvas.config(cursor="")
-        
-        if mode == "TILE":
-            self.selected_tile_id = asset_id
+        if mode == "OBJECT":
+            if self.mode != "OBJECT":
+                obj_path = os.path.join(self.save_manager.project_path, "TILESET", "OBJECTS_TILESET.png")
+                self.tileset_palette.load_tileset(obj_path)
+                self.mode = "OBJECT"
+                self.mode_var.set("OBJECT")
+                self.tileset_palette.set_mode("OBJECT")
+            if asset_id is not None:
+                self.selected_tile_id = asset_id
+        elif mode == "ITEMS":
+            if self.mode != "ITEMS":
+                items_path = os.path.join(self.save_manager.project_path, "TILESET", "ITEMS_TILESET.png")
+                self.tileset_palette.load_tileset(items_path)
+                self.mode = "ITEMS"
+                self.mode_var.set("OBJECT")
+                self.tileset_palette.set_mode("ITEMS")
+            if asset_id is not None:
+                self.selected_tile_id = asset_id
+        elif mode == "TILE":
+            if self.mode != "TILE":
+                world_path = os.path.join(self.save_manager.project_path, "TILESET", "World_TILESET.png")
+                self.tileset_palette.load_tileset(world_path)
+                self.mode = "TILE"
+                self.mode_var.set("TILE")
+                self.tileset_palette.set_mode("TILE")
+            if asset_id is not None:
+                self.selected_tile_id = asset_id
         else:
-            self.selected_chunk_id = asset_id
-        
-        print(f"[DEBUG] Selection: {asset_id} ({mode})")
+            self.mode = mode
+            self.mode_var.set(mode)
+            if asset_id is not None:
+                self.selected_chunk_id = asset_id
+            world_path = os.path.join(self.save_manager.project_path, "TILESET", "World_TILESET.png")
+            self.tileset_palette.load_tileset(world_path)
+
+        self.canvas.config(cursor="")
+        print(f"[DEBUG] Selection: {asset_id} ({self.mode})")
 
     def _update_mode(self):
-        self.mode = self.mode_var.get()
+        new_mode = self.mode_var.get()
+        if self.mode == new_mode:
+            return
+        self.mode = new_mode
         self.canvas.config(cursor="crosshair" if self.mode == "POINT" else "")
-        self.tileset_palette.set_mode(self.mode)
+        self.tileset_palette.set_mode(self.mode, render=False)
+        if self.mode == "OBJECT":
+            obj_path = os.path.join(self.save_manager.project_path, "TILESET", "OBJECTS_TILESET.png")
+            self.tileset_palette.load_tileset(obj_path)
+        elif self.mode == "TILE":
+            world_path = os.path.join(self.save_manager.project_path, "TILESET", "World_TILESET.png")
+            self.tileset_palette.load_tileset(world_path)
+        else:
+            world_path = os.path.join(self.save_manager.project_path, "TILESET", "World_TILESET.png")
+            self.tileset_palette.load_tileset(world_path)
         print(f"[DEBUG] World Editor Mode: {self.mode}")
 
     def _sync_poi_to_palette(self):
@@ -532,7 +580,7 @@ class WorldEditor:
             import copy
             self.redo_stack.clear()
             self.current_stroke_tiles = []
-            if self.mode != "TILE":
+            if self.mode not in ["TILE", "OBJECT", "ITEMS"]:
                 self.history.append(("CHUNK", copy.deepcopy(grid)))
                 if len(self.history) > 50: self.history.pop(0)
             self.last_grid_pos = pos
@@ -546,8 +594,8 @@ class WorldEditor:
                 grid[crow][ccol] = self.selected_chunk_id
                 self._draw_canvas()
                 self.save_manager.mark_dirty()
-        elif self.mode == "TILE":
-            # TILE MODE: Direct edit of the chunk at this location
+        elif self.mode in ["TILE", "OBJECT", "ITEMS"]:
+            # TILE/OBJECT MODE: Direct edit of the chunk at this location
             # Normalize CID for registry lookup
             raw_cid = grid[crow][ccol]
             if not raw_cid: return
@@ -597,8 +645,12 @@ class WorldEditor:
                             if isinstance(row, list) and sm_x < len(row): row[sm_x] = self.selected_tile_id
 
                 if isinstance(data, dict):
-                    target = data.get("ground", data.get("layer0"))
-                    if target is not None: update_layer(target)
+                    layer_name = "objects" if self.mode in ["OBJECT", "ITEMS"] else "ground"
+                    target = data.get(layer_name)
+                    if target is None:
+                        data[layer_name] = [[0]*config.CHUNK_SIZE for _ in range(config.CHUNK_SIZE)]
+                        target = data[layer_name]
+                    update_layer(target)
                 elif isinstance(data, list):
                     update_layer(data)
                 

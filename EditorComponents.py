@@ -235,10 +235,15 @@ class TilesetPalette:
         self.chunk_zoom = 48 # Display size for chunk thumbnails
         
         # Load Tileset for rendering
+        self._tileset_cache = {}
+        self._tileset_tk_cache = {}
+        self.current_tileset_source = tileset_path
+        
         self.orig_img = None
         if os.path.exists(tileset_path):
             try:
                 self.orig_img = Image.open(tileset_path).convert("RGBA")
+                self._tileset_cache[tileset_path] = self.orig_img
             except: pass
             
         # UI Container
@@ -270,6 +275,10 @@ class TilesetPalette:
         self.b_tile = tk.Button(self.tab_f, text="Tiles", command=lambda: self._tab_click("TILE"), 
                                 relief="sunken", bg="#eee", font=("Arial", 8))
         self.b_tile.pack(side="left", expand=True, fill="x")
+        
+        self.b_obj = tk.Button(self.tab_f, text="Objects", command=lambda: self._tab_click("OBJECT"), 
+                               relief="raised", bg="#eee", font=("Arial", 8))
+        self.b_obj.pack(side="left", expand=True, fill="x")
         
         self.b_chunk = tk.Button(self.tab_f, text="Chunks", command=lambda: self._tab_click("CHUNK"), 
                                  relief="raised", bg="#eee", font=("Arial", 8))
@@ -318,7 +327,7 @@ class TilesetPalette:
         except: return
 
         # Mode-Aware Geometric calculation
-        if self.mode == "TILE":
+        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
             ds = 2 # Display Scale
             sz = self.tile_size * ds
             gap = 0
@@ -381,7 +390,7 @@ class TilesetPalette:
 
     def _get_full_ids(self):
         """ Returns the contextually relevant ID list for current mode. """
-        if self.mode == "TILE":
+        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
             if not self.orig_img: return []
             tw = self.orig_img.width // self.tile_size
             th = self.orig_img.height // self.tile_size
@@ -402,25 +411,57 @@ class TilesetPalette:
         if self.mode == "CHUNK":
             self.render_view()
 
-    def set_mode(self, mode):
+    def load_tileset(self, tileset_source):
+        self.current_tileset_source = tileset_source
+
+        if isinstance(tileset_source, Image.Image):
+            self.orig_img = tileset_source
+        elif tileset_source in self._tileset_cache:
+            self.orig_img = self._tileset_cache[tileset_source]
+        else:
+            self.orig_img = None
+            if os.path.exists(tileset_source):
+                try:
+                    self.orig_img = Image.open(tileset_source).convert("RGBA")
+                    self._tileset_cache[tileset_source] = self.orig_img
+                except: pass
+        self.render_view()
+
+    def set_mode(self, mode, render=True):
         self.mode = mode
         if mode == "POINT":
             self.b_tile.config(text="+ Add", relief="raised", command=lambda: self.callback(None, "POINT_ADD"))
             self.b_chunk.config(text="- Remove", relief="raised", command=lambda: self.callback(None, "POINT_DEL"))
+            self.b_obj.pack_forget()
             self.poi_frame.pack(fill="both", expand=True)
             self.canvas.pack_forget()
             self.v_scroll.pack_forget()
         else:
+            self.b_tile.pack_forget()
+            self.b_obj.pack_forget()
+            self.b_chunk.pack_forget()
+            
             self.b_tile.config(text="Tiles", relief="sunken" if mode == "TILE" else "raised", command=lambda: self._tab_click("TILE"))
+            self.b_obj.config(text="Items" if mode == "ITEMS" else "Objects", relief="sunken" if mode in ["OBJECT", "ITEMS"] else "raised", command=lambda: self._tab_click("OBJECT"))
             self.b_chunk.config(text="Chunks", relief="sunken" if mode == "CHUNK" else "raised", command=lambda: self._tab_click("CHUNK"))
+            
+            self.b_tile.pack(side="left", expand=True, fill="x")
+            self.b_obj.pack(side="left", expand=True, fill="x")
+            self.b_chunk.pack(side="left", expand=True, fill="x")
             self.poi_frame.pack_forget()
             
             # Restore Canvas UI
             self.v_scroll.pack(side="right", fill="y")
             self.canvas.pack(side="left", fill="both", expand=True)
-            self.render_view()
+            if render:
+                self.render_view()
 
     def _tab_click(self, mode):
+        if mode == "OBJECT":
+            if self.mode == "OBJECT":
+                mode = "ITEMS"
+            elif self.mode == "ITEMS":
+                mode = "OBJECT"
         self.set_mode(mode)
         if self.callback: self.callback(None, mode)
 
@@ -454,20 +495,32 @@ class TilesetPalette:
         self.persist_refs = []
         self.chunk_thumbnails.clear() # Optional: clear old thumbnails to save memory
         
-        if self.mode == "TILE":
+        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
             self._render_tileset()
         else:
             self.update_visible()
 
     def _render_tileset(self):
         if not self.orig_img: return
-        # Display at 2x scale
-        display_scale = 2
-        sz = self.tile_size * display_scale
-        scaled_w = self.orig_img.width * display_scale
-        scaled_h = self.orig_img.height * display_scale
         
-        self.tk_img = ImageTk.PhotoImage(self.orig_img.resize((scaled_w, scaled_h), Image.NEAREST))
+        source_key = self.current_tileset_source
+        
+        # Check PhotoImage cache
+        if source_key and source_key in self._tileset_tk_cache:
+            self.tk_img = self._tileset_tk_cache[source_key]
+            scaled_w = self.tk_img.width()
+            scaled_h = self.tk_img.height()
+        else:
+            # Display at 2x scale
+            display_scale = 2
+            sz = self.tile_size * display_scale
+            scaled_w = self.orig_img.width * display_scale
+            scaled_h = self.orig_img.height * display_scale
+            
+            self.tk_img = ImageTk.PhotoImage(self.orig_img.resize((scaled_w, scaled_h), Image.NEAREST))
+            if source_key:
+                self._tileset_tk_cache[source_key] = self.tk_img
+        
         self.canvas.create_image(0, 0, image=self.tk_img, anchor="nw")
         self.persist_refs.append(self.tk_img)
         
@@ -475,7 +528,7 @@ class TilesetPalette:
         self.draw_selection()
     def update_visible(self, event=None):
         """ The Core Virtualization Engine: Optimized for 4000+ items. """
-        if self.mode == "TILE":
+        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
             return # No virtualization/grid layout needed for continuous tileset image
         if hasattr(self, "_updating_visible") and self._updating_visible: return
         self._updating_visible = True
@@ -666,7 +719,7 @@ class TilesetPalette:
         self.canvas.delete("selection_rect")
         if self.selected_id is None: return
 
-        if self.mode == "TILE":
+        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
             if not self.orig_img: return
             try:
                 sel_id = int(self.selected_id)
@@ -700,7 +753,7 @@ class TilesetPalette:
     def on_click(self, event):
         vx, vy = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
         
-        if self.mode == "TILE":
+        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
             if not self.orig_img: return
             ds = 2
             sz = self.tile_size * ds
@@ -717,7 +770,7 @@ class TilesetPalette:
             if 0 <= idx < (tw * th):
                 self.selected_id = idx
                 self.draw_selection()
-                if self.callback: self.callback(self.selected_id, "TILE")
+                if self.callback: self.callback(self.selected_id, self.mode)
         else:
             # Deterministic Grid Math for Chunks
             sz = self.chunk_zoom
