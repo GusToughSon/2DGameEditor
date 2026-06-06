@@ -42,7 +42,11 @@ choice /C 12 /D 2 /T 2 /M "Select Mode"
 set MODE=%errorlevel%
 
 set "CONSOLE_FLAG=--noconsole"
-if "!MODE!"=="2" set "CONSOLE_FLAG=--console"
+set "MODE_NAME=Production"
+if "!MODE!"=="2" (
+    set "CONSOLE_FLAG=--console"
+    set "MODE_NAME=Diagnostic"
+)
 
 set "INFO_FILE=dist\version_info.txt"
 
@@ -79,7 +83,7 @@ echo     VarFileInfo([VarStruct('Translation', [1033, 1200])])>> "%INFO_FILE%"
 echo   ]>> "%INFO_FILE%"
 echo )>> "%INFO_FILE%"
 
-echo [DEBUG] Compiling Production Binary (Corporate Signature)...
+echo [DEBUG] Compiling !MODE_NAME! Binary (Corporate Signature)...
 %PYTHON_CMD% -m PyInstaller ^
     --onefile ^
     !CONSOLE_FLAG! ^
@@ -94,11 +98,11 @@ echo [DEBUG] Compiling Production Binary (Corporate Signature)...
     GameEditor.py
 
 if %errorlevel% neq 0 (
-    echo [ERROR] Production Build failed.
+    echo [ERROR] !MODE_NAME! Build failed.
     pause
 ) else (
     echo.
-    echo [DEBUG] SUCCESS! Standalone Production EXE created in dist/
+    echo [DEBUG] SUCCESS! Standalone !MODE_NAME! EXE created in dist/
     
     REM Standard Cleanup
     if exist "build" rmdir /s /q "build"
