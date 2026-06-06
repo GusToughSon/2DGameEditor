@@ -5,6 +5,9 @@ import shutil
 import config
 import threading
 from PIL import Image, ImageTk, ImageDraw
+Image_NEAREST = getattr(getattr(Image, "Resampling", Image), "NEAREST")
+Image_FLIP_LEFT_RIGHT = getattr(getattr(Image, "Transpose", Image), "FLIP_LEFT_RIGHT")
+Image_FLIP_TOP_BOTTOM = getattr(getattr(Image, "Transpose", Image), "FLIP_TOP_BOTTOM")
 import PixelEditor # NEW Module
 import AnimationEditor
 import ScriptParser
@@ -227,7 +230,7 @@ class TilesetEditor:
                 self.occlu_menu = ttk.Combobox(check_container, values=["-", "Std", "Dp"], width=4, state="disabled", font=("Arial", 7))
                 self.occlu_menu.set("-")
                 self.occlu_menu.grid(row=0, column=i*2+1, padx=1)
-                self.occlu_menu.bind("<<ComboboxSelected>>", self._save_current_props)
+                self.occlu_menu.bind("<<ComboboxSelected>>", lambda e: self._save_current_props())
                 var.trace_add("write", self._on_occlu_toggle)
             
             if key == "animated":
@@ -382,6 +385,7 @@ class TilesetEditor:
         self._trigger_redraw() # MUST update while panning
 
     def on_mouse_wheel(self, event):
+        if not self.base_image: return
         if event.state & 0x0004: # Control Key
             # 1. Capture world coordinates before zoom
             mx = self.canvas.canvasx(event.x)
@@ -588,7 +592,7 @@ class TilesetEditor:
         self.preview_canvas.delete("all")
         img = self._get_tile_img(sc, sr)
         if img:
-            photo = ImageTk.PhotoImage(img.resize((32, 32), Image.NEAREST))
+            photo = ImageTk.PhotoImage(img.resize((32, 32), Image_NEAREST))
             self._static_preview_photo = photo # Ref
             self.preview_canvas.create_image(16, 16, image=photo)
 
@@ -620,7 +624,7 @@ class TilesetEditor:
             if img:
                 try:
                     tile = img.crop((tx*self.tile_size, ty*self.tile_size, (tx+1)*self.tile_size, (ty+1)*self.tile_size))
-                    photo = ImageTk.PhotoImage(tile.resize((32, 32), Image.NEAREST))
+                    photo = ImageTk.PhotoImage(tile.resize((32, 32), Image_NEAREST))
                     self.preview_canvas.delete("all")
                     self.preview_canvas.create_image(16, 16, image=photo)
                     self._current_anim_photo = photo # Keep ref
@@ -687,7 +691,7 @@ class TilesetEditor:
         return self.base_image.crop((left, top, left+self.tile_size, top+self.tile_size))
 
     def _paste_at(self, c, r, img):
-        if not self.base_image or not img: return
+        if not self.base_image or not img or not self.active_file: return
         with self.io_lock:
             # We copy base_image so we don't modify the currently rendered one until save is done
             new_img = self.base_image.copy()
@@ -703,7 +707,7 @@ class TilesetEditor:
 
     def _paste_twice(self, c1, r1, img1, c2, r2, img2):
         """ Hardened atomic double-paste for swaps """
-        if not self.base_image: return
+        if not self.base_image or not self.active_file: return
         with self.io_lock:
             # Modify off-screen clone first
             new_img = self.base_image.copy()
@@ -729,13 +733,13 @@ class TilesetEditor:
         if not hasattr(self, 'selected_tile'): return
         sc, sr = self.selected_tile
         img = self._get_tile_img(sc, sr)
-        if img: self._paste_at(sc, sr, img.transpose(Image.FLIP_LEFT_RIGHT))
+        if img: self._paste_at(sc, sr, img.transpose(Image_FLIP_LEFT_RIGHT))
 
     def flip_v(self):
         if not hasattr(self, 'selected_tile'): return
         sc, sr = self.selected_tile
         img = self._get_tile_img(sc, sr)
-        if img: self._paste_at(sc, sr, img.transpose(Image.FLIP_TOP_BOTTOM))
+        if img: self._paste_at(sc, sr, img.transpose(Image_FLIP_TOP_BOTTOM))
 
     def rotate_tile(self):
         if not hasattr(self, 'selected_tile'): return
@@ -966,7 +970,7 @@ class TilesetEditor:
                     # The Tile
                     chunk = self.base_image.crop((c*self.tile_size, r*self.tile_size, (c+1)*self.tile_size, (r+1)*self.tile_size))
                     if self.zoom != 1.0: 
-                        chunk = chunk.resize((sz, sz), Image.NEAREST)
+                        chunk = chunk.resize((sz, sz), Image_NEAREST)
                     
                     tkc = ImageTk.PhotoImage(chunk, master=self.win)
                     self.tk_image_chunks.append(tkc)

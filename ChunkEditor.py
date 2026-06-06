@@ -9,6 +9,7 @@ import copy
 import config
 import threading
 from PIL import Image, ImageTk, ImageDraw
+Image_NEAREST = getattr(getattr(Image, "Resampling", Image), "NEAREST")
 from EditorComponents import center_window, TilesetPalette
 
 class ChunkEditor:
@@ -199,18 +200,22 @@ class ChunkEditor:
 
 
     def _safe_get_tile(self, cid, r, c):
-        chunk = self.chunks.get(cid, {})
-        data = chunk.get("data", {})
+        chunk = self.chunks.get(cid)
+        if not chunk: return 0
+        data = chunk.get("data")
+        if not data: return 0
         # Layer Detection Logic
         grid = data.get("ground", data.get("layer0", data)) if isinstance(data, dict) else data
+        if not grid: return 0
         if isinstance(grid, list):
             row = grid[r] if r < len(grid) else []
             if isinstance(row, list): return row[c] if c < len(row) else 0
             return 0
         elif isinstance(grid, dict):
-            row = grid.get(str(r), grid.get(r, {}))
+            row = grid.get(str(r), grid.get(r))
+            if not row: return 0
             if isinstance(row, list): return row[c] if c < len(row) else 0
-            return row.get(str(c), row.get(c, 0))
+            if isinstance(row, dict): return row.get(str(c), row.get(c, 0))
         return 0
 
     def _safe_set_tile(self, cid, r, c, tid):
@@ -441,16 +446,17 @@ class ChunkEditor:
         # Paste Preview
         if self.tool_mode == "PASTE" and self.clipboard and hasattr(self, 'mouse_grid'):
             r, c = self.mouse_grid
-            cb_rows, cb_cols = len(self.clipboard), len(self.clipboard[0])
-            sr, sc = r - cb_rows//2, c - cb_cols//2
-            for cr in range(cb_rows):
-                for cc in range(cb_cols):
-                    tid = self.clipboard[cr][cc]
-                    if tid == -1: continue
-                    px, py = ox + ((sc + cc) * sz), oy + ((sr + cr) * sz)
-                    img = self._get_tile_img(tid)
-                    if img: self.canvas.create_image(px, py, image=img, anchor="nw", tags="preview")
-                    self.canvas.create_rectangle(px, py, px+sz, py+sz, outline="white", width=1, dash=(2,2))
+            if r is not None and c is not None:
+                cb_rows, cb_cols = len(self.clipboard), len(self.clipboard[0])
+                sr, sc = r - cb_rows//2, c - cb_cols//2
+                for cr in range(cb_rows):
+                    for cc in range(cb_cols):
+                        tid = self.clipboard[cr][cc]
+                        if tid == -1: continue
+                        px, py = ox + ((sc + cc) * sz), oy + ((sr + cr) * sz)
+                        img = self._get_tile_img(tid)
+                        if img: self.canvas.create_image(px, py, image=img, anchor="nw", tags="preview")
+                        self.canvas.create_rectangle(px, py, px+sz, py+sz, outline="white", width=1, dash=(2,2))
 
     def _on_mouse_down(self, event):
         r, c = self._event_to_grid(event)
@@ -588,6 +594,7 @@ class ChunkEditor:
         self.render()
 
     def _finalize_selection(self):
+        if not self.selection_start or not self.selection_end: return
         r1, c1 = self.selection_start
         r2, c2 = self.selection_end
         min_r, max_r = min(r1, r2), max(r1, r2)
@@ -710,7 +717,7 @@ class ChunkEditor:
         tx, ty = (tid % tw) * self.tile_size, (tid // tw) * self.tile_size
         try:
             crop = self.orig_tileset.crop((tx, ty, tx+self.tile_size, ty+self.tile_size))
-            resized = crop.resize((sz, sz), Image.NEAREST)
+            resized = crop.resize((sz, sz), Image_NEAREST)
             tk_img = ImageTk.PhotoImage(resized)
             self.tile_cache[cache_key] = tk_img
             return tk_img

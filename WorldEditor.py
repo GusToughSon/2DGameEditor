@@ -10,10 +10,7 @@ from tkinter import messagebox, simpledialog, ttk
 import os
 import config
 from PIL import Image, ImageTk, ImageDraw
-try:
-    NEAREST_FILTER = Image.Resampling.NEAREST
-except AttributeError:
-    NEAREST_FILTER = Image.NEAREST
+NEAREST_FILTER = getattr(getattr(Image, "Resampling", Image), "NEAREST")
 from EditorComponents import center_window, TilesetPalette
 import ScriptParser
 
@@ -362,7 +359,7 @@ class WorldEditor:
                             
                             scaled_w = int(img.width * self.zoom)
                             scaled_h = int(img.height * self.zoom)
-                            tk_img = ImageTk.PhotoImage(img.resize((scaled_w, scaled_h), Image.NEAREST))
+                            tk_img = ImageTk.PhotoImage(img.resize((scaled_w, scaled_h), NEAREST_FILTER))
                             self.photo_cache[cache_key] = tk_img
                             
                         self.tk_chunks.append(tk_img)
@@ -392,6 +389,7 @@ class WorldEditor:
 
     def _get_rendered_chunk(self, cid):
         """ Returns a PIL image of the chunk, cached with a strict 150-item limit. """
+        if not self.tileset_img: return None
         # Normalize CID to string with 'C_' prefix if it's a raw number
         if isinstance(cid, (int, float)):
             scid = f"C_{int(cid)}"
@@ -423,10 +421,11 @@ class WorldEditor:
 
         for layer in layers:
             for r in range(config.CHUNK_SIZE):
-                row = layer.get(str(r), layer.get(r, [])) if isinstance(layer, dict) else (layer[r] if r < len(layer) else [])
+                row = layer.get(str(r), layer.get(r)) if isinstance(layer, dict) else (layer[r] if r < len(layer) else [])
+                if not row: continue
                 for c in range(config.CHUNK_SIZE):
-                    tid = row.get(str(c), row.get(c, 0)) if isinstance(row, dict) else (row[c] if c < len(row) else 0)
-                    if tid <= 0: continue 
+                    tid = row.get(str(c), row.get(c, 0)) if isinstance(row, dict) else (row[c] if isinstance(row, list) and c < len(row) else 0)
+                    if tid is None or tid <= 0: continue 
                     try:
                         tw = self.tileset_img.width // self.tile_size
                         tx = (tid % tw) * self.tile_size
@@ -762,7 +761,7 @@ class WorldEditor:
         self.map_list.append(clean_name)
         self._sync_maps_to_defines()
         
-        self.map_combo.config(values=self.map_list)
+        self.map_combo["values"] = self.map_list
         self.map_combo.set(clean_name)
         self._on_map_changed()
 
@@ -823,7 +822,7 @@ class WorldEditor:
         if new_list != self.map_list:
             print(f"[DEBUG] World Editor: Map list synced from script ({len(new_list)} maps).")
             self.map_list = new_list
-            self.map_combo.config(values=self.map_list)
+            self.map_combo["values"] = self.map_list
             
             # If our current map was deleted in code, switch to safe fallback
             if self.current_map_name not in self.map_list and self.map_list:

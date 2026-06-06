@@ -3,6 +3,9 @@ from tkinter import messagebox, colorchooser, filedialog
 import os
 import config
 from PIL import Image, ImageTk, ImageDraw
+Image_NEAREST = getattr(getattr(Image, "Resampling", Image), "NEAREST")
+Image_FLIP_LEFT_RIGHT = getattr(getattr(Image, "Transpose", Image), "FLIP_LEFT_RIGHT")
+Image_FLIP_TOP_BOTTOM = getattr(getattr(Image, "Transpose", Image), "FLIP_TOP_BOTTOM")
 import collections
 import re
 from DebugUtils import DebugUtils
@@ -613,7 +616,7 @@ class PixelEditor:
     def flip_h(self): 
         if self.is_locked: return
         self._push_undo()
-        self.image = self.image.transpose(Image.FLIP_LEFT_RIGHT)
+        self.image = self.image.transpose(Image_FLIP_LEFT_RIGHT)
         self.refresh_workspace()
         self._soft_save()
         self._hard_save()
@@ -622,7 +625,7 @@ class PixelEditor:
     def flip_v(self): 
         if self.is_locked: return
         self._push_undo()
-        self.image = self.image.transpose(Image.FLIP_TOP_BOTTOM)
+        self.image = self.image.transpose(Image_FLIP_TOP_BOTTOM)
         self.refresh_workspace()
         self._soft_save()
         self._hard_save()
@@ -907,7 +910,7 @@ class PixelEditor:
                 # Crop & Size
                 chunk = self.full_tileset_img.crop((src_c*self.tile_size, src_r*self.tile_size, (src_c+1)*self.tile_size, (src_r+1)*self.tile_size))
                 if self.sidebar_zoom != 1.0:
-                    chunk = chunk.resize((sz, sz), Image.NEAREST)
+                    chunk = chunk.resize((sz, sz), Image_NEAREST)
                 
                 tkc = ImageTk.PhotoImage(chunk)
                 self.tileset_photo_chunks.append(tkc)
@@ -1003,6 +1006,6 @@ class PixelEditor:
         if event.widget == self.win:
             print("[DEBUG] Releasing Pixel Editor resources...")
             self.image = None
-            self.full_tileset_img = None
+            self.full_tileset_img = None  # type: ignore
             self.tileset_photo_chunks.clear()
             self.clipboard = None

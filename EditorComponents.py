@@ -5,6 +5,7 @@ import config
 import math
 import threading
 from PIL import Image, ImageTk
+Image_NEAREST = getattr(getattr(Image, "Resampling", Image), "NEAREST")
 
 class GameStatusBar:
     """
@@ -517,7 +518,7 @@ class TilesetPalette:
             scaled_w = self.orig_img.width * display_scale
             scaled_h = self.orig_img.height * display_scale
             
-            self.tk_img = ImageTk.PhotoImage(self.orig_img.resize((scaled_w, scaled_h), Image.NEAREST))
+            self.tk_img = ImageTk.PhotoImage(self.orig_img.resize((scaled_w, scaled_h), Image_NEAREST))
             if source_key:
                 self._tileset_tk_cache[source_key] = self.tk_img
         
@@ -633,7 +634,7 @@ class TilesetPalette:
             x, y = c * (sz + gap) + 5, r * (sz + gap) + 5
             
             tile_img = self.orig_img.crop((tx, ty, tx + self.tile_size, ty + self.tile_size))
-            photo = ImageTk.PhotoImage(tile_img.resize((sz, sz), Image.NEAREST))
+            photo = ImageTk.PhotoImage(tile_img.resize((sz, sz), Image_NEAREST))
             self.canvas.create_image(x, y, image=photo, anchor="nw", tags=("tile_thumb", str(i)))
             self.persist_refs.append(photo)
             
@@ -643,6 +644,7 @@ class TilesetPalette:
         key = f"{cid}_{sz}"
         if key in self.chunk_thumbnails: return self.chunk_thumbnails[key]
         
+        if not self.orig_img: return None
         chunk = self.chunks_data.get(cid)
         if not chunk: return None
         
@@ -708,7 +710,7 @@ class TilesetPalette:
                                 img.paste(tile, (itm*ts, r*ts), tile)
             
             # Scale to thumbnail
-            photo = ImageTk.PhotoImage(img.resize((sz, sz), Image.NEAREST))
+            photo = ImageTk.PhotoImage(img.resize((sz, sz), Image_NEAREST))
             self.chunk_thumbnails[key] = photo
             return photo
         except Exception as e:
@@ -722,7 +724,7 @@ class TilesetPalette:
         if self.mode in ["TILE", "OBJECT", "ITEMS"]:
             if not self.orig_img: return
             try:
-                sel_id = int(self.selected_id)
+                sel_id = int(self.selected_id)  # type: ignore
             except (ValueError, TypeError):
                 return
             
