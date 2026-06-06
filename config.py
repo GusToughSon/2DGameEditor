@@ -31,7 +31,7 @@ FONT_UI_LIST = ("MS Sans Serif", "Arial", "sans-serif")
 # GENERAL APP INFO
 # ------------------------------------------------------------------------------
 APP_TITLE = "2DGameEditor" # The name that shows up at the very top of the window
-VERSION = "1.3.23"           # The version number (Architectural Milestone)
+VERSION = "1.3.26"           # The version number (Architectural Milestone)
 CHUNK_SIZE = 16              # The size of a single chunk (16x16 tiles)
 SAVES_DIR = "Saves"          # The folder where we keep all your project workspaces!
 

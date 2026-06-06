@@ -36,10 +36,13 @@ set "ICON_PATH=%APP_DIR%Assets\EditorIcon.ico"
 
 echo [DEBUG] Build Version: !APP_VER!
 echo.
-echo [1] Production Mode (Clean) [DEFAULT in 2s]
-echo [2] Diagnostic Mode (Show Console)
-choice /C 12 /D 1 /T 2 /M "Select Mode"
+echo [1] Production Mode (Clean)
+echo [2] Diagnostic Mode (Show Console) [DEFAULT in 2s]
+choice /C 12 /D 2 /T 2 /M "Select Mode"
 set MODE=%errorlevel%
+
+set "CONSOLE_FLAG=--noconsole"
+if "!MODE!"=="2" set "CONSOLE_FLAG=--console"
 
 set "INFO_FILE=dist\version_info.txt"
 
@@ -79,7 +82,7 @@ echo )>> "%INFO_FILE%"
 echo [DEBUG] Compiling Production Binary (Corporate Signature)...
 %PYTHON_CMD% -m PyInstaller ^
     --onefile ^
-    --noconsole ^
+    !CONSOLE_FLAG! ^
     --clean ^
     --icon="%ICON_PATH%" ^
     --add-data "%APP_DIR%Assets;Assets" ^
