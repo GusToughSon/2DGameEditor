@@ -127,6 +127,7 @@ class ChunkEditor:
         self.name_entry = tk.Entry(name_f, bg="#222", fg="white", insertbackground="white", bd=0, width=15, font=("Arial", 9))
         self.name_entry.pack(side="left", padx=2, ipady=2)
         self.name_entry.bind("<FocusOut>", self._on_name_entry_focus_out)
+        self.name_entry.bind("<Key>", self._on_name_entry_keypress)
         self.name_entry.bind("<KeyRelease>", self._on_name_entry_key_release)
         self.name_entry.bind("<Return>", lambda e: self.win.focus())
 
@@ -248,6 +249,7 @@ class ChunkEditor:
             return
         
         self.selected_chunk_id = cid
+        self.name_edited = False
         self.tile_cache.clear()
         print("[TRACE-SELECT-2] Invalidating Surface...")
         self.win.update() 
@@ -263,8 +265,12 @@ class ChunkEditor:
             self.name_entry.delete(0, tk.END)
             self.name_entry.insert(0, display_name)
 
+    def _on_name_entry_keypress(self, event):
+        self.name_edited = True
+
     def _on_name_entry_focus_out(self, event=None):
-        if not self.selected_chunk_id: return
+        if not self.selected_chunk_id or not getattr(self, 'name_edited', False): return
+        self.name_edited = False
         new_name = self.name_entry.get().strip()
         if not new_name: return
         
