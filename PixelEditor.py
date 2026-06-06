@@ -29,15 +29,18 @@ class PixelEditor:
     """
     def __init__(self, parent, tile_img=None, col=0, row=0, callback=None, tileset_dir=None, save_manager=None, **kwargs):
         self.parent = parent
+        self.tileset_editor = kwargs.get("tileset_editor", None)
         self.callback = callback 
         self.col, self.row = col, row
         self.tileset_dir = tileset_dir
         self.save_manager = save_manager
         
         # --- DATA ---
+        self._initial_tile_sync = False
         if tile_img:
             self.image = tile_img.convert("RGBA")
             self.tile_size = self.image.width
+            self._initial_tile_sync = True
         else:
             # FIX: Properly fetch tile size from project metadata for empty tiles
             self.tile_size = self.save_manager.project_data.get("tile_size", 16) if self.save_manager else 16
@@ -469,18 +472,15 @@ class PixelEditor:
     def _soft_save(self):
         """ Instantly updates the sidebar to reflect edits in memory. """
         if hasattr(self, 'full_tileset_img'):
-            # Paste our current 16x16 edit back into the master sheet in memory
-            self.full_tileset_img.paste(self.image, (self.col*16, self.row*16))
+            # Paste our current edit back into the master sheet in memory
+            self.full_tileset_img.paste(self.image, (self.col*self.tile_size, self.row*self.tile_size))
             self._refresh_sidebar()
 
     def _hard_save(self):
         """ Flushes the memory buffer to the physical PNG file on disk. """
         if hasattr(self, 'full_tileset_img') and self.current_tileset_path:
+            lock = self.save_manager.io_lock if self.save_manager else None
             try:
-                # --- THREAD SYNCHRONIZATION ---
-                # We acquire the central project lock to prevent the Tileset Editor
-                # and this Pixel Suite from trampling on each other's I/O.
-                lock = self.save_manager.io_lock if self.save_manager else None
                 if lock: lock.acquire()
 
                 # --- ATOMIC DISPLACEMENT ---
@@ -490,12 +490,13 @@ class PixelEditor:
                 self.full_tileset_img.save(temp, format="PNG")
                 os.replace(temp, self.current_tileset_path)
 
-                if lock: lock.release()
                 print(f"[DEBUG] Auto-saved tileset: {os.path.basename(self.current_tileset_path)}")
                 if self.save_manager:
                     self.save_manager.mark_dirty()
             except Exception as e:
                 print(f"[ERROR] Auto-save failed: {e}")
+            finally:
+                if lock: lock.release()
 
     def toggle_lock(self):
         """ Toggles the editing lock. """
@@ -684,8 +685,8 @@ class PixelEditor:
     def _on_sidebar_click(self, event):
         if not hasattr(self, 'full_tileset_img'): return
         tw, th = self.full_tileset_img.size
-        ts_cols = tw // 16
-        ts_rows = th // 16
+        ts_cols = tw // self.tile_size
+        ts_rows = th // self.tile_size
 
         cx, cy = self.side_canvas.canvasx(event.x), self.side_canvas.canvasy(event.y)
         
@@ -708,15 +709,24 @@ class PixelEditor:
             # --- COPY/PASTE LOGIC ---
             if self.active_tool == "COPY_TILE" and self.clipboard:
                 # Paste clipboard into the master sheet at THIS clicked location
-                self.full_tileset_img.paste(self.clipboard, (src_c*16, src_r*16))
+                self.full_tileset_img.paste(self.clipboard, (src_c*self.tile_size, src_r*self.tile_size))
                 print(f"[DEBUG] Stamped tile to ({src_c}, {src_r})")
                 self.set_tool("PENCIL")
                 self._refresh_sidebar()
                 self._hard_save() # Save the stamp immediately
             else:
                 # Normal Switch
-                self.image = self.full_tileset_img.crop((src_c*16, src_r*16, (src_c+1)*16, (src_r+1)*16))
+                self.image = self.full_tileset_img.crop((src_c*self.tile_size, src_r*self.tile_size, (src_c+1)*self.tile_size, (src_r+1)*self.tile_size))
                 self.col, self.row = src_c, src_r
+                
+                # Sync selection with parent TilesetEditor
+                if hasattr(self.parent, 'selected_tile'):
+                    self.parent.selected_tile = (src_c, src_r)
+                    if hasattr(self.parent, '_refresh_prop_ui'):
+                        self.parent._refresh_prop_ui()
+                    if hasattr(self.parent, 'draw_canvas'):
+                        self.parent.draw_canvas()
+                        
                 self.refresh_workspace()
                 self._refresh_sidebar()
 
@@ -806,6 +816,13 @@ class PixelEditor:
             else:
                 return
 
+        # Sync tileset selection with parent TilesetEditor
+        editor = self.tileset_editor or self.parent
+        if hasattr(editor, 'selected_name') and hasattr(editor, 'on_select'):
+            if editor.selected_name.get() != val:
+                editor.selected_name.set(val)
+                editor.on_select(val)
+
         self.current_tileset_path = os.path.join(self.tileset_dir, self.tileset_map[val])
         if os.path.exists(self.current_tileset_path):
             lock = self.save_manager.io_lock if self.save_manager else None
@@ -815,6 +832,29 @@ class PixelEditor:
                     self.full_tileset_img = img.convert("RGBA")
             finally:
                 if lock: lock.release()
+                
+            # Reset active tile selection for the new tileset
+            editor = self.tileset_editor or self.parent
+            if hasattr(editor, 'selected_tile'):
+                self.col, self.row = editor.selected_tile
+            elif not hasattr(self, 'col'):
+                self.col, self.row = 0, 0
+                
+            # If we have an initial tile sync pending, paste self.image into full_tileset_img
+            # instead of cropping from disk!
+            if getattr(self, '_initial_tile_sync', False):
+                self._initial_tile_sync = False
+                if hasattr(self, 'full_tileset_img'):
+                    self.full_tileset_img.paste(self.image, (self.col*self.tile_size, self.row*self.tile_size))
+            else:
+                # Load new tile data
+                tw, th = self.full_tileset_img.size
+                cols, rows = tw // self.tile_size, th // self.tile_size
+                self.col = max(0, min(self.col, cols - 1))
+                self.row = max(0, min(self.row, rows - 1))
+                self.image = self.full_tileset_img.crop((self.col*self.tile_size, self.row*self.tile_size, (self.col+1)*self.tile_size, (self.row+1)*self.tile_size))
+            
+            self.refresh_workspace()
             self._refresh_sidebar()
 
     def _refresh_sidebar(self):
@@ -824,10 +864,10 @@ class PixelEditor:
         
         sw = self.win.winfo_width() / 4 
         gap = 4
-        sz = int(16 * self.sidebar_zoom)
+        sz = int(self.tile_size * self.sidebar_zoom)
         
         tw, th = self.full_tileset_img.size
-        cols, rows = tw // 16, th // 16
+        cols, rows = tw // self.tile_size, th // self.tile_size
         total_items = cols * rows
         
         # FIX: Hold the actual dimensions of the tileset, do not wrap/continue past
@@ -865,7 +905,7 @@ class PixelEditor:
                 self.side_canvas.create_rectangle(x, y, x+sz, y+sz, outline="#222", fill="#0a0a0a", tags="tile")
 
                 # Crop & Size
-                chunk = self.full_tileset_img.crop((src_c*16, src_r*16, (src_c+1)*16, (src_r+1)*16))
+                chunk = self.full_tileset_img.crop((src_c*self.tile_size, src_r*self.tile_size, (src_c+1)*self.tile_size, (src_r+1)*self.tile_size))
                 if self.sidebar_zoom != 1.0:
                     chunk = chunk.resize((sz, sz), Image.NEAREST)
                 
@@ -883,7 +923,7 @@ class PixelEditor:
         if not hasattr(self, 'full_tileset_img') or not self.current_tileset_path: return
         
         tw, th = self.full_tileset_img.size
-        cols, rows = tw // 16, th // 16
+        cols, rows = tw // self.tile_size, th // self.tile_size
         
         new_cols = max(1, cols + d_cols)
         new_rows = max(1, rows + d_rows)
@@ -898,7 +938,7 @@ class PixelEditor:
                 return
 
         # Perform atomic resize in memory
-        new_w, new_h = new_cols * 16, new_rows * 16
+        new_w, new_h = new_cols * self.tile_size, new_rows * self.tile_size
         new_img = Image.new("RGBA", (new_w, new_h), (0,0,0,0))
         new_img.paste(self.full_tileset_img, (0, 0))
         self.full_tileset_img = new_img
@@ -938,11 +978,12 @@ class PixelEditor:
         """ Hard Save to disk and update parent if alive """
         self._hard_save()
         if self.callback: 
-            # If we are expanded, we might need the parent to reload the whole sheet
-            if hasattr(self.parent, 'refresh_view'):
-                self.parent.refresh_view()
-            else:
-                self.callback(self.image)
+            self.callback(self.image)
+        editor = self.tileset_editor or self.parent
+        if hasattr(editor, 'refresh_view'):
+            editor.refresh_view()
+        if self.save_manager:
+            self.save_manager.save_project()
         print("[DEBUG] Manual save triggered: Disk flush complete.")
 
     def _export_png(self):

@@ -771,10 +771,11 @@ class TilesetEditor:
         
         # Open the new window with the project directory for the sidebar!
         PixelEditor.PixelEditor(self.win, tile_img, sc, sr, 
-                                callback=lambda new_img: self._paste_at(sc, sr, new_img),
+                                callback=lambda new_img: self._paste_at(self.selected_tile[0], self.selected_tile[1], new_img),
                                 tileset_dir=self.tileset_dir,
                                 save_manager=self.save_manager,
-                                initial_tileset=self.selected_name.get())
+                                initial_tileset=self.selected_name.get(),
+                                tileset_editor=self)
 
     def open_animation_editor(self):
         """ Launches the Animation Suite for the current selection """
@@ -900,6 +901,7 @@ class TilesetEditor:
     def _finalize_load(self, img):
         self.base_image = img
         self.draw_canvas()
+        self._update_preview()
 
     def refresh_view(self): self._on_asset_changed()
 
@@ -1029,7 +1031,7 @@ class TilesetEditor:
                 self.save_manager.mark_dirty()
                 # Instead of re-reading from disk, we hand the new image directly to the UI
                 self.base_image = ni 
-                self.win.after(0, self.draw_canvas)
+                self.win.after(0, lambda: (self.draw_canvas(), self._update_preview()))
                 
             print(f"[DEBUG] Tileset Resized to {nw}x{nh}. Instant render triggered.")
         except Exception as e: 
