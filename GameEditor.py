@@ -9,7 +9,23 @@ import tkinter as tk                 # The toolbox for making windows/buttons
 from tkinter import messagebox, filedialog # Pop-up boxes and file seekers
 import os                            # Tools for talking to computer folders
 import sys                           # Tool for checking the Operating System (Win/Linux)
-from PIL import Image, ImageDraw, ImageTk     # Tools for image making/display
+from importlib import util
+import importlib
+
+Image = None
+ImageTk = None
+pystray = None
+item = None
+
+if util.find_spec("PIL") is not None:
+    _pil = importlib.import_module("PIL")
+    Image = getattr(_pil, "Image", None)
+    ImageTk = getattr(_pil, "ImageTk", None)
+
+if util.find_spec("pystray") is not None:
+    pystray = importlib.import_module("pystray")
+    item = getattr(pystray, "MenuItem", None)
+
 import ctypes                         # Windows API for Taskbar Icons
 
 # WE IMPORT OUR OWN BRAIN FILES HERE!
@@ -31,15 +47,14 @@ import ObjectSheetEditor
 import PixelEditor
 import collections
 import threading
-import pystray
-from pystray import MenuItem as item
 from DebugUtils import DebugUtils
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev, PyInstaller, and Nuitka """
     # 1. Check for PyInstaller/Nuitka temp extraction folder
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
+    meipass = getattr(sys, '_MEIPASS', None)
+    if meipass:
+        return os.path.join(meipass, relative_path)
         
     # 2. For Nuitka onefile, the resources are extracted to a temp folder 
     # reachable via the directory of the script file.
@@ -54,6 +69,16 @@ def resource_path(relative_path):
             return os.path.join(exe_dir, relative_path)
 
     return os.path.join(base_path, relative_path)
+
+
+def load_image(path):
+    """Load an image for Tkinter, using PIL if available."""
+    if Image is not None and ImageTk is not None:
+        return ImageTk.PhotoImage(Image.open(path))
+    try:
+        return tk.PhotoImage(file=path)
+    except Exception:
+        return None
 
 class GameEditor:
     """
@@ -78,10 +103,9 @@ class GameEditor:
         # Apply icons to root
         if os.path.exists(icon_png):
             try:
-                pil_img = Image.open(icon_png)
-                self._brand_img = ImageTk.PhotoImage(pil_img)
-                self.root.iconphoto(True, self._brand_img)
-                # On Windows, iconbitmap is more reliable for taskbar if called before anything else
+                self._brand_img = load_image(icon_png)
+                if self._brand_img:
+                    self.root.iconphoto(True, self._brand_img)
                 if os.path.exists(icon_ico) and sys.platform == "win32":
                     self.root.iconbitmap(icon_ico)
                 DebugUtils.log("Application Branding Hardened.")
@@ -228,8 +252,10 @@ class GameEditor:
         self.title_bar.pack(fill="x", side="top")
         
         # App Title & Icon
-        icon_label = tk.Label(self.title_bar, image=self._brand_img, bg=config.COLOR_TITLE_BAR) if hasattr(self, "_brand_img") else None
-        if icon_label: icon_label.pack(side="left", padx=5)
+        icon_label = None
+        if hasattr(self, "_brand_img") and self._brand_img is not None:
+            icon_label = tk.Label(self.title_bar, image=self._brand_img, bg=config.COLOR_TITLE_BAR)
+            icon_label.pack(side="left", padx=5)
         
         tk.Label(self.title_bar, text=f"{config.APP_TITLE}", bg=config.COLOR_TITLE_BAR, 
                  fg=config.COLOR_TITLE_TEXT, font=config.FONT_TITLE).pack(side="left")
@@ -301,7 +327,8 @@ class GameEditor:
         bg_path = os.path.join("Assets", "EDITOR_BACKGROUND.png")
         if os.path.exists(bg_path):
             try:
-                # Use PIL to load and keep a reference
+                if Image is None or ImageTk is None:
+                    raise RuntimeError("PIL is required to load the editor background.")
                 img = Image.open(bg_path)
                 self.bg_photo = ImageTk.PhotoImage(img)
                 
@@ -373,8 +400,9 @@ class GameEditor:
         icon_path = resource_path(os.path.join("Assets", "NewIcon.png"))
         if os.path.exists(icon_path):
             try:
-                self._new_win_icon = ImageTk.PhotoImage(Image.open(icon_path))
-                self.new_win.iconphoto(False, self._new_win_icon)
+                self._new_win_icon = load_image(icon_path)
+                if self._new_win_icon:
+                    self.new_win.iconphoto(False, self._new_win_icon)
             except: pass
         
         # --- CENTER IN PARENT ---
@@ -446,8 +474,9 @@ class GameEditor:
         icon_path = resource_path(os.path.join("Assets", "OpenIcon.png"))
         if os.path.exists(icon_path):
             try:
-                self._open_icon = ImageTk.PhotoImage(Image.open(icon_path))
-                self.open_win.iconphoto(False, self._open_icon)
+                self._open_icon = load_image(icon_path)
+                if self._open_icon:
+                    self.open_win.iconphoto(False, self._open_icon)
             except: pass
         
         # --- CENTER IN PARENT ---
@@ -622,8 +651,9 @@ class GameEditor:
         icon_path = resource_path(os.path.join("Assets", "SaveIcon.png"))
         if os.path.exists(icon_path):
             try:
-                self._save_as_icon = ImageTk.PhotoImage(Image.open(icon_path))
-                self.save_as_win.iconphoto(False, self._save_as_icon)
+                self._save_as_icon = load_image(icon_path)
+                if self._save_as_icon:
+                    self.save_as_win.iconphoto(False, self._save_as_icon)
             except: pass
         
         # --- CENTER IN PARENT ---
@@ -704,8 +734,9 @@ class GameEditor:
     def open_pixel_editor(self):
         """ Opens the Pixel Editor in Standalone Mode. """
         ts_dir = None
-        if self.state == "Loaded":
-            ts_dir = os.path.join(self.save_manager.project_path, "TILESET")
+        project_path = getattr(self.save_manager, 'project_path', None)
+        if self.state == "Loaded" and isinstance(project_path, str):
+            ts_dir = os.path.join(project_path, "TILESET")
         pe = PixelEditor.PixelEditor(self.root, tileset_dir=ts_dir, save_manager=self.save_manager)
         
         # --- MEMORY PROTECTION ---
@@ -888,6 +919,8 @@ class GameEditor:
             icon_path = resource_path(os.path.join("Assets", "EditorIcon.png"))
             if not os.path.exists(icon_path): return
             
+            if pystray is None or item is None or Image is None:
+                return
             image = Image.open(icon_path)
             # We must use lambda or a wrapper to call deiconify safely
             menu = (
