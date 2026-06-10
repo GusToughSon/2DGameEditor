@@ -9,7 +9,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 :: 1. Force execution in the script's actual directory
 :: Prevents the infamous "Run as Administrator drops you in System32" bug.
-
+pushd "%~dp0"
 
 :: 2. Set console aesthetics and branding
 title 2DGameEditor Bootstrapper [Node: %COMPUTERNAME%]
@@ -23,7 +23,7 @@ echo ===========================================================================
 :: 3. Locate the correct Python interpreter dynamically
 set "PYTHON_BIN="
 
-:: Priority lookup: 'py' (Windows Launcher) -^> 'python3' -^> 'python'
+:: Priority lookup: 'py' (Windows Launcher) -> 'python3' -> 'python'
 for %%X in (py python3 python) do (
     where %%X >nul 2>&1
     if !ERRORLEVEL! EQU 0 (
@@ -48,7 +48,7 @@ echo [INFO] Python Interpreter mounted: '!PYTHON_BIN!'
 echo [INFO] Checking dependencies...
 !PYTHON_BIN! -c "import PIL, pystray" >nul 2>&1
 if !ERRORLEVEL! NEQ 0 (
-    echo [INFO] Installing missing dependencies (Pillow, pystray)...
+    echo [INFO] Installing missing dependencies (Pillow, pystray)
     !PYTHON_BIN! -m pip install Pillow pystray
     if !ERRORLEVEL! NEQ 0 (
         echo [ERROR] Failed to install dependencies. The application might fail to start.
@@ -86,4 +86,4 @@ if !EXIT_CODE! NEQ 0 (
 :: Restore original working directory and flush memory
 popd
 endlocal
-exit /B !EXIT_CODE!
+::exit /B !EXIT_CODE!
