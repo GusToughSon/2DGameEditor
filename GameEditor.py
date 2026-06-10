@@ -18,9 +18,11 @@ pystray = None
 item = None
 
 if util.find_spec("PIL") is not None:
-    _pil = importlib.import_module("PIL")
-    Image = getattr(_pil, "Image", None)
-    ImageTk = getattr(_pil, "ImageTk", None)
+    try:
+        from PIL import Image, ImageTk
+    except ImportError:
+        Image = None
+        ImageTk = None
 
 if util.find_spec("pystray") is not None:
     pystray = importlib.import_module("pystray")
