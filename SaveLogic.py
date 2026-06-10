@@ -441,15 +441,21 @@ Shop "General Store"
         """ 
         Saves chunks to the High-Speed Binary Dat system.
         """
-        # Prepare for storage (strip C_ prefixes)
-        to_save = {}
-        for scid, info in chunks.items():
-            cid = scid[2:] if scid.startswith("C_") else scid
-            to_save[cid] = info
-
-        # --- 1. PERSIST TO BINARY DATABASE ---
         db_mgr = DatabaseManager(self.project_path)
-        db_mgr.save_all_chunks(to_save)
+        if chunk_ids_to_save:
+            # Optimize: Only save the specified chunks to database
+            for scid in chunk_ids_to_save:
+                chunk_data = chunks.get(scid)
+                if chunk_data:
+                    cid = scid[2:] if scid.startswith("C_") else scid
+                    db_mgr.save_chunk(cid, chunk_data)
+        else:
+            # Prepare for storage (strip C_ prefixes)
+            to_save = {}
+            for scid, info in chunks.items():
+                cid = scid[2:] if scid.startswith("C_") else scid
+                to_save[cid] = info
+            db_mgr.save_all_chunks(to_save)
         self.mark_dirty()
 
     def delete_chunk(self, chunk_id):
