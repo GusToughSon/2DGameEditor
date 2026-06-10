@@ -26,6 +26,7 @@ class WorldEditor:
         self.world_data = self.save_manager.load_world(self.current_map_name)
         self.chunks = self.save_manager.load_chunks()
         self.tileset_img = self._load_tileset()
+        self.obj_tileset_img = self._load_obj_tileset()
         self.tile_size = self.save_manager.project_data.get("tile_size", 16)
         
         # --- STATE ---
@@ -87,6 +88,12 @@ class WorldEditor:
 
     def _load_tileset(self):
         path = os.path.join(self.save_manager.project_path, "TILESET", "World_TILESET.png")
+        if os.path.exists(path):
+            return Image.open(path).convert("RGBA")
+        return None
+
+    def _load_obj_tileset(self):
+        path = os.path.join(self.save_manager.project_path, "TILESET", "OBJECTS_TILESET.png")
         if os.path.exists(path):
             return Image.open(path).convert("RGBA")
         return None
@@ -332,7 +339,7 @@ class WorldEditor:
             
             start_row = max(0, int(-self.pan_y // chunk_px))
             end_row = min(rows, int((-self.pan_y + win_h) // chunk_px) + 1)
-
+            
             draw_count = 0
             for r in range(start_row, end_row):
                 for c in range(start_col, end_col):
@@ -345,25 +352,47 @@ class WorldEditor:
                     x = self.pan_x + (c * chunk_px)
                     y = self.pan_y + (r * chunk_px)
                     
-                    # Render/Get Chunk Image
-                    img = self._get_rendered_chunk(cid)
-                    if img:
-                        cache_key = (cid, round(self.zoom, 2))
-                        if cache_key in self.photo_cache:
-                            tk_img = self.photo_cache[cache_key]
+                    # 1. Render/Get Ground Chunk Image
+                    ground_img = self._get_rendered_layer_chunk(cid, "ground", self.tileset_img)
+                    if ground_img:
+                        g_cache_key = (cid, "ground", round(self.zoom, 2))
+                        if g_cache_key in self.photo_cache:
+                            tk_g_img = self.photo_cache[g_cache_key]
                         else:
                             # Memory Guard
-                            if len(self.photo_cache) > 400:
+                            if len(self.photo_cache) > 600:
                                 self.photo_cache.clear()
                                 self.tk_chunks = []
                             
-                            scaled_w = int(img.width * self.zoom)
-                            scaled_h = int(img.height * self.zoom)
-                            tk_img = ImageTk.PhotoImage(img.resize((scaled_w, scaled_h), NEAREST_FILTER))
-                            self.photo_cache[cache_key] = tk_img
+                            scaled_w = int(ground_img.width * self.zoom)
+                            scaled_h = int(ground_img.height * self.zoom)
+                            tk_g_img = ImageTk.PhotoImage(ground_img.resize((scaled_w, scaled_h), NEAREST_FILTER))
+                            self.photo_cache[g_cache_key] = tk_g_img
                             
-                        self.tk_chunks.append(tk_img)
-                        self.canvas.create_image(x, y, image=tk_img, anchor="nw", tags="chunk")
+                        self.tk_chunks.append(tk_g_img)
+                        self.canvas.create_image(x, y, image=tk_g_img, anchor="nw", tags="chunk")
+
+                    # 2. Render/Get Object Chunk Image (overlay)
+                    obj_img = self._get_rendered_layer_chunk(cid, "objects", self.obj_tileset_img)
+                    if obj_img:
+                        o_cache_key = (cid, "objects", round(self.zoom, 2))
+                        if o_cache_key in self.photo_cache:
+                            tk_o_img = self.photo_cache[o_cache_key]
+                        else:
+                            # Memory Guard
+                            if len(self.photo_cache) > 600:
+                                self.photo_cache.clear()
+                                self.tk_chunks = []
+                            
+                            scaled_w = int(obj_img.width * self.zoom)
+                            scaled_h = int(obj_img.height * self.zoom)
+                            tk_o_img = ImageTk.PhotoImage(obj_img.resize((scaled_w, scaled_h), NEAREST_FILTER))
+                            self.photo_cache[o_cache_key] = tk_o_img
+                            
+                        self.tk_chunks.append(tk_o_img)
+                        self.canvas.create_image(x, y, image=tk_o_img, anchor="nw", tags="chunk")
+
+                    if ground_img or obj_img:
                         draw_count += 1
                         
                     # Show Index if zoomed in
@@ -372,9 +401,9 @@ class WorldEditor:
                         if display_name.startswith("C_") and display_name[2:].isdigit():
                             display_name = display_name[2:]
                         self.canvas.create_text(x + chunk_px/2, y + chunk_px/2, 
-                                              text=str(display_name), fill="white", 
-                                              font=("Arial", int(12 * self.zoom), "bold"),
-                                              stipple="gray50", tags="chunk")
+                                               text=str(display_name), fill="white", 
+                                               font=("Arial", int(12 * self.zoom), "bold"),
+                                               stipple="gray50", tags="chunk")
             print(f"[DEBUG] _draw_canvas: Finished. Draw Count: {draw_count}")
 
             # --- Draw Points ---
@@ -387,22 +416,35 @@ class WorldEditor:
         finally:
             self.is_drawing = False
 
-    def _get_rendered_chunk(self, cid):
-        """ Returns a PIL image of the chunk, cached with a strict 150-item limit. """
-        if not self.tileset_img: return None
-        # Normalize CID to string with 'C_' prefix if it's a raw number
+    def _normalize_cid(self, cid):
         if isinstance(cid, (int, float)):
-            scid = f"C_{int(cid)}"
+            return f"C_{int(cid)}"
         elif not str(cid).startswith("C_"):
-            scid = f"C_{cid}"
-        else:
-            scid = cid
+            return f"C_{cid}"
+        return cid
 
-        if scid in self.chunk_cache:
-            return self.chunk_cache[scid]
+    def _invalidate_cache(self, cid):
+        scid = self._normalize_cid(cid)
+        # Clean chunk_cache keys that match scid
+        to_del_chunk = [k for k in self.chunk_cache.keys() if (isinstance(k, tuple) and len(k) > 0 and k[0] == scid) or k == scid]
+        for k in to_del_chunk:
+            del self.chunk_cache[k]
             
-        # L1 EVICTION: Prevent RAM ballooning
-        if len(self.chunk_cache) > 150:
+        # Clean photo_cache keys that match scid
+        to_del_photo = [k for k in self.photo_cache.keys() if (isinstance(k, tuple) and len(k) > 0 and k[0] == scid) or k == scid]
+        for k in to_del_photo:
+            del self.photo_cache[k]
+
+    def _get_rendered_layer_chunk(self, cid, layer_name, tileset_img):
+        """ Returns a PIL image of the specific layer of the chunk. """
+        if not tileset_img: return None
+        scid = self._normalize_cid(cid)
+        
+        cache_key = (scid, layer_name)
+        if cache_key in self.chunk_cache:
+            return self.chunk_cache[cache_key]
+            
+        if len(self.chunk_cache) > 300:
             self.chunk_cache.clear()
 
         chunk = self.chunks.get(scid)
@@ -412,30 +454,55 @@ class WorldEditor:
         img = Image.new("RGBA", (full_sz, full_sz), (0,0,0,0))
         
         data = chunk["data"]
-        layers = []
+        layer_grid = None
         if isinstance(data, dict):
-            if "ground" in data: layers.append(data["ground"])
-            if "objects" in data: layers.append(data["objects"])
-        elif isinstance(data, list):
-            layers.append(data)
-
-        for layer in layers:
+            layer_grid = data.get(layer_name)
+        elif isinstance(data, list) and layer_name == "ground":
+            layer_grid = data
+            
+        has_any_tile = False
+        if layer_grid:
             for r in range(config.CHUNK_SIZE):
-                row = layer.get(str(r), layer.get(r)) if isinstance(layer, dict) else (layer[r] if r < len(layer) else [])
+                row = layer_grid.get(str(r), layer_grid.get(r)) if isinstance(layer_grid, dict) else (layer_grid[r] if r < len(layer_grid) else [])
                 if not row: continue
                 for c in range(config.CHUNK_SIZE):
                     tid = row.get(str(c), row.get(c, 0)) if isinstance(row, dict) else (row[c] if isinstance(row, list) and c < len(row) else 0)
                     if tid is None or tid <= 0: continue 
                     try:
-                        tw = self.tileset_img.width // self.tile_size
+                        tw = tileset_img.width // self.tile_size
                         tx = (tid % tw) * self.tile_size
                         ty = (tid // tw) * self.tile_size
-                        if ty + self.tile_size <= self.tileset_img.height:
-                            tile = self.tileset_img.crop((tx, ty, tx+self.tile_size, ty+self.tile_size))
+                        if ty + self.tile_size <= tileset_img.height:
+                            tile = tileset_img.crop((tx, ty, tx+self.tile_size, ty+self.tile_size))
                             img.paste(tile, (c * self.tile_size, r * self.tile_size), tile)
+                            has_any_tile = True
                     except: continue
-                
-        self.chunk_cache[scid] = img
+                    
+        result_img = img if has_any_tile else None
+        self.chunk_cache[cache_key] = result_img
+        return result_img
+
+    def _get_rendered_chunk(self, cid):
+        """ Compatibility wrapper that flattens ground and objects. """
+        scid = self._normalize_cid(cid)
+        if (scid, "flattened") in self.chunk_cache:
+            return self.chunk_cache[(scid, "flattened")]
+            
+        ground_img = self._get_rendered_layer_chunk(scid, "ground", self.tileset_img)
+        obj_img = self._get_rendered_layer_chunk(scid, "objects", self.obj_tileset_img)
+        
+        if not ground_img and not obj_img:
+            self.chunk_cache[(scid, "flattened")] = None
+            return None
+            
+        full_sz = self.tile_size * config.CHUNK_SIZE
+        img = Image.new("RGBA", (full_sz, full_sz), (0,0,0,0))
+        if ground_img:
+            img.paste(ground_img, (0, 0), ground_img)
+        if obj_img:
+            img.paste(obj_img, (0, 0), obj_img)
+            
+        self.chunk_cache[(scid, "flattened")] = img
         return img
 
     def undo(self):
@@ -450,10 +517,7 @@ class WorldEditor:
                 if chunk:
                     redo_tiles.append((target_cid, copy.deepcopy(chunk["data"])))
                     chunk["data"] = prev_data
-                    if target_cid in self.chunk_cache:
-                        del self.chunk_cache[target_cid]
-                    to_del = [k for k in self.photo_cache.keys() if k[0] == target_cid]
-                    for k in to_del: del self.photo_cache[k]
+                    self._invalidate_cache(target_cid)
                     self.save_manager.save_chunks(self.chunks, [target_cid])
             self.redo_stack.append(("TILE", redo_tiles))
         else:
@@ -477,10 +541,7 @@ class WorldEditor:
                 if chunk:
                     undo_tiles.append((target_cid, copy.deepcopy(chunk["data"])))
                     chunk["data"] = next_data
-                    if target_cid in self.chunk_cache:
-                        del self.chunk_cache[target_cid]
-                    to_del = [k for k in self.photo_cache.keys() if k[0] == target_cid]
-                    for k in to_del: del self.photo_cache[k]
+                    self._invalidate_cache(target_cid)
                     self.save_manager.save_chunks(self.chunks, [target_cid])
             self.history.append(("TILE", undo_tiles))
         else:
@@ -654,11 +715,7 @@ class WorldEditor:
                     update_layer(data)
                 
                 # Invalidate cache for this chunk
-                if scid in self.chunk_cache:
-                    del self.chunk_cache[scid]
-                # Clear photo cache for this chunk only
-                to_del = [k for k in self.photo_cache.keys() if k[0] == scid or k[0] == target_cid]
-                for k in to_del: del self.photo_cache[k]
+                self._invalidate_cache(target_cid)
                 
                 self._draw_canvas()
                 self.save_manager.save_chunks(self.chunks, [scid])

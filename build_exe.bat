@@ -10,17 +10,25 @@ echo.
 pushd "%~dp0"
 set "APP_DIR=%~dp0"
 
-:: Identify Python Command
-set PYTHON_CMD=python
-python --version >nul 2>&1
-if %errorlevel% neq 0 (
-    set PYTHON_CMD=py
-    py --version >nul 2>&1
-    if %errorlevel% neq 0 (
-        :: Fallback to common user path or fail
-        set PYTHON_CMD="C:\Users\gooro\AppData\Local\Python\pythoncore-3.14-64\python.exe"
+:: Identify Python Command (Priority: py -> python3 -> python -> fallback)
+set "PYTHON_CMD="
+for %%X in (py python3 python) do (
+    where %%X >nul 2>&1
+    if !errorlevel! equ 0 (
+        set "PYTHON_CMD=%%X"
+        goto :FoundPython
     )
 )
+if exist "C:\Users\gooro\AppData\Local\Python\pythoncore-3.14-64\python.exe" (
+    set "PYTHON_CMD="C:\Users\gooro\AppData\Local\Python\pythoncore-3.14-64\python.exe""
+    goto :FoundPython
+)
+
+echo [FATAL] Python interpreter not found.
+pause
+exit /b 1
+
+:FoundPython
 
 :: 0. Dependency Check
 echo [DEBUG] Verifying build environment...
@@ -41,7 +49,7 @@ echo [2] Diagnostic Mode (Show Console) [DEFAULT in 2s]
 choice /C 12 /D 2 /T 2 /M "Select Mode"
 set MODE=%errorlevel%
 
-set "CONSOLE_FLAG=--noconsole"
+set "CONSOLE_FLAG=--console"
 set "MODE_NAME=Production"
 if "!MODE!"=="2" (
     set "CONSOLE_FLAG=--console"
