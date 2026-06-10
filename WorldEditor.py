@@ -173,8 +173,9 @@ class WorldEditor:
         self.canvas.bind("<Button-1>", self.on_click)
         self.canvas.bind("<B1-Motion>", self.on_click)
         self.canvas.bind("<ButtonRelease-1>", self.end_stroke)
-        self.canvas.bind("<Button-3>", self.start_pan)
-        self.canvas.bind("<B3-Motion>", self.do_pan)
+        self.canvas.bind("<Button-3>", self.on_right_click)
+        self.canvas.bind("<B3-Motion>", self.on_right_click)
+        self.canvas.bind("<ButtonRelease-3>", self.end_stroke)
         self.canvas.bind("<MouseWheel>", self.on_zoom)
 
         
@@ -558,6 +559,12 @@ class WorldEditor:
             self.redo_stack.clear()
             self.history.append(("TILE", self.current_stroke_tiles))
             if len(self.history) > 50: self.history.pop(0)
+            
+            # Persist all modified chunks during the stroke to the database at once
+            modified_cids = [cid for cid, _ in self.current_stroke_tiles]
+            if modified_cids:
+                self.save_manager.save_chunks(self.chunks, modified_cids)
+                
             self.current_stroke_tiles = []
 
     def _on_alt_click(self, event):
@@ -718,7 +725,6 @@ class WorldEditor:
                 self._invalidate_cache(target_cid)
                 
                 self._draw_canvas()
-                self.save_manager.save_chunks(self.chunks, [scid])
         elif self.mode == "POINT":
             # Add a POI at coordinates
             # Screen -> World (unscaled)
@@ -892,3 +898,68 @@ class WorldEditor:
 
     def on_close(self):
         self.win.destroy()
+
+    def on_right_click(self, event):
+        if self.mode in ["OBJECT", "ITEMS"]:
+            self.erase_object_at(event)
+        else:
+            if event.type == tk.EventType.ButtonPress:
+                self.start_pan(event)
+            else:
+                self.do_pan(event)
+
+    def erase_object_at(self, event):
+        chunk_px = (self.tile_size * config.CHUNK_SIZE) * self.zoom
+        world_x = (event.x - self.pan_x) / chunk_px
+        world_y = (event.y - self.pan_y) / chunk_px
+        ccol, crow = int(world_x), int(world_y)
+        
+        grid = self.world_data.get("grid", [])
+        if not (0 <= crow < len(grid) and 0 <= ccol < len(grid[0])): return
+
+        pos = (ccol, crow)
+        if event.type == tk.EventType.ButtonPress:
+            self.redo_stack.clear()
+            self.current_stroke_tiles = []
+            self.last_grid_pos = pos
+        elif pos == self.last_grid_pos:
+            return
+        self.last_grid_pos = pos
+
+        raw_cid = grid[crow][ccol]
+        if not raw_cid: return
+        target_cid = self._normalize_cid(raw_cid)
+        
+        chunk = self.chunks.get(target_cid)
+        if not chunk or chunk.get("locked"): return
+
+        # Record undo
+        import copy
+        if not any(cid == target_cid for cid, _ in self.current_stroke_tiles):
+            self.current_stroke_tiles.append((target_cid, copy.deepcopy(chunk["data"])))
+
+        sm_x = int((world_x - ccol) * config.CHUNK_SIZE)
+        sm_y = int((world_y - crow) * config.CHUNK_SIZE)
+
+        if 0 <= sm_x < config.CHUNK_SIZE and 0 <= sm_y < config.CHUNK_SIZE:
+            data = chunk["data"]
+            if isinstance(data, dict):
+                layer_name = "objects"
+                target = data.get(layer_name)
+                if target is not None:
+                    if isinstance(target, dict):
+                        row_key = str(sm_y) if str(sm_y) in target else sm_y
+                        if row_key in target:
+                            row = target[row_key]
+                            col_key = str(sm_x) if isinstance(row, dict) and str(sm_x) in row else sm_x
+                            if isinstance(row, dict) and col_key in row:
+                                row[col_key] = 0
+                    elif isinstance(target, list):
+                        if sm_y < len(target):
+                            row = target[sm_y]
+                            if isinstance(row, list) and sm_x < len(row):
+                                row[sm_x] = 0
+
+            # Invalidate cache and redraw
+            self._invalidate_cache(target_cid)
+            self._draw_canvas()
