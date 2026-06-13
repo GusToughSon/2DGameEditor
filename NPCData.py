@@ -7,8 +7,7 @@ from EditorComponents import center_window
 
 class NPCDataEditor:
     """
-    A professional-grade Creature Statistics Editor.
-    Fully script-driven via Types.hry and .hry headers.
+    NPC Statistics Editor.
     """
     def __init__(self, parent, save_manager=None):
         self.parent = parent

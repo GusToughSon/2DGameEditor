@@ -1,9 +1,4 @@
-# ==============================================================================
-# GAMEEDITOR.PY - THE MAIN CONTROLLER (THE BOSS)
-# ==============================================================================
-# This is the first file that runs! It builds the big window, the menus, 
-# and the blinking status bar at the bottom.
-# ==============================================================================
+# GAMEEDITOR.PY - Main application entry point and controller
 
 import tkinter as tk                 # The toolbox for making windows/buttons
 from tkinter import messagebox, filedialog # Pop-up boxes and file seekers
@@ -30,7 +25,7 @@ if util.find_spec("pystray") is not None:
 
 import ctypes                         # Windows API for Taskbar Icons
 
-# WE IMPORT OUR OWN BRAIN FILES HERE!
+# Import project modules
 import config                        # Colors and Fonts
 from SaveLogic import SaveLogic      # Saving and Loading files
 from TilesetEditor import TilesetEditor # The art-sheet editor window
@@ -128,7 +123,7 @@ class GameEditor:
         self.root.deiconify() # Reveal
         self.root.configure(bg=config.COLOR_BG)
         
-        # --- OUR INTERNAL BRAIN ---
+        # Initialize save manager
         self.save_manager = SaveLogic()
         self.state = "Welcome" # We start at the 'Welcome' screen
         self.active_editors = [] # Track open PixelEditor windows

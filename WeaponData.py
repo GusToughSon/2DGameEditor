@@ -7,8 +7,7 @@ from EditorComponents import center_window
 
 class WeaponDataEditor:
     """
-    A vintage 90s-style Weapon Statistics Editor.
-    Fully script-driven via Types.hry and .hry headers.
+    Weapon Statistics Editor.
     """
     def __init__(self, parent, save_manager=None):
         self.parent = parent

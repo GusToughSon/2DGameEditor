@@ -1,6 +1,4 @@
-# ==============================================================================
-# CHUNKEDITOR.PY - THE PIECEMAKER (EXTREME TRACE & ASYNC SAVE)
-# ==============================================================================
+# CHUNKEDITOR.PY - Chunk Editor Suite
 
 import tkinter as tk
 from tkinter import messagebox, ttk

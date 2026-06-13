@@ -1,10 +1,4 @@
-# ==============================================================================
-# CONFIG.PY - THE PROJECT'S "MAKEUP BAG" (UI STYLES AND COLORS)
-# ==============================================================================
-# This file stores all the colors, fonts, and names so we don't have to 
-# write them over and over again in the main code. 
-# If you want to change how the app looks, change it HERE!
-# ==============================================================================
+# CONFIG.PY - Global UI styles and configuration constants
 
 # THE COLORS (Using "Hex Codes" like #RRGGBB)
 # ------------------------------------------------------------------------------

@@ -7,8 +7,7 @@ from EditorComponents import center_window
 
 class ArmorDataEditor:
     """
-    A classic Windows-style Armor Statistics Editor.
-    Fully script-driven via Types.hry and .hry headers.
+    Armor Statistics Editor.
     """
     def __init__(self, parent, save_manager=None):
         self.parent = parent

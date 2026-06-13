@@ -80,8 +80,7 @@ class TypeEditor:
 
     def _sync_hairys_to_types(self):
         """ 
-        The Source of Truth Engine. 
-        Wipes the in-memory types_data and rebuilds it by scanning all .hry files.
+        Synchronizes in-memory type data with disk by scanning all .hry files.
         """
         def run_sync():
             hairy_dir = os.path.join(self.project_path, "HAIRY")
@@ -160,7 +159,7 @@ class TypeEditor:
         threading.Thread(target=run_sync, daemon=True).start()
 
     def _load_types(self):
-        """ The Single Source of Truth Loader: Scrapes Types.hry for all metadata. """
+        """ Loads all types from Types.hry. """
         hairy_dir = os.path.join(self.project_path, "HAIRY")
         types_hry = os.path.join(hairy_dir, "Types.hry")
         if os.path.exists(types_hry):
@@ -168,7 +167,7 @@ class TypeEditor:
         return {}
 
     def _load_tileset_props(self):
-        """ The Single Source of Truth for Tiles: Scrapes Tiles.hry. """
+        """ Loads tile properties from script. """
         return ScriptParser.parse_tile_properties(self.project_path)
 
     def _save_tileset_props(self):
@@ -185,7 +184,7 @@ class TypeEditor:
             print(f"[ERROR] Failed to save TilesetTypes.json: {e}")
 
     def _save_types(self):
-        """ Single Source of Truth Saver: Writes exclusively to Types.hry. """
+        """ Saves in-memory types data to Types.hry. """
         if self._is_saving: return
         self._is_saving = True
         try:

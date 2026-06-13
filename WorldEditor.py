@@ -1,9 +1,4 @@
-# ==============================================================================
-# WORLDEDITOR.PY - THE CARTOGRAPHER'S COMPASS
-# ==============================================================================
-# This module handles large-scale map editing and world grid stitching.
-# Supports Tile/Chunk tool modes with direct passthrough to chunk data.
-# ==============================================================================
+# WORLDEDITOR.PY - World map editor module
 
 import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk

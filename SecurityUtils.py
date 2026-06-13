@@ -4,9 +4,7 @@ import hashlib
 
 def changeChecksum(file_path):
     """
-    Subtly alters the binary signature of a file by appending a small 
-    random noise block. This changes the file's Hash/Checksum to 
-    help mitigate heuristic false positives from sensitive AVs.
+    Appends a small random salt to the end of a file to modify its hash/checksum.
     """
     if not os.path.exists(file_path):
         return False, "File not found."

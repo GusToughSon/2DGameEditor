@@ -1,14 +1,9 @@
 @echo off
-:: ===============================================================================
-:: 2DGameEditor Application Launcher
-:: ===============================================================================
-:: Written to the standards of a 40-year Greybeard sysadmin.
-:: Robust, self-aware, and fault-tolerant.
+:: 2DGameEditor Launcher
 :: ===============================================================================
 setlocal EnableExtensions EnableDelayedExpansion
 
-:: 1. Force execution in the script's actual directory
-:: Prevents the infamous "Run as Administrator drops you in System32" bug.
+:: Change directory to the script's folder
 pushd "%~dp0"
 
 :: 2. Set console aesthetics and branding
@@ -57,7 +52,7 @@ if !ERRORLEVEL! NEQ 0 (
 
 :: 4. Execution & Handoff
 echo [INFO] Terminating existing instances...
-:: We target only windows with the specific '[Active Engine]' tag to avoid closing the IDE or AI.
+:: Target only windows with the specific '[Active Engine]' tag to avoid closing other editors.
 taskkill /F /FI "WINDOWTITLE eq 2DGameEditor [Active Engine]*" /T >nul 2>&1
 
 echo [INFO] Handing off control to Python runtime...
