@@ -186,23 +186,39 @@ class WorldEditor:
 
     def _on_chunk_pal_triple_click(self, event):
         """ The 'Master Architect' Hot-Switch gesture. """
-        if self.mode != "CHUNK": return
-        
-        # Determine chunk ID under mouse (TilesetPalette stores selected_id)
-        cid = self.tileset_palette.selected_id
-        if not cid: return
-        
-        print(f"[DEBUG] World Editor: Triple-click detected on {cid}. Swapping to Chunk Editor...")
-        
-        # 1. Save current World Layout
-        self.save_world()
-        
-        # 2. Close this window & Cleanup DB
-        self._on_window_close()
-        
-        # 3. Request Master App to open Chunk Editor with this ID
-        if hasattr(self.master_app, "open_chunk_editor"):
-            self.master_app.open_chunk_editor(target_chunk_id=cid)
+        if self.mode == "CHUNK":
+            # Determine chunk ID under mouse (TilesetPalette stores selected_id)
+            cid = self.tileset_palette.selected_id
+            if not cid: return
+            
+            print(f"[DEBUG] World Editor: Triple-click detected on {cid}. Swapping to Chunk Editor...")
+            
+            # 1. Save current World Layout
+            self.save_world()
+            
+            # 2. Close this window & Cleanup DB
+            self._on_window_close()
+            
+            # 3. Request Master App to open Chunk Editor with this ID
+            if hasattr(self.master_app, "open_chunk_editor"):
+                self.master_app.open_chunk_editor(target_chunk_id=cid)
+        elif self.mode in ["OBJECT", "ITEMS"]:
+            # Triple click on an object/item in the sidebar
+            tid = self.tileset_palette.selected_id
+            if not tid: return
+            
+            print(f"[DEBUG] World Editor: Triple-click detected on type {tid}. Opening Type Editor properties...")
+            
+            # 1. Open or locate the Type Editor using master_app
+            if hasattr(self.master_app, "open_type_editor"):
+                self.master_app.open_type_editor()
+                
+                # 2. Select the type in the Type Editor and open its properties
+                te = self.master_app.current_type_editor
+                if te and te.win.winfo_exists():
+                    te.selected_type_id = tid
+                    te.refresh_type_list()
+                    te.open_property_editor(tid)
 
     def _on_asset_selected(self, asset_id, mode):
         """ Unified callback for Tiles, Chunks, and POIs. """
