@@ -751,3 +751,60 @@ def sync_metadata_to_hairy(project_path, type_name, metadata):
     with open(path, 'w', encoding='utf-8') as f: f.writelines(new_lines)
     return True
 
+
+def load_all_types_with_metadata(project_path):
+    """
+    Scans all Hairy scripts in HAIRY/ directory, extracting full metadata for each type.
+    Returns: { tid: { name, family, tileset, tile_coords, properties, animation } }
+    """
+    hairy_dir = os.path.join(project_path, "HAIRY")
+    if not os.path.exists(hairy_dir): return {}
+
+    # 1. Map Names to IDs based on Types.hry/FAM_*.hry modular files
+    id_map = {} # {Name.lower(): ID}
+    script_ids = parse_types_use_sync(os.path.join(hairy_dir, "Types.hry"))
+    for tid, s_data in script_ids.items():
+        id_map[s_data["name"].lower()] = tid
+
+    # 2. Scan every .hry for Metadata
+    new_types = {}
+    next_id = 9000
+    
+    system_files = {"defines.hry", "template.hry", "types.hry", "tables.hry", "skills.hry", "tiles.hry"}
+    use_files = []
+    for root, _, files in os.walk(hairy_dir):
+        for f in files:
+            if f.lower().endswith(".hry"):
+                use_files.append(os.path.relpath(os.path.join(root, f), hairy_dir))
+    
+    processed_names = set()
+
+    for use_file in use_files:
+        if use_file.lower() in system_files: continue
+        
+        filepath = os.path.join(hairy_dir, use_file)
+        headers = parse_hairy_headers(filepath)
+        
+        if not headers: continue # Not a valid Object/Type script
+        
+        name = headers["name"]
+        name_lower = name.lower()
+        if name_lower in processed_names: continue
+        processed_names.add(name_lower)
+        
+        tid = id_map.get(name_lower)
+        if not tid:
+            while str(next_id) in new_types: next_id += 1
+            tid = str(next_id)
+        
+        new_types[tid] = {
+            "name": name,
+            "family": headers.get("family", "FAM_OBJ"),
+            "tileset": headers.get("tileset", "World"),
+            "tile_coords": headers.get("tile_coords", [0, 0]),
+            "properties": headers.get("properties", {}),
+            "animation": headers.get("animation", {})
+        }
+    return new_types
+
+

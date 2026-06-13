@@ -5,6 +5,7 @@ import config
 import math
 import threading
 from PIL import Image, ImageTk
+import ScriptParser
 Image_NEAREST = getattr(getattr(Image, "Resampling", Image), "NEAREST")
 
 class GameStatusBar:
@@ -491,13 +492,20 @@ class TilesetPalette:
             self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
             self.update_visible()
 
+    def _load_types(self):
+        self.project_path = os.path.dirname(os.path.dirname(self.current_tileset_source))
+        self.types_data = ScriptParser.load_all_types_with_metadata(self.project_path)
+
     def render_view(self):
         self.canvas.delete("all")
         self.persist_refs = []
         self.chunk_thumbnails.clear() # Optional: clear old thumbnails to save memory
         
-        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
+        if self.mode == "TILE":
             self._render_tileset()
+        elif self.mode in ["OBJECT", "ITEMS"]:
+            self._load_types()
+            self.update_visible()
         else:
             self.update_visible()
 
@@ -529,7 +537,7 @@ class TilesetPalette:
         self.draw_selection()
     def update_visible(self, event=None):
         """ The Core Virtualization Engine: Optimized for 4000+ items. """
-        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
+        if self.mode == "TILE":
             return # No virtualization/grid layout needed for continuous tileset image
         if hasattr(self, "_updating_visible") and self._updating_visible: return
         self._updating_visible = True
@@ -537,8 +545,131 @@ class TilesetPalette:
         try:
             if self.mode == "CHUNK":
                 self._update_visible_chunks()
+            elif self.mode in ["OBJECT", "ITEMS"]:
+                self._update_visible_types()
         finally:
             self._updating_visible = False
+
+    def _update_visible_types(self):
+        self.canvas.delete("all")
+        self.persist_refs = []
+        
+        # Sort types by name for stable display
+        sorted_types = []
+        if hasattr(self, "types_data") and self.types_data:
+            for tid, data in self.types_data.items():
+                fam = data.get("family", "").upper()
+                ts = data.get("tileset", "")
+                
+                is_match = False
+                if self.mode == "OBJECT":
+                    is_match = (ts == "Objects") or fam.startswith("FAM_OBJ")
+                elif self.mode == "ITEMS":
+                    item_prefixes = ["FAM_ARMOR", "FAM_GAUNT", "FAM_HELM", "FAM_LEG", "FAM_PLATE", "FAM_SHIELD", "FAM_TRINKET", "FAM_WEAPON", "FAM_CONSUMABLE", "FAM_ITEM"]
+                    is_match = (ts == "Items") or any(fam.startswith(p) for p in item_prefixes)
+                
+                if is_match:
+                    sorted_types.append((tid, data))
+        
+        sorted_types.sort(key=lambda x: x[1].get("name", "").lower())
+        
+        sz = 32
+        gap_h = 24
+        gap_v = 28
+        cw = self.frame.winfo_width()
+        if cw < 50: cw = 200
+        
+        cols = max(1, cw // (sz + gap_h))
+        rows_total = math.ceil(len(sorted_types) / cols)
+        total_h = rows_total * (sz + gap_v) + 40
+        
+        new_sr = (0, 0, cw, total_h)
+        if self.canvas.cget("scrollregion") != " ".join(map(str, new_sr)):
+            self.canvas.config(scrollregion=new_sr)
+            
+        v_start = self.canvas.canvasy(0)
+        v_end = v_start + max(600, self.canvas.winfo_height())
+        
+        row_start = max(0, int(v_start // (sz + gap_v)))
+        row_end = min(rows_total, int(v_end // (sz + gap_v)) + 1)
+        
+        idx_start = row_start * cols
+        idx_end = min(len(sorted_types), row_end * cols)
+        
+        # Keep track of coordinates of each displayed type so on_click can hit-test them!
+        self._displayed_types = []  # List of tuples: (rect_x, rect_y, rect_w, rect_h, tid, tile_id)
+        
+        # Cache for tileset images to avoid reloading them per tile
+        tiles_cache = {}
+        
+        def get_tile(ts_name, tx, ty):
+            if ts_name not in tiles_cache:
+                path = os.path.join(self.project_path, "TILESET", f"{ts_name}_TILESET.png")
+                if os.path.exists(path):
+                    tiles_cache[ts_name] = Image.open(path).convert("RGBA")
+                else:
+                    return None
+            img = tiles_cache[ts_name]
+            tsize = self.tile_size
+            try:
+                return img.crop((tx*tsize, ty*tsize, (tx+1)*tsize, (ty+1)*tsize)).resize((sz, sz), Image_NEAREST)
+            except:
+                return None
+
+        # Pre-load tileset width to calculate 1D tile ID
+        ts_name = "OBJECTS" if self.mode == "OBJECT" else "ITEMS"
+        ts_path = os.path.join(self.project_path, "TILESET", f"{ts_name}_TILESET.png")
+        ts_width = 16 # fallback
+        if os.path.exists(ts_path):
+            try:
+                with Image.open(ts_path) as img:
+                    ts_width = img.width // self.tile_size
+            except:
+                pass
+
+        for i in range(idx_start, idx_end):
+            tid, data = sorted_types[i]
+            r, c = i // cols, i % cols
+            x, y = c * (sz + gap_h) + 12, r * (sz + gap_v + 10) + 15
+            
+            # Draw preview
+            anim = data.get("animation", {})
+            frame_seq = anim.get("frame_sequence", []) if isinstance(anim, dict) else []
+            if frame_seq and len(frame_seq) > 0:
+                tx, ty, ts_src = frame_seq[0]
+            else:
+                ts_src = data.get("tileset", "World")
+                tx, ty = data.get("tile_coords", [0, 0])
+                
+            tile_img = get_tile(ts_src, tx, ty)
+            
+            # Selection Highlight
+            type_tile_id = ty * ts_width + tx
+            is_sel = (self.selected_id == type_tile_id)
+            
+            box_w = sz + 16
+            box_h = sz + 20
+            rx, ry = x - 8, y - 4
+            
+            self._displayed_types.append((rx, ry, box_w, box_h, tid, type_tile_id))
+            
+            tag = f"type_item_{tid}"
+            if is_sel:
+                self.canvas.create_rectangle(rx, ry, rx + box_w, ry + box_h, fill="#000080", outline="white", width=1, tags=tag)
+            else:
+                self.canvas.create_rectangle(rx, ry, rx + box_w, ry + box_h, fill="#111", outline="#333", width=1, tags=tag)
+                
+            if tile_img:
+                photo = ImageTk.PhotoImage(tile_img)
+                self.canvas.create_image(x, y, image=photo, anchor="nw", tags=tag)
+                self.persist_refs.append(photo)
+            else:
+                self.canvas.create_rectangle(x, y, x + sz, y + sz, fill="gray", tags=tag)
+                
+            name = data.get("name", "Unnamed")
+            disp_name = (name[:8] + "..") if len(name) > 10 else name
+            txt_color = "white" if is_sel else "#ccc"
+            self.canvas.create_text(x + sz//2, y + sz + 2, text=disp_name, fill=txt_color, font=("Arial", 7), anchor="n", tags=tag)
 
     def _update_visible_chunks(self, event=None):
         full_ids = self._get_full_ids()
@@ -719,9 +850,10 @@ class TilesetPalette:
 
     def draw_selection(self):
         self.canvas.delete("selection_rect")
+        self.canvas.delete("sel")
         if self.selected_id is None: return
 
-        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
+        if self.mode == "TILE":
             if not self.orig_img: return
             try:
                 sel_id = int(self.selected_id)  # type: ignore
@@ -736,6 +868,9 @@ class TilesetPalette:
             grid_r = sel_id // cols
             x, y = grid_c * sz, grid_r * sz
             self.canvas.create_rectangle(x, y, x + sz, y + sz, outline="yellow", width=2, tags="selection_rect")
+        elif self.mode in ["OBJECT", "ITEMS"]:
+            # Selection highlight is handled during type list rendering.
+            pass
         else:
             full_ids = self._get_full_ids()
             if self.selected_id not in full_ids: return
@@ -755,7 +890,7 @@ class TilesetPalette:
     def on_click(self, event):
         vx, vy = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
         
-        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
+        if self.mode == "TILE":
             if not self.orig_img: return
             ds = 2
             sz = self.tile_size * ds
@@ -773,6 +908,13 @@ class TilesetPalette:
                 self.selected_id = idx
                 self.draw_selection()
                 if self.callback: self.callback(self.selected_id, self.mode)
+        elif self.mode in ["OBJECT", "ITEMS"]:
+            for rx, ry, w, h, tid, type_tile_id in getattr(self, "_displayed_types", []):
+                if rx <= vx <= rx + w and ry <= vy <= ry + h:
+                    self.selected_id = type_tile_id
+                    self.render_view()
+                    if self.callback: self.callback(self.selected_id, self.mode)
+                    break
         else:
             # Deterministic Grid Math for Chunks
             sz = self.chunk_zoom
