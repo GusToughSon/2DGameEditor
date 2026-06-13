@@ -17,10 +17,6 @@ class TilesetSelector:
         
         self.win = tk.Toplevel(parent)
         self.win.title(f"Select Tile - {os.path.basename(tileset_path)}")
-        
-        # Standardized Centering
-        center_window(self.win, parent, 400, 550)
-        
         self.win.configure(bg=config.COLOR_BG)
         self.win.transient(parent)
         self.win.grab_set() # Force interaction
@@ -51,9 +47,6 @@ class TilesetSelector:
         self.canvas.bind("<Double-Button-1>", self._on_double_click)
         self.canvas.bind("<MouseWheel>", self._on_mousewheel)
         
-        # --- DYNAMIC RESIZING ---
-        self.canvas.bind("<Configure>", lambda e: self._render_grid())
-
         # 3. Action Buttons (Bottom)
         btn_f = tk.Frame(self.win, bg=config.COLOR_BG, pady=10)
         btn_f.pack(fill="x")
@@ -78,6 +71,20 @@ class TilesetSelector:
 
         try:
             self.full_img = Image.open(self.tileset_path).convert("RGBA")
+            
+            # Dynamic window width based on image columns (displayed at 2x scale)
+            tw, th = self.full_img.size
+            ts = self.tile_size
+            cols = tw // ts
+            display_scale = 2
+            sz = ts * display_scale
+            
+            calc_w = cols * sz + 40
+            screen_w = self.win.winfo_screenwidth()
+            w_width = min(max(calc_w, 400), int(screen_w * 0.9))
+            
+            center_window(self.win, self.parent, w_width, 550)
+            
             self._render_grid()
         except Exception as e:
             print(f"[ERROR] TilesetSelector failed to load: {e}")
@@ -90,60 +97,49 @@ class TilesetSelector:
         ts = self.tile_size
         cols, rows = tw // ts, th // ts
         
-        display_sz = 32 # Visual scaling for easier picking
-        gap = 4
+        display_scale = 2
+        sz = ts * display_scale
+        scaled_w = tw * display_scale
+        scaled_h = th * display_scale
         
-        # Calculate items per row based on ACTUAL window width
-        canvas_w = self.canvas.winfo_width()
-        if canvas_w < 100: canvas_w = 380 # Fallback for initial render
+        resized = self.full_img.resize((scaled_w, scaled_h), Image.NEAREST)
+        self.tk_img = ImageTk.PhotoImage(resized)
+        self.photo_chunks.append(self.tk_img) # keep ref
         
-        items_per_row = max(1, (canvas_w - 20) // (display_sz + gap))
-        total_rows = (cols * rows + items_per_row - 1) // items_per_row
+        self.canvas.create_image(10, 10, image=self.tk_img, anchor="nw")
         
-        full_h = total_rows * (display_sz + gap) + 20
-        self.canvas.config(scrollregion=(0, 0, canvas_w, full_h))
-
-        for i in range(cols * rows):
-            sc, sr = i % cols, i // cols
-            grid_x = (i % items_per_row) * (display_sz + gap) + 10
-            grid_y = (i // items_per_row) * (display_sz + gap) + 10
+        # Draw boundaries grid
+        for c in range(cols + 1):
+            x = c * sz + 10
+            self.canvas.create_line(x, 10, x, scaled_h + 10, fill="#444", width=1)
+        for r in range(rows + 1):
+            y = r * sz + 10
+            self.canvas.create_line(10, y, scaled_w + 10, y, fill="#444", width=1)
             
-            chunk = self.full_img.crop((sc*ts, sr*ts, (sc+1)*ts, (sr+1)*ts)).resize((display_sz, display_sz), Image.NEAREST)
-            tkc = ImageTk.PhotoImage(chunk)
-            self.photo_chunks.append(tkc)
-            
-            self.canvas.create_image(grid_x, grid_y, image=tkc, anchor="nw", tags=f"tile_{sc}_{sr}")
-            
-        # Selection info
-        self.items_per_row = items_per_row
-        self.display_sz = display_sz
-        self.gap = gap
+        full_h = scaled_h + 40
+        self.canvas.config(scrollregion=(0, 0, scaled_w + 20, full_h))
+        
+        self.display_sz = sz
         self.cols_in_source = cols
 
     def _on_click(self, event):
         cx, cy = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
         
-        grid_c = int((cx - 10) // (self.display_sz + self.gap))
-        grid_r = int((cy - 10) // (self.display_sz + self.gap))
+        grid_c = int((cx - 10) // self.display_sz)
+        grid_r = int((cy - 10) // self.display_sz)
         
-        if grid_c < 0 or grid_c >= self.items_per_row: return
+        if grid_c < 0 or grid_c >= self.cols_in_source: return
+        if grid_r < 0 or grid_r >= (self.full_img.height // self.tile_size): return
         
-        idx = grid_r * self.items_per_row + grid_c
-        total_tiles = (self.full_img.width // self.tile_size) * (self.full_img.height // self.tile_size)
-        if idx < 0 or idx >= total_tiles: return
+        self.selected_c = grid_c
+        self.selected_r = grid_r
         
-        # Convert back to source tileset coords
-        self.selected_c = idx % self.cols_in_source
-        self.selected_r = idx // self.cols_in_source
-        
-        # Draw Selection Rectangle
         self.canvas.delete("selector")
-        gx = grid_c * (self.display_sz + self.gap) + 10
-        gy = grid_r * (self.display_sz + self.gap) + 10
-        self.canvas.create_rectangle(gx-2, gy-2, gx+self.display_sz+2, gy+self.display_sz+2, 
+        gx = grid_c * self.display_sz + 10
+        gy = grid_r * self.display_sz + 10
+        self.canvas.create_rectangle(gx-1, gy-1, gx+self.display_sz+1, gy+self.display_sz+1, 
                                      outline="yellow", width=2, tags="selector")
         
-        # Enable OK button
         self.ok_btn.config(state="normal")
         print(f"[DEBUG] TilesetSelector focus: ({self.selected_c}, {self.selected_r})")
 
@@ -154,5 +150,6 @@ class TilesetSelector:
             self.win.destroy()
 
     def _on_double_click(self, event):
-        self._on_click(event) # Ensure it's selected
+        self._on_click(event)
         self._on_ok()
+

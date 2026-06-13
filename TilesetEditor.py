@@ -131,6 +131,7 @@ class TilesetEditor:
         tk.Button(top_frame, text="📥 New Tileset...", command=self.add_new_tileset, bg="#444", fg="lime", relief="raised", bd=1).pack(side="left", padx=5)
         tk.Button(top_frame, text="🔄 Import/Swap...", command=self.import_tileset, bg=config.COLOR_BG, relief="raised", bd=1).pack(side="left", padx=5)
         tk.Button(top_frame, text="📤 Export PNG...", command=self.export_tileset, bg=config.COLOR_BG, relief="raised", bd=1).pack(side="left", padx=5)
+        tk.Button(top_frame, text="📥 Import PNG", command=self.import_tile_png, bg=config.COLOR_BG, relief="raised", bd=1).pack(side="left", padx=5)
         
         self.zoom_label = tk.Label(top_frame, text="Zoom: 180%", bg=config.COLOR_TITLE_BAR, fg="white", font=config.FONT_UI)
         self.zoom_label.pack(side="right", padx=20)
@@ -376,6 +377,30 @@ class TilesetEditor:
                 elif m_maj == maj: mino = max(mino, m_mino)
         dest = filedialog.asksaveasfilename(title="Export", initialdir=export_dir, initialfile=f"{label}_{maj}.{mino+1}.png", parent=self.win)
         if dest: shutil.copy(self.active_file, dest)
+
+    def import_tile_png(self):
+        if not hasattr(self, 'selected_tile') or not self.selected_tile:
+            messagebox.showwarning("Warning", "Please select/highlight a tile first!", parent=self.win)
+            return
+            
+        if not self.active_file or not os.path.exists(self.active_file) or not self.base_image:
+            return
+            
+        src = filedialog.askopenfilename(title="Select PNG to Import into Highlighted Tile", 
+                                         filetypes=[("PNG", "*.png")], parent=self.win)
+        if not src: return
+        
+        try:
+            with Image.open(src) as img:
+                img_data = img.convert("RGBA")
+                # Resize to fit the project tile size
+                resized_img = img_data.resize((self.tile_size, self.tile_size), Image_NEAREST)
+                
+            sc, sr = self.selected_tile
+            self._paste_at(sc, sr, resized_img)
+            self.status_label.config(text=f"Imported tile to ({sc}, {sr}) successfully!", fg="blue")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to import tile PNG: {e}", parent=self.win)
 
     def pan_start(self, event): 
         self.canvas.scan_mark(event.x, event.y)
