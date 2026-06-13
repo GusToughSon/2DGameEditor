@@ -494,7 +494,25 @@ class TilesetPalette:
 
     def _load_types(self):
         self.project_path = os.path.dirname(os.path.dirname(self.current_tileset_source))
-        self.types_data = ScriptParser.load_all_types_with_metadata(self.project_path)
+        if hasattr(self, "save_manager") and hasattr(self.save_manager, "types_data") and self.save_manager.types_data:
+            self.types_data = self.save_manager.types_data
+        else:
+            if not getattr(self, "_loading_types", False):
+                self._loading_types = True
+                def bg():
+                    try:
+                        types = ScriptParser.load_all_types_with_metadata(self.project_path)
+                        if hasattr(self, "save_manager"):
+                            self.save_manager.types_data = types
+                        self.types_data = types
+                        if self.canvas.winfo_exists():
+                            self.canvas.after(0, self.update_visible)
+                    except Exception as e:
+                        print(f"[ERROR] bg type load failed: {e}")
+                    finally:
+                        self._loading_types = False
+                import threading
+                threading.Thread(target=bg, daemon=True).start()
 
     def render_view(self):
         self.canvas.delete("all")

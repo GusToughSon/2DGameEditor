@@ -20,6 +20,7 @@ class SaveLogic:
         self.project_path = None
         self.project_name = "MyNewProject"
         self.project_data = {}
+        self.types_data = {}
         self.is_dirty = False
         self.io_lock = threading.Lock() # Global lock for file operations
         
@@ -785,6 +786,16 @@ Shop "General Store"
             # --- ASSET SYNC ---
             # Automatically heal Defines.hry if new files were added manually
             self.sync_asset_definitions()
+            
+            # --- ASYNC TYPES LOAD ---
+            def async_load_types():
+                try:
+                    import ScriptParser
+                    self.types_data = ScriptParser.load_all_types_with_metadata(self.project_path)
+                    DebugUtils.log(f"Asynchronously loaded {len(self.types_data)} Hairy types into cache.")
+                except Exception as ex:
+                    print(f"[ERROR] Async type loading failed: {ex}")
+            threading.Thread(target=async_load_types, daemon=True).start()
             
             self.is_dirty = False
             return (self.project_data, None)

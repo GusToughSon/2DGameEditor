@@ -146,18 +146,20 @@ class WorldEditor:
         self.tileset_palette.set_points(self.world_data.get("points", []))
         self.tileset_palette.set_mode(self.mode)
         
-        # Pre-load objects and items tilesets to cache them in background at startup
-        obj_path = os.path.join(self.save_manager.project_path, "TILESET", "OBJECTS_TILESET.png")
-        items_path = os.path.join(self.save_manager.project_path, "TILESET", "ITEMS_TILESET.png")
-        if os.path.exists(obj_path):
-            orig_mode = self.tileset_palette.mode
-            self.tileset_palette.set_mode("OBJECT", render=False)
-            self.tileset_palette.load_tileset(obj_path)
-            if os.path.exists(items_path):
-                self.tileset_palette.set_mode("ITEMS", render=False)
-                self.tileset_palette.load_tileset(items_path)
-            self.tileset_palette.set_mode(orig_mode, render=True)
-            self.tileset_palette.load_tileset(ts_path)
+        # Pre-load objects and items tilesets in a background thread to prevent startup lag
+        def bg_preload():
+            obj_path = os.path.join(self.save_manager.project_path, "TILESET", "OBJECTS_TILESET.png")
+            items_path = os.path.join(self.save_manager.project_path, "TILESET", "ITEMS_TILESET.png")
+            try:
+                if os.path.exists(obj_path):
+                    self.tileset_palette._tileset_cache[obj_path] = Image.open(obj_path).convert("RGBA")
+                if os.path.exists(items_path):
+                    self.tileset_palette._tileset_cache[items_path] = Image.open(items_path).convert("RGBA")
+            except Exception as e:
+                print(f"[ERROR] Background pre-load of tilesets failed: {e}")
+        
+        import threading
+        threading.Thread(target=bg_preload, daemon=True).start()
         
         # --- HOT-SWITCH TRIPLE CLICK ---
         self.tileset_palette.canvas.bind("<Triple-Button-1>", self._on_chunk_pal_triple_click)

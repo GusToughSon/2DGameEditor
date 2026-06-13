@@ -83,73 +83,81 @@ class TypeEditor:
         The Source of Truth Engine. 
         Wipes the in-memory types_data and rebuilds it by scanning all .hry files.
         """
-        hairy_dir = os.path.join(self.project_path, "HAIRY")
-        if not os.path.exists(hairy_dir): return
+        def run_sync():
+            hairy_dir = os.path.join(self.project_path, "HAIRY")
+            if not os.path.exists(hairy_dir): return
 
-        print(f"[SYNC] Building Database from Scripts...")
-        
-        # 1. Map Names to IDs based on Types.hry (Truth #1: Identity)
-        id_map = {} # {Name.lower(): ID}
-        types_hry = os.path.join(hairy_dir, "Types.hry")
-        if os.path.exists(types_hry):
-            try:
-                with open(types_hry, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-                # Find all #Define TYPE_FAM_NAME ID (or similar)
-                # We need to be careful with the suffix.
-                # Actually, ScriptParser.parse_types_use_sync already does this.
-                script_ids = ScriptParser.parse_types_use_sync(types_hry)
-                for tid, s_data in script_ids.items():
-                    id_map[s_data["name"].lower()] = tid
-            except: pass
+            print(f"[SYNC] Building Database from Scripts...")
+            
+            # 1. Map Names to IDs based on Types.hry (Truth #1: Identity)
+            id_map = {} # {Name.lower(): ID}
+            types_hry = os.path.join(hairy_dir, "Types.hry")
+            if os.path.exists(types_hry):
+                try:
+                    with open(types_hry, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                    # Find all #Define TYPE_FAM_NAME ID (or similar)
+                    # We need to be careful with the suffix.
+                    # Actually, ScriptParser.parse_types_use_sync already does this.
+                    script_ids = ScriptParser.parse_types_use_sync(types_hry)
+                    for tid, s_data in script_ids.items():
+                        id_map[s_data["name"].lower()] = tid
+                except: pass
 
-        # 2. Scan every .hry for Metadata (Truth #2: Attributes)
-        new_types = {}
-        next_id = 9000 # Start safe for any completely un-IDed scripts
-        
-        system_files = {"defines.hry", "template.hry", "types.hry", "tables.hry", "skills.hry", "tiles.hry"}
-        use_files = []
-        for root, _, files in os.walk(hairy_dir):
-            for f in files:
-                if f.lower().endswith(".hry"):
-                    # Store path relative to hairy_dir for consistent processing
-                    use_files.append(os.path.relpath(os.path.join(root, f), hairy_dir))
-        
-        processed_names = set()
+            # 2. Scan every .hry for Metadata (Truth #2: Attributes)
+            new_types = {}
+            next_id = 9000 # Start safe for any completely un-IDed scripts
+            
+            system_files = {"defines.hry", "template.hry", "types.hry", "tables.hry", "skills.hry", "tiles.hry"}
+            use_files = []
+            for root, _, files in os.walk(hairy_dir):
+                for f in files:
+                    if f.lower().endswith(".hry"):
+                        # Store path relative to hairy_dir for consistent processing
+                        use_files.append(os.path.relpath(os.path.join(root, f), hairy_dir))
+            
+            processed_names = set()
 
-        for use_file in use_files:
-            if use_file.lower() in system_files: continue
-            
-            filepath = os.path.join(hairy_dir, use_file)
-            headers = ScriptParser.parse_hairy_headers(filepath)
-            
-            if not headers: continue # Not a valid Object/Type script
-            
-            name = headers["name"]
-            name_lower = name.lower()
-            if name_lower in processed_names: continue
-            processed_names.add(name_lower)
-            
-            # Find ID
-            tid = id_map.get(name_lower)
-            if not tid:
-                # If name isn't in Types.hry, generate a new ID
-                while str(next_id) in new_types: next_id += 1
-                tid = str(next_id)
-                print(f"[SYNC] New Discovery: '{name}' assigned dynamic ID {tid}")
-                # Registering it in Types.hry happens on save
-            
-            new_types[tid] = {
-                "name": name,
-                "family": headers.get("family", "FAM_OBJ"),
-                "tileset": headers.get("tileset", "World"),
-                "tile_coords": headers.get("tile_coords", [0, 0]),
-                "properties": headers.get("properties", {}),
-                "animation": headers.get("animation", {})
-            }
-            
-        print(f"[SYNC] Discovery finished: Found {len(new_types)} Type(s) in HAIRY/")
-        self.types_data = new_types
+            for use_file in use_files:
+                if use_file.lower() in system_files: continue
+                
+                filepath = os.path.join(hairy_dir, use_file)
+                headers = ScriptParser.parse_hairy_headers(filepath)
+                
+                if not headers: continue # Not a valid Object/Type script
+                
+                name = headers["name"]
+                name_lower = name.lower()
+                if name_lower in processed_names: continue
+                processed_names.add(name_lower)
+                
+                # Find ID
+                tid = id_map.get(name_lower)
+                if not tid:
+                    # If name isn't in Types.hry, generate a new ID
+                    while str(next_id) in new_types: next_id += 1
+                    tid = str(next_id)
+                    print(f"[SYNC] New Discovery: '{name}' assigned dynamic ID {tid}")
+                    # Registering it in Types.hry happens on save
+                
+                new_types[tid] = {
+                    "name": name,
+                    "family": headers.get("family", "FAM_OBJ"),
+                    "tileset": headers.get("tileset", "World"),
+                    "tile_coords": headers.get("tile_coords", [0, 0]),
+                    "properties": headers.get("properties", {}),
+                    "animation": headers.get("animation", {})
+                }
+                
+            print(f"[SYNC] Discovery finished: Found {len(new_types)} Type(s) in HAIRY/")
+            self.types_data = new_types
+            if self.save_manager:
+                self.save_manager.types_data = new_types
+            if self.win.winfo_exists():
+                self.win.after(0, self.refresh_type_list)
+
+        import threading
+        threading.Thread(target=run_sync, daemon=True).start()
 
     def _load_types(self):
         """ The Single Source of Truth Loader: Scrapes Types.hry for all metadata. """
