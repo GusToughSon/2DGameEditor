@@ -318,8 +318,40 @@ class TilesetPalette:
     def select_id(self, asset_id, mode):
         """ Used by Eye Dropper to sync the palette. """
         self.mode = mode
-        self.selected_id = asset_id
-        self.select_and_center(asset_id)
+        if mode in ["OBJECT", "ITEMS"]:
+            if isinstance(asset_id, int):
+                found_tid = None
+                if hasattr(self, "types_data") and self.types_data:
+                    ts_name = "OBJECTS" if mode == "OBJECT" else "ITEMS"
+                    ts_path = os.path.join(self.project_path, "TILESET", f"{ts_name}_TILESET.png")
+                    ts_width = 16
+                    if os.path.exists(ts_path):
+                        try:
+                            with Image.open(ts_path) as img:
+                                ts_width = img.width // self.tile_size
+                        except: pass
+                    
+                    for tid, data in self.types_data.items():
+                        anim = data.get("animation", {})
+                        frame_seq = anim.get("frame_sequence", []) if isinstance(anim, dict) else []
+                        if frame_seq and len(frame_seq) > 0:
+                            tx, ty, ts_src = frame_seq[0]
+                        else:
+                            tx, ty = data.get("tile_coords", [0, 0])
+                        
+                        type_tile_id = ty * ts_width + tx
+                        if type_tile_id == asset_id:
+                            found_tid = tid
+                            break
+                if found_tid:
+                    self.selected_id = found_tid
+                else:
+                    self.selected_id = asset_id
+            else:
+                self.selected_id = asset_id
+        else:
+            self.selected_id = asset_id
+        self.select_and_center(self.selected_id)
 
     def select_and_center(self, asset_id):
         """ Instantly scroll the library to focus on this asset ONLY if it's not fully visible. """
@@ -329,7 +361,14 @@ class TilesetPalette:
         except: return
 
         # Mode-Aware Geometric calculation
-        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
+        if self.mode in ["OBJECT", "ITEMS"]:
+            sz = 32
+            gap = 28 + 10 # gap_v + 10
+            gap_h = 24
+            cw = self.frame.winfo_width()
+            if cw < 50: cw = 200
+            cols = max(1, cw // (sz + gap_h))
+        elif self.mode == "TILE":
             ds = 2 # Display Scale
             sz = self.tile_size * ds
             gap = 0
@@ -392,7 +431,25 @@ class TilesetPalette:
 
     def _get_full_ids(self):
         """ Returns the contextually relevant ID list for current mode. """
-        if self.mode in ["TILE", "OBJECT", "ITEMS"]:
+        if self.mode in ["OBJECT", "ITEMS"]:
+            sorted_types = []
+            if hasattr(self, "types_data") and self.types_data:
+                for tid, data in self.types_data.items():
+                    fam = data.get("family", "").upper()
+                    ts = data.get("tileset", "")
+                    
+                    is_match = False
+                    if self.mode == "OBJECT":
+                        is_match = (ts == "Objects") or fam.startswith("FAM_OBJ")
+                    elif self.mode == "ITEMS":
+                        item_prefixes = ["FAM_ARMOR", "FAM_GAUNT", "FAM_HELM", "FAM_LEG", "FAM_PLATE", "FAM_SHIELD", "FAM_TRINKET", "FAM_WEAPON", "FAM_CONSUMABLE", "FAM_ITEM"]
+                        is_match = (ts == "Items") or any(fam.startswith(p) for p in item_prefixes)
+                    
+                    if is_match:
+                        sorted_types.append((tid, data))
+            sorted_types.sort(key=lambda x: x[1].get("name", "").lower())
+            return [t[0] for t in sorted_types]
+        elif self.mode == "TILE":
             if not self.orig_img: return []
             tw = self.orig_img.width // self.tile_size
             th = self.orig_img.height // self.tile_size
@@ -505,6 +562,34 @@ class TilesetPalette:
                         if hasattr(self, "save_manager"):
                             self.save_manager.types_data = types
                         self.types_data = types
+                        
+                        # Resolve integer selected_id to type ID (tid)
+                        if isinstance(self.selected_id, int) and self.mode in ["OBJECT", "ITEMS"]:
+                            found_tid = None
+                            ts_name = "OBJECTS" if self.mode == "OBJECT" else "ITEMS"
+                            ts_path = os.path.join(self.project_path, "TILESET", f"{ts_name}_TILESET.png")
+                            ts_width = 16
+                            if os.path.exists(ts_path):
+                                try:
+                                    with Image.open(ts_path) as img:
+                                        ts_width = img.width // self.tile_size
+                                except: pass
+                            
+                            for tid, data in self.types_data.items():
+                                anim = data.get("animation", {})
+                                frame_seq = anim.get("frame_sequence", []) if isinstance(anim, dict) else []
+                                if frame_seq and len(frame_seq) > 0:
+                                    tx, ty, ts_src = frame_seq[0]
+                                else:
+                                    tx, ty = data.get("tile_coords", [0, 0])
+                                
+                                type_tile_id = ty * ts_width + tx
+                                if type_tile_id == self.selected_id:
+                                    found_tid = tid
+                                    break
+                            if found_tid:
+                                self.selected_id = found_tid
+
                         if self.canvas.winfo_exists():
                             self.canvas.after(0, self.update_visible)
                     except Exception as e:
@@ -663,7 +748,7 @@ class TilesetPalette:
             
             # Selection Highlight
             type_tile_id = ty * ts_width + tx
-            is_sel = (self.selected_id == type_tile_id)
+            is_sel = (self.selected_id == tid)
             
             box_w = sz + 16
             box_h = sz + 20
@@ -929,9 +1014,9 @@ class TilesetPalette:
         elif self.mode in ["OBJECT", "ITEMS"]:
             for rx, ry, w, h, tid, type_tile_id in getattr(self, "_displayed_types", []):
                 if rx <= vx <= rx + w and ry <= vy <= ry + h:
-                    self.selected_id = type_tile_id
+                    self.selected_id = tid
                     self.render_view()
-                    if self.callback: self.callback(self.selected_id, self.mode)
+                    if self.callback: self.callback(type_tile_id, self.mode)
                     break
         else:
             # Deterministic Grid Math for Chunks
