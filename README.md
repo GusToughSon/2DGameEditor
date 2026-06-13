@@ -67,14 +67,29 @@ Normally, making a game is hard because you have to draw pictures 🎨, design m
 
 ## 🏗️ Inside the Magic Toolbox (File Structure) 🏗️
 
-* 🎮 **`GameEditor.py`**: The big boss window that manages all the other tools!
-* 🎨 **`TilesetEditor.py`**: Manage your sprite sheets and tag solid/passable zones!
-* 🖌️ **`PixelEditor.py`**: Your custom pixel drawing board!
-* 🏷️ **`TypeEditor.py`**: Win95-style database manager for all your items and enemies!
+* 🎮 **`GameEditor.py`**: The big boss window that manages all the other tools! It controls the window lifecycle, tray minimization, and handles editor-switching logic.
+* 🎨 **`TilesetEditor.py`**: Manage your sprite sheets and tag solid/passable zones! It writes structural metadata for coordinates on the sheets.
+* 🖌️ **`PixelEditor.py`**: Your custom pixel drawing board! Edits sprite sheets pixel by pixel.
+* 🏷️ **`TypeEditor.py`**: Win95-style database manager for all your items and enemies! Rebuilds object templates and triggers file generation.
 * 📜 **`Hairy.py`**: The cute text editor where you write your game logic!
 * 🧱 **`ChunkEditor.py`**: The prefabs room where you assemble 16x16 map chunks!
-* 💾 **`SaveLogic.py`**: The brain that compresses and packages files safely!
+* 💾 **`SaveLogic.py`**: The brain that compresses and packages files safely! It coordinates disk writing, file locks, and async background thread database pre-loading.
 * 📊 **`SkillsEditor.py`**: Define stats, experience curves, and level-ups!
+* 🧩 **`ScriptParser.py`**: The script engine that parses `.hry` syntax trees and extracts metadata for game objects (names, tilesets, coords, animations).
+
+### ⚙️ How the Magic Gears Turn Behind the Scenes (Deep Architecture) ⚙️
+
+1. **Bi-Directional Sync (The Double-Bridge) 🌉**:
+   When you create a new game object in the **Type Editor** 🏷️, it automatically writes a `#Define` constant inside the modular `HAIRY/FAM_*.hry` script files. Conversely, if you write a new script file manually on disk, the editor reads it, extracts headers, and registers it as a placeable game object in the **World Editor** 🗺️. No database mismatch ever!
+
+2. **Asynchronous Threading Pipeline (The Speedy Helper) 🧵**:
+   To prevent freezing, the application relies on lightweight daemon threads. The main GUI runs on the Tkinter event loop. When a heavy task occurs (like parsing 50 script files or loading massive 2K image textures), a background thread is spawned. Once the data is parsed, it schedules a repaint on the GUI thread using Tkinter's thread-safe `.after(0, callback)` method.
+
+3. **High-Speed Binary Databases (The Fast Files) 🗄️**:
+   Map files (`Chunks.json` and `World.json`) can get extremely large. The engine uses custom managers (`DatabaseManager` and `WorldDatabaseManager`) to index maps and prefabs using optimized layouts. Files are compressed dynamically inside a hidden directory (`EditingPool`) for speed during live sessions.
+
+4. **Surgical Script Compiling 📜**:
+   The engine reads Hairy script statements, filters comments, and compiles definitions into a lookup structure. This is how warp points (`Teleport`) and dialog strings (`Say`) are parsed and mapped to map coordinates.
 
 ---
 Have fun building your dream worlds! 🌸✨ Let's make some games! 🕹️🎉
