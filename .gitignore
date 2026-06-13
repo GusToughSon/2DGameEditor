@@ -5,3 +5,4 @@ __pycache__/
 PIL/
 pystray/
 .aider*
+Saves/
