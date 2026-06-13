@@ -19,15 +19,70 @@ def parse_hairy_headers(filepath):
             break
             
     # 2. Extract Attributes
-    result["tileset"] = defines.get("TILESET", "World")
+    result["tileset"] = defines.get("TILESET", "World").strip('"')
     
-    coords = defines.get("TILE_COORDS", "0,0")
+    coords = defines.get("TILE_COORDS", "0,0").strip('"')
     try:
         result["tile_coords"] = [int(x) for x in coords.split(",")]
     except:
         result["tile_coords"] = [0, 0]
         
-    result["solid"] = str(defines.get("LOCAL_SOLID", "1")) == "1"
+    # Full properties dict extraction
+    props = {}
+    props["solid"] = str(defines.get("SOLID", defines.get("LOCAL_SOLID", "1"))) == "1"
+    props["not_moveable"] = str(defines.get("NOT_MOVEABLE", defines.get("LOCAL_NOT_MOVEABLE", "0"))) == "1"
+    props["is_container"] = str(defines.get("IS_CONTAINER", defines.get("LOCAL_IS_CONTAINER", "0"))) == "1"
+    props["collectable"] = str(defines.get("COLLECTABLE", defines.get("LOCAL_COLLECTABLE", "0"))) == "1"
+    props["is_treasure"] = str(defines.get("IS_TREASURE", defines.get("LOCAL_IS_TREASURE", "0"))) == "1"
+    props["can_reach_over"] = str(defines.get("CAN_REACH_OVER", defines.get("LOCAL_CAN_REACH_OVER", "0"))) == "1"
+    props["illuminates"] = str(defines.get("ILLUMINATES", defines.get("LOCAL_ILLUMINATES", "0"))) == "1"
+    
+    def get_int_value(primary, fallback, default=0):
+        val = defines.get(primary)
+        if val is None:
+            val = defines.get(fallback)
+        if val is None:
+            return default
+        try:
+            return int(val)
+        except:
+            return default
+
+    props["weight"] = get_int_value("WEIGHT", "LOCAL_WEIGHT", 0)
+    props["mass"] = get_int_value("MASS", "LOCAL_MASS", 0)
+    props["use_delay"] = get_int_value("USE_DELAY", "LOCAL_USE_DELAY", 0)
+    props["brightness"] = get_int_value("BRIGHTNESS", "LOCAL_BRIGHTNESS", 0)
+    props["radius"] = get_int_value("ILLUMINATION_RADIUS", "LOCAL_RADIUS", 0)
+    
+    result["properties"] = props
+    result["solid"] = props["solid"]
+    
+    # 3. Extract Animation
+    anim = {}
+    if "ANIM_MODE" in defines or "ANIM_FRAMES" in defines:
+        anim["mode"] = defines.get("ANIM_MODE", "Cycle").strip('"')
+        try: anim["speed"] = int(defines.get("ANIM_SPEED", "100"))
+        except: anim["speed"] = 100
+        try: anim["frames"] = int(defines.get("ANIM_FRAMES", "1"))
+        except: anim["frames"] = 1
+        anim["random_speed"] = str(defines.get("ANIM_RAND_SPEED", "0")) == "1"
+        
+        seq_str = defines.get("ANIM_SEQUENCE", "").strip('"')
+        frame_seq = []
+        if seq_str:
+            parts = seq_str.split(";")
+            for p in parts:
+                if not p: continue
+                subparts = p.split(",")
+                if len(subparts) >= 3:
+                    try:
+                        frame_seq.append([int(subparts[0]), int(subparts[1]), subparts[2]])
+                    except:
+                        pass
+        anim["frame_sequence"] = frame_seq
+        result["animation"] = anim
+    else:
+        result["animation"] = {}
     
     # 3. Find the Name and Kind (The Trigger)
     try:
@@ -179,35 +234,35 @@ def parse_types_use_sync(filepath):
                 if f.upper().startswith("FAM_") and f.lower().endswith(".hry"):
                     found_modern = True
                     path = os.path.join(root, f)
-                # We extract the family name directly from the filename for 100% accuracy
-                # e.g. FAM_NPC.hry means the family is FAM_NPC
-                fam_from_file = f[:-4].upper()
-                if fam_from_file.startswith("FAM_FAM_"): fam_from_file = fam_from_file[8:]
-                elif fam_from_file.startswith("FAM_"): fam_from_file = fam_from_file[4:]
-                
-                with open(path, "r", encoding="utf-8", errors="replace") as file:
-                    for line in file:
-                        # Improved Regex: Capture the TID and everything between TYPE_ and the ID
-                        # Then we'll split it logically.
-                        m_hier = re.search(r"(?i)(?:#Define|Define)\s+TYPE_([A-Z0-9_]+)\s+(\d+)", line)
-                        if m_hier:
-                            total_name = m_hier.group(1)
-                            tid = m_hier.group(2)
-                            
-                            # If total_name is FAM_NPC_GUARD and file is FAM_NPC.hry
-                            # then name is GUARD.
-                            prefix_to_strip = f"FAM_{fam_from_file}_"
-                            if total_name.upper().startswith(prefix_to_strip):
-                                name_raw = total_name[len(prefix_to_strip):]
-                            else:
-                                # Fallback: assume the last part is the name
-                                parts = total_name.split("_")
-                                name_raw = parts[-1] if len(parts) > 1 else total_name
+                    # We extract the family name directly from the filename for 100% accuracy
+                    # e.g. FAM_NPC.hry means the family is FAM_NPC
+                    fam_from_file = f[:-4].upper()
+                    if fam_from_file.startswith("FAM_FAM_"): fam_from_file = fam_from_file[8:]
+                    elif fam_from_file.startswith("FAM_"): fam_from_file = fam_from_file[4:]
+                    
+                    with open(path, "r", encoding="utf-8", errors="replace") as file:
+                        for line in file:
+                            # Improved Regex: Capture the TID and everything between TYPE_ and the ID
+                            # Then we'll split it logically.
+                            m_hier = re.search(r"(?i)(?:#Define|Define)\s+TYPE_([A-Z0-9_]+)\s+(\d+)", line)
+                            if m_hier:
+                                total_name = m_hier.group(1)
+                                tid = m_hier.group(2)
                                 
-                            results[tid] = {
-                                "name": name_raw.replace("_", " ").title(),
-                                "family": f"FAM_{fam_from_file}"
-                            }
+                                # If total_name is FAM_NPC_GUARD and file is FAM_NPC.hry
+                                # then name is GUARD.
+                                prefix_to_strip = f"FAM_{fam_from_file}_"
+                                if total_name.upper().startswith(prefix_to_strip):
+                                    name_raw = total_name[len(prefix_to_strip):]
+                                else:
+                                    # Fallback: assume the last part is the name
+                                    parts = total_name.split("_")
+                                    name_raw = parts[-1] if len(parts) > 1 else total_name
+                                    
+                                results[tid] = {
+                                    "name": name_raw.replace("_", " ").title(),
+                                    "family": f"FAM_{fam_from_file}"
+                                }
                             
         # 2. Legacy Fallback: If no modern files found, try parsing the monolithic Types.hry
         if not found_modern:
@@ -513,7 +568,7 @@ def get_hairy_defines(filepath):
             for line in f:
                 # Matches both #Define KEY VAL and DEFINE [SCOPE] KEY VAL
                 # We normalize all to UPPERCASE keys for easier dictionary lookup.
-                m = re.search(r'(?i)(?:#Define|DEFINE)(?:\s+[A-Z_]+)?\s+([A-Z0-9_]+)(?:\s+([^/\n\r]+))?', line)
+                m = re.search(r'(?i)(?:#Define|DEFINE)(?:\s+(?:GLOBAL_TIMER|GLOBAL|LOCAL))?\s+([A-Z0-9_]+)(?:\s+([^/\n\r]+))?', line)
                 if m:
                     key = m.group(1).upper()
                     val = m.group(2).strip() if m.group(2) else ""
@@ -605,21 +660,82 @@ def sync_metadata_to_hairy(project_path, type_name, metadata):
     path = os.path.join(hairy_dir, filename)
     if not os.path.exists(path): return False
 
-    with open(path, 'r') as f: lines = f.readlines()
+    # 1. Parse existing defines so we can merge/preserve them
+    existing_headers = parse_hairy_headers(path) or {}
     
-    # 1. Create the new header block
+    # 2. Merge existing headers with new metadata
+    merged = {
+        "family": existing_headers.get("family", "FAM_OBJ"),
+        "tileset": existing_headers.get("tileset", "World"),
+        "tile_coords": existing_headers.get("tile_coords", [0, 0]),
+        "solid": existing_headers.get("solid", True),
+        "animation": existing_headers.get("animation", {}),
+        "properties": existing_headers.get("properties", {})
+    }
+    
+    # Overwrite with any values passed in metadata
+    for k, v in metadata.items():
+        if v is not None:
+            if k == "properties" and isinstance(v, dict):
+                # Deep merge properties
+                merged["properties"] = dict(merged["properties"])
+                merged["properties"].update(v)
+            else:
+                merged[k] = v
+
+    # 3. Read the file lines
+    with open(path, 'r', encoding='utf-8', errors='replace') as f: lines = f.readlines()
+    
+    # 4. Create the new header block
     header = []
-    header.append(f"DEFINE {metadata.get('family', 'FAM_OBJ')}\n")
+    header.append(f"DEFINE {merged.get('family', 'FAM_OBJ')}\n")
     
-    if metadata.get('solid') is not None:
-        val = 1 if metadata['solid'] else 0
-        header.append(f"DEFINE LOCAL_SOLID {val}\n")
+    # Extract properties for writing
+    props = merged.get("properties", {})
     
-    # 2. Rebuild file
+    # Update solid: prioritize props['solid'] if defined, otherwise check merged['solid']
+    solid_val = props.get("solid") if "solid" in props else merged.get("solid", True)
+    header.append(f"DEFINE SOLID {1 if solid_val else 0}\n")
+    header.append(f"DEFINE NOT_MOVEABLE {1 if props.get('not_moveable') else 0}\n")
+    header.append(f"DEFINE IS_CONTAINER {1 if props.get('is_container') else 0}\n")
+    header.append(f"DEFINE COLLECTABLE {1 if props.get('collectable') else 0}\n")
+    header.append(f"DEFINE IS_TREASURE {1 if props.get('is_treasure') else 0}\n")
+    header.append(f"DEFINE CAN_REACH_OVER {1 if props.get('can_reach_over') else 0}\n")
+    header.append(f"DEFINE ILLUMINATES {1 if props.get('illuminates') else 0}\n")
+    
+    header.append(f"DEFINE WEIGHT {props.get('weight', 0)}\n")
+    header.append(f"DEFINE MASS {props.get('mass', 0)}\n")
+    header.append(f"DEFINE USE_DELAY {props.get('use_delay', 0)}\n")
+    header.append(f"DEFINE BRIGHTNESS {props.get('brightness', 0)}\n")
+    header.append(f"DEFINE ILLUMINATION_RADIUS {props.get('radius', 0)}\n")
+    
+    if merged.get('tileset'):
+        header.append(f"DEFINE TILESET \"{merged['tileset']}\"\n")
+        
+    if merged.get('tile_coords'):
+        coords_str = ",".join(str(x) for x in merged['tile_coords'])
+        header.append(f"DEFINE TILE_COORDS \"{coords_str}\"\n")
+        
+    # Animation properties
+    anim = merged.get('animation')
+    if anim:
+        header.append(f"DEFINE ANIM_MODE \"{anim.get('mode', 'Cycle')}\"\n")
+        header.append(f"DEFINE ANIM_SPEED {anim.get('speed', 100)}\n")
+        header.append(f"DEFINE ANIM_FRAMES {anim.get('frames', 1)}\n")
+        val_rand = 1 if anim.get('random_speed') else 0
+        header.append(f"DEFINE ANIM_RAND_SPEED {val_rand}\n")
+        
+        seq_parts = []
+        for frame in anim.get('frame_sequence', []):
+            if len(frame) >= 3:
+                seq_parts.append(f"{frame[0]},{frame[1]},{frame[2]}")
+        seq_str = ";".join(seq_parts)
+        header.append(f"DEFINE ANIM_SEQUENCE \"{seq_str}\"\n")
+    
+    # 5. Rebuild file (skipping old DEFINEs)
     new_lines = []
     in_header_block = True
     for line in lines:
-        # Once we hit 'Object' or any logic, the header block is over
         if line.strip().startswith('Object') or line.strip().startswith('On'):
             if in_header_block:
                 new_lines.extend(header)
@@ -632,6 +748,6 @@ def sync_metadata_to_hairy(project_path, type_name, metadata):
         else:
             new_lines.append(line)
             
-    with open(path, 'w') as f: f.writelines(new_lines)
+    with open(path, 'w', encoding='utf-8') as f: f.writelines(new_lines)
     return True
 

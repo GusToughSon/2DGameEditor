@@ -10,9 +10,10 @@ class AnimationEditor:
     A professional, Win95-style Animation Editor for 2D assets.
     Provides frame-by-frame management and real-time playback simulation.
     """
-    def __init__(self, parent, save_manager=None, initial_tile=None, initial_name=None, initial_tileset="World"):
+    def __init__(self, parent, save_manager=None, initial_tile=None, initial_name=None, initial_tileset="World", on_save_callback=None):
         self.parent = parent
         self.save_manager = save_manager
+        self.on_save_callback = on_save_callback
         
         self.win = tk.Toplevel(parent)
         self.win.title(f"Animation Editor - {initial_name if initial_name else '[Untitled]'}")
@@ -223,25 +224,28 @@ class AnimationEditor:
 
     def load_existing_anim_data(self):
         """ Hydrates the editor if called from an existing type. """
-        types_file = os.path.join(self.save_manager.project_path, "Types.json")
-        if not os.path.exists(types_file): return
+        if not self.save_manager or not self.save_manager.project_path: return
         
-        with open(types_file, 'r') as f: data = json.load(f)
+        hairy_dir = os.path.join(self.save_manager.project_path, "HAIRY")
+        import ScriptParser
+        filename = ScriptParser._hairy_filename(self.anim_name.get())
+        filepath = os.path.join(hairy_dir, filename)
         
-        for tid, tdata in data.items():
-            if tdata.get("name") == self.anim_name.get():
-                anim = tdata.get("animation", {})
+        if os.path.exists(filepath):
+            headers = ScriptParser.parse_hairy_headers(filepath)
+            if headers and "animation" in headers:
+                anim = headers["animation"]
                 if anim:
                     self.frame_count.set(anim.get("frames", 1))
                     self.speed.set(anim.get("speed", 100))
                     self.loop_mode.set(anim.get("mode", "Cycle"))
+                    self.random_speed.set(anim.get("random_speed", False))
                     
                     # If we had saved frame data (tile mappings), load them here
                     frames = anim.get("frame_sequence", [])
                     for i, f in enumerate(frames[:8]):
                         if len(f) >= 3: self.frame_data[i] = f
                         self.refresh_slot_icon(i)
-                break
 
     def save_anim(self):
         """ Modified Save to include the Frame Sequence. """
@@ -267,33 +271,15 @@ class AnimationEditor:
             "frame_sequence": self.frame_data[:count] # [ [x,y,ts], [x,y,ts]... ]
         }
 
-        # Sync code... (Keeping rest of logic same)
-        types_file = os.path.join(self.save_manager.project_path, "Types.json")
-        types_data = {}
-        if os.path.exists(types_file):
-            try:
-                with open(types_file, 'r') as f: types_data = json.load(f)
-            except: pass
+        # Invoke callback if provided to update parent's state
+        if self.on_save_callback:
+            self.on_save_callback(anim_data)
 
-        target_id = None
-        for tid, tdata in types_data.items():
-            if tdata.get("name") == name:
-                target_id = tid; break
+        # Write directly to the Hairy file
+        import ScriptParser
+        ScriptParser.sync_metadata_to_hairy(self.save_manager.project_path, name, {"animation": anim_data})
 
-        if target_id:
-            types_data[target_id]["animation"] = anim_data
-        else:
-            nid = str(max([int(k) for k in types_data.keys()] + [100]) + 1)
-            types_data[nid] = {
-                "name": name, "family": "Default", "animation": anim_data,
-                "tileset": self.frame_data[0][2], "tile_coords": [self.frame_data[0][0], self.frame_data[0][1]],
-                "properties": {"is_dummy": True}
-            }
-
-        with open(types_file, 'w') as f: json.dump(types_data, f, indent=4)
         self.save_manager.mark_dirty()
-        if hasattr(self.parent, "_update_preview"):
-            self.parent._update_preview()
         self.win.destroy()
 
 if __name__ == "__main__":

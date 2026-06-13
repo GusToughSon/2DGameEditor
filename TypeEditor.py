@@ -144,9 +144,8 @@ class TypeEditor:
                 "family": headers.get("family", "FAM_OBJ"),
                 "tileset": headers.get("tileset", "World"),
                 "tile_coords": headers.get("tile_coords", [0, 0]),
-                "properties": {
-                    "solid": headers.get("solid", True)
-                }
+                "properties": headers.get("properties", {}),
+                "animation": headers.get("animation", {})
             }
             
         print(f"[SYNC] Discovery finished: Found {len(new_types)} Type(s) in HAIRY/")
@@ -267,11 +266,13 @@ class TypeEditor:
     def zoom_in(self):
         """ Scales the UI upwards. """
         self.grid_zoom = min(4.0, self.grid_zoom + 0.1)
+        print(f"[DEBUG] Zoomed in (scale: {self.grid_zoom:.1f})")
         self.refresh_type_list()
 
     def zoom_out(self):
         """ Scales the UI downwards. """
         self.grid_zoom = max(0.5, self.grid_zoom - 0.1)
+        print(f"[DEBUG] Zoomed out (scale: {self.grid_zoom:.1f})")
         self.refresh_type_list()
 
     def _pan_start(self, event):
@@ -353,8 +354,13 @@ class TypeEditor:
             self.type_canvas.create_rectangle(rect_x, y-6, rect_x+rect_w, y+rect_h, fill=bg_color, outline=border, width=1, tags=tag)
             
             # Draw Icon
-            ts_name = data.get("tileset", "World")
-            tx, ty = data.get("tile_coords", [0,0])
+            anim = data.get("animation", {})
+            frame_seq = anim.get("frame_sequence", []) if isinstance(anim, dict) else []
+            if frame_seq and len(frame_seq) > 0:
+                tx, ty, ts_name = frame_seq[0]
+            else:
+                ts_name = data.get("tileset", "World")
+                tx, ty = data.get("tile_coords", [0,0])
             tile_img = get_tile(ts_name, tx, ty)
             
             if tile_img:
@@ -419,6 +425,7 @@ class TypeEditor:
 
     def unselect_all(self):
         """ Clears selection when clicking empty space. """
+        print("[DEBUG] Unselected all types")
         self.selected_type_id = None
         self.refresh_type_list()
 
@@ -427,6 +434,7 @@ class TypeEditor:
         if not self.selected_type_id:
             messagebox.showwarning("Warning", "No type selected to edit.", parent=self.win)
             return
+        print(f"[DEBUG] Edit Type requested for ID: {self.selected_type_id}")
         self.open_property_editor(self.selected_type_id)
 
     def select_type(self, tid):
@@ -483,10 +491,12 @@ class TypeEditor:
         if self.save_manager:
             self.save_manager.mark_dirty()
         self.refresh_type_list()
+        print(f"[DEBUG] Created New Type: '{unique_name}' (ID: {new_id})")
         self.open_property_editor(new_id)
 
     def open_property_editor(self, tid):
         data = self.types_data[tid]
+        print(f"[DEBUG] Opened Property Editor for Type ID: {tid} ({data['name']})")
         
         # Classic Win95 Dialog
         dlg = tk.Toplevel(self.win)
@@ -523,14 +533,20 @@ class TypeEditor:
         
         def update_preview():
             img_box.delete("all")
-            ts = data.get("tileset", "World")
-            tc = data.get("tile_coords", [0,0])
+            anim = data.get("animation", {})
+            frame_seq = anim.get("frame_sequence", []) if isinstance(anim, dict) else []
+            if frame_seq and len(frame_seq) > 0:
+                tx, ty, ts = frame_seq[0]
+            else:
+                ts = data.get("tileset", "World")
+                tc = data.get("tile_coords", [0,0])
+                tx, ty = tc[0], tc[1]
             # Use current project tile size for crop
             tsize = self.tile_size
             path = os.path.join(self.project_path, "TILESET", f"{ts}_TILESET.png")
             if os.path.exists(path):
                 img = Image.open(path).convert("RGBA")
-                chunk = img.crop((tc[0]*tsize, tc[1]*tsize, (tc[0]+1)*tsize, (tc[1]+1)*tsize)).resize((64, 64), Image.NEAREST)
+                chunk = img.crop((tx*tsize, ty*tsize, (tx+1)*tsize, (ty+1)*tsize)).resize((64, 64), Image.NEAREST)
                 self._preview_photo = ImageTk.PhotoImage(chunk) # Ref
                 # Hardened Offset: Adjusted (2,2) to clear the sunken border properly. 
                 img_box.create_image(2, 2, image=self._preview_photo, anchor="nw")
@@ -556,10 +572,17 @@ class TypeEditor:
             # INHERIT the tileset from the current Type's Family/Selection
             fam = fam_var.get()
             ts_key = self._get_tileset_for_fam(fam)
+            print(f"[DEBUG] Launching Animation Editor for Type '{name_var.get()}' (Tileset: '{ts_key}')")
+            
+            def on_anim_saved(anim_data):
+                data["animation"] = anim_data
+                print(f"[DEBUG] Animation saved callback received for '{data['name']}': {anim_data}")
+                update_preview()
             
             ae = AnimationEditor.AnimationEditor(dlg, self.save_manager, 
                                                  initial_name=name_var.get(),
-                                                 initial_tileset=ts_key)
+                                                 initial_tileset=ts_key,
+                                                 on_save_callback=on_anim_saved)
             dlg.sub_windows.append(ae.win)
             
         self.anim_button = tk.Button(btn_f, text="Select Anim", font=self.ui_font, bg="#C0C0C0", width=10, command=launch_anim_editor)
@@ -570,10 +593,12 @@ class TypeEditor:
             fam = fam_var.get()
             ts_key = self._get_tileset_for_fam(fam)
             ts_path = os.path.join(self.project_path, "TILESET", f"{ts_key}_TILESET.png")
+            print(f"[DEBUG] Opening Tile Selector for Type '{data['name']}' using tileset: '{ts_key}'")
             
             def on_picked(c, r):
                 data["tileset"] = ts_key
                 data["tile_coords"] = [c, r]
+                print(f"[DEBUG] Selected tile coordinates [{c}, {r}] for Type '{data['name']}'")
                 self._save_types()
                 self.refresh_type_list()
                 update_preview()
@@ -587,6 +612,7 @@ class TypeEditor:
         def edit_hairy():
             """ Opens the SHARED Hairy IDE and navigates to this Type's script. """
             current_name = name_var.get().strip()
+            print(f"[DEBUG] Edit Hairy requested for '{current_name}'")
             if not current_name:
                 messagebox.showwarning("Warning", "Type needs a name before editing hairy.", parent=dlg)
                 return
@@ -697,6 +723,7 @@ class TypeEditor:
             # 1. Sync back to raw format: "Armor Plate" -> "FAM_ARMOR_PLATE"
             raw_val = f.upper().replace(" ", "_")
             data["family"] = f"FAM_{raw_val}" if f != "World" else "World"
+            print(f"[DEBUG] Type family changed in UI to '{data['family']}' (Tileset: '{self._get_tileset_for_fam(f)}')")
             
             # 2. Automatic Tileset Selection
             target_ts = self._get_tileset_for_fam(f)
@@ -725,11 +752,11 @@ class TypeEditor:
         right_col.pack(side="right", fill="both", expand=True)
 
         # Numeric Fields Setup
-        num_labels = [("weight", "Weight"), ("mass", "Mass"), ("use_delay", "Use delay"), ("brightness", "Brightness"), ("radius", "Radius")]
+        num_labels = [("weight", "Weight"), ("mass", "Mass"), ("use_delay", "Use delay"), ("brightness", "Brightness"), ("radius", "Illumination radius")]
         for p_key, label in num_labels:
             f = tk.Frame(right_col, bg="#C0C0C0")
             f.pack(fill="x", pady=2)
-            tk.Label(f, text=f"{label}:", bg="#C0C0C0", font=self.ui_font, width=10, anchor="e").pack(side="left")
+            tk.Label(f, text=f"{label}:", bg="#C0C0C0", font=self.ui_font, width=16, anchor="e").pack(side="left")
             var = tk.StringVar(value=str(data["properties"].get(p_key, 0)))
             num_vars[p_key] = var
             tk.Entry(f, textvariable=var, width=5, bg="white", relief="sunken").pack(side="left", padx=5)
@@ -767,11 +794,11 @@ class TypeEditor:
                 src_props = data["properties"]
                 
                 # Standard numeric properties
-                n_labels = [("weight", "Weight"), ("mass", "Mass"), ("use_delay", "Use delay"), ("brightness", "Brightness"), ("radius", "Radius")]
+                n_labels = [("weight", "Weight"), ("mass", "Mass"), ("use_delay", "Use delay"), ("brightness", "Brightness"), ("radius", "Illumination radius")]
                 for p_key, lbl in n_labels:
                     f = tk.Frame(right_col, bg="#C0C0C0")
                     f.pack(fill="x", pady=2)
-                    tk.Label(f, text=f"{lbl}:", bg="#C0C0C0", font=self.ui_font, width=10, anchor="e").pack(side="left")
+                    tk.Label(f, text=f"{lbl}:", bg="#C0C0C0", font=self.ui_font, width=16, anchor="e").pack(side="left")
                     v = tk.StringVar(value=str(src_props.get(p_key, 0)))
                     num_vars[p_key] = v
                     tk.Entry(f, textvariable=v, width=5, bg="white", relief="sunken").pack(side="left", padx=5)
@@ -836,9 +863,11 @@ class TypeEditor:
                 "family": data.get("family", "FAM_OBJ"),
                 "tileset": data.get("tileset", "World"),
                 "tile_coords": data.get("tile_coords", [0, 0]),
-                "solid": data.get("properties", {}).get("solid", True)
+                "solid": data.get("properties", {}).get("solid", True),
+                "animation": data.get("animation", {})
             }
             ScriptParser.sync_metadata_to_hairy(self.project_path, data["name"], meta_payload)
+            print(f"[DEBUG] Changes applied successfully for Type ID: {tid} ({data['name']}). Saved to Hairy script.")
             
             self._save_types()
             self.refresh_type_list()
@@ -847,6 +876,7 @@ class TypeEditor:
         tk.Button(dlg, text="OK", command=apply_changes, width=10, bg="#C0C0C0", relief="raised", bd=2).pack(side="bottom", pady=10)
 
     def _on_close(self):
+        print("[DEBUG] Closing Type Editor and cleaning up active dialogs")
         # Close all child property dialogs surgically
         for dlg in list(self.active_dialogs):
             try:

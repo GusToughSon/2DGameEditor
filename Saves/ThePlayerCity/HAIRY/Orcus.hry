@@ -4,23 +4,12 @@
 //
 //====================================================================
 
-DEFINE FAM_MONSTER                    // The logic family
-DEFINE LOCAL_HEALTH          35000  // HP
-DEFINE LOCAL_STRENGTH        10   // Str
-DEFINE LOCAL_IS_USEABLE      1    // Interactive
-DEFINE NPC_LEVEL          130
-DEFINE NPC_MIN_DMG        800
-DEFINE NPC_MAX_DMG        2200
-DEFINE NPC_ATK_SPEED      700
-DEFINE LOCAL_ATTACK_TICK     700
 // DEFINE LOCAL_REGEN_INTERVAL 5000
 
-DEFINE HasClicked            0
-DEFINE IsActivated           0
 
-DEFINE TILESET AVATAR
-DEFINE GRAPHIC 976, 576
-DEFINE SOLID TRUE
+
+DEFINE Monster
+DEFINE LOCAL_SOLID 1
 
 Object "Orcus"
 {
