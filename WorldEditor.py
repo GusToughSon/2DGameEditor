@@ -118,7 +118,7 @@ class WorldEditor:
         mode_f.pack(side="left", padx=20)
         
         self.mode_var = tk.StringVar(value=self.mode)
-        tools = [("Chunk", "CHUNK"), ("Tile", "TILE"), ("Objects", "OBJECT"), ("Points", "POINT"), ("Sampler", "DROP"), ("Bucket", "FILL")]
+        tools = [("Chunk", "CHUNK"), ("Tile", "TILE"), ("Objects", "OBJECT"), ("Points", "POINT"), ("Sampler", "DROP")]
         for text, val in tools:
             tk.Radiobutton(mode_f, text=text, variable=self.mode_var, value=val, 
                           command=self._update_mode, bg=config.COLOR_BG).pack(side="left")
@@ -302,12 +302,16 @@ class WorldEditor:
         if self.mode == "OBJECT":
             obj_path = os.path.join(self.save_manager.project_path, "TILESET", "OBJECTS_TILESET.png")
             self.tileset_palette.load_tileset(obj_path)
+            self.tileset_palette.select_id(self.selected_tile_id, "OBJECT")
         elif self.mode == "TILE":
             world_path = os.path.join(self.save_manager.project_path, "TILESET", "World_TILESET.png")
             self.tileset_palette.load_tileset(world_path)
+            self.tileset_palette.select_id(self.selected_tile_id, "TILE")
         else:
             world_path = os.path.join(self.save_manager.project_path, "TILESET", "World_TILESET.png")
             self.tileset_palette.load_tileset(world_path)
+            if self.mode == "CHUNK":
+                self.tileset_palette.select_id(self.selected_chunk_id, "CHUNK")
         print(f"[DEBUG] World Editor Mode: {self.mode}")
 
     def _sync_poi_to_palette(self):
@@ -582,9 +586,53 @@ class WorldEditor:
         if 0 <= crow < len(grid) and 0 <= ccol < len(grid[ crow ]):
             cid = grid[crow][ccol]
             if cid:
-                self.selected_chunk_id = cid
-                self.tileset_palette.select_id(cid, "CHUNK")
-                print(f"[DEBUG] Sampler captured: {cid}")
+                # Normalize CID
+                if isinstance(cid, (int, float)):
+                    target_cid = f"C_{int(cid)}"
+                elif not str(cid).startswith("C_"):
+                    target_cid = f"C_{cid}"
+                else:
+                    target_cid = cid
+
+                if self.mode in ["CHUNK", "DROP"]:
+                    self.selected_chunk_id = target_cid
+                    self.tileset_palette.select_id(target_cid, "CHUNK")
+                    print(f"[DEBUG] Sampler captured chunk: {target_cid}")
+                else:
+                    # In TILE or OBJECT/ITEMS mode, grab the specific sub-tile under the mouse!
+                    chunk = self.chunks.get(target_cid)
+                    if chunk:
+                        world_x = (event.x - self.pan_x) / chunk_px
+                        world_y = (event.y - self.pan_y) / chunk_px
+                        sm_x = int((world_x - ccol) * config.CHUNK_SIZE)
+                        sm_y = int((world_y - crow) * config.CHUNK_SIZE)
+                        
+                        if 0 <= sm_x < config.CHUNK_SIZE and 0 <= sm_y < config.CHUNK_SIZE:
+                            data = chunk.get("data", {})
+                            tile_id = 0
+                            
+                            layer_name = "objects" if self.mode in ["OBJECT", "ITEMS"] else "ground"
+                            
+                            if isinstance(data, dict):
+                                layer_grid = data.get(layer_name)
+                            elif isinstance(data, list) and layer_name == "ground":
+                                layer_grid = data
+                            else:
+                                layer_grid = None
+                                
+                            if layer_grid:
+                                row = layer_grid.get(str(sm_y), layer_grid.get(sm_y)) if isinstance(layer_grid, dict) else (layer_grid[sm_y] if sm_y < len(layer_grid) else [])
+                                if row:
+                                    tile_id = row.get(str(sm_x), row.get(sm_x, 0)) if isinstance(row, dict) else (row[sm_x] if isinstance(row, list) and sm_x < len(row) else 0)
+                            
+                            if tile_id is not None and tile_id >= 0:
+                                if self.mode in ["OBJECT", "ITEMS"] and tile_id == 0:
+                                    # Ignore empty space when sampling objects/items
+                                    pass
+                                else:
+                                    self.selected_tile_id = tile_id
+                                    self.tileset_palette.select_id(tile_id, self.mode)
+                                    print(f"[DEBUG] Sampler captured {self.mode} ID: {tile_id}")
 
     def _execute_fill(self, event):
         """ Viewport-limited Paint Bucket. """

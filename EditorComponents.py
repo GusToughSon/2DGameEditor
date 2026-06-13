@@ -673,7 +673,7 @@ class TilesetPalette:
             
             tag = f"type_item_{tid}"
             if is_sel:
-                self.canvas.create_rectangle(rx, ry, rx + box_w, ry + box_h, fill="#000080", outline="white", width=1, tags=tag)
+                self.canvas.create_rectangle(rx, ry, rx + box_w, ry + box_h, fill="#000080", outline="yellow", width=3, tags=tag)
             else:
                 self.canvas.create_rectangle(rx, ry, rx + box_w, ry + box_h, fill="#111", outline="#333", width=1, tags=tag)
                 
