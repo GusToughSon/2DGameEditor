@@ -65,23 +65,63 @@ class WorldDatabaseManager:
             self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
             cursor = self.conn.cursor()
             
-            # Table 1: The Global Coordinate Grid (256x256 typically)
+            # Check if map_name column exists in world_grid to trigger auto-upgrade
+            cursor.execute("PRAGMA table_info(world_grid)")
+            columns = [col[1] for col in cursor.fetchall()]
+            
+            if columns and "map_name" not in columns:
+                self._noisy_log(Colors.WARNING, "Upgrading world_grid table to support multiple maps...")
+                cursor.execute("ALTER TABLE world_grid RENAME TO old_world_grid")
+                cursor.execute('''
+                    CREATE TABLE world_grid (
+                        map_name TEXT,
+                        x INTEGER,
+                        y INTEGER,
+                        chunk_id TEXT,
+                        PRIMARY KEY (map_name, x, y)
+                    )
+                ''')
+                cursor.execute("INSERT INTO world_grid (map_name, x, y, chunk_id) SELECT 'WORLD', x, y, chunk_id FROM old_world_grid")
+                cursor.execute("DROP TABLE old_world_grid")
+                
+            # Same upgrade check for world_points
+            cursor.execute("PRAGMA table_info(world_points)")
+            columns_pts = [col[1] for col in cursor.fetchall()]
+            if columns_pts and "map_name" not in columns_pts:
+                self._noisy_log(Colors.WARNING, "Upgrading world_points table to support multiple maps...")
+                cursor.execute("ALTER TABLE world_points RENAME TO old_world_points")
+                cursor.execute('''
+                    CREATE TABLE world_points (
+                        map_name TEXT,
+                        id TEXT,
+                        x INTEGER,
+                        y INTEGER,
+                        data TEXT,
+                        PRIMARY KEY (map_name, id)
+                    )
+                ''')
+                cursor.execute("INSERT INTO world_points (map_name, id, x, y, data) SELECT 'WORLD', id, x, y, data FROM old_world_points")
+                cursor.execute("DROP TABLE old_world_points")
+
+            # Final check to ensure tables exist with the map_name architecture
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS world_grid (
+                    map_name TEXT,
                     x INTEGER,
                     y INTEGER,
                     chunk_id TEXT,
-                    PRIMARY KEY (x, y)
+                    PRIMARY KEY (map_name, x, y)
                 )
             ''')
             
-            # Table 2: POIs and Global Metadata
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS world_points (
-                    id TEXT PRIMARY KEY,
+                    map_name TEXT,
+                    id TEXT,
                     x INTEGER,
                     y INTEGER,
-                    data TEXT
+                    data TEXT,
+                    PRIMARY KEY (map_name, id)
                 )
             ''')
             
@@ -104,18 +144,18 @@ class WorldDatabaseManager:
             
             cursor = self.conn.cursor()
             count = 0
-            # Perform atomic migration
+            # Perform atomic migration to default map name 'WORLD'
             for r_idx, row in enumerate(grid):
                 for c_idx, cid in enumerate(row):
-                    cursor.execute("INSERT OR REPLACE INTO world_grid (x, y, chunk_id) VALUES (?, ?, ?)", 
-                                   (c_idx, r_idx, str(cid)))
+                    cursor.execute("INSERT OR REPLACE INTO world_grid (map_name, x, y, chunk_id) VALUES (?, ?, ?, ?)", 
+                                   ('WORLD', c_idx, r_idx, str(cid)))
                     count += 1
                 if r_idx % 20 == 0:
                     self._noisy_log(Colors.OKCYAN, f"Spatial Indexing Progress: Row {r_idx} committed...")
 
             for p in points:
-                cursor.execute("INSERT OR REPLACE INTO world_points (id, x, y, data) VALUES (?, ?, ?, ?)", 
-                               (p.get("name", "POI"), p.get("x", 0), p.get("y", 0), json.dumps(p)))
+                cursor.execute("INSERT OR REPLACE INTO world_points (map_name, id, x, y, data) VALUES (?, ?, ?, ?, ?)", 
+                               ('WORLD', p.get("name", "POI"), p.get("x", 0), p.get("y", 0), json.dumps(p)))
 
             self.conn.commit()
             duration = time.time() - start_time
@@ -125,66 +165,73 @@ class WorldDatabaseManager:
             self._noisy_log(Colors.FAIL, f"SPATIAL MIGRATION FAILED: {e}")
             if self.conn: self.conn.rollback()
 
-    def load_world_state(self):
-        """ Fetch Global Grid and Points with Legacy Fallback Redundancy """
+    def load_world_state(self, map_name="WORLD"):
+        """ Fetch Global Grid and Points for a specific map """
+        map_name = str(map_name).upper()
         world_data = {"grid": [], "points": []}
         try:
-            self._noisy_log(Colors.OKCYAN, "QUERY: Reconstruction global world grid...")
+            self._noisy_log(Colors.OKCYAN, f"QUERY: Reconstructing global world grid for map {map_name}...")
             cursor = self.conn.cursor()
             
-            # Fetch grid (reconstructing the 2D array for app compatibility)
-            cursor.execute("SELECT MAX(x), MAX(y) FROM world_grid")
-            max_x, max_y = cursor.fetchone()
-            if max_x is None: return self._fallback_json_load()
+            # Fetch grid size
+            cursor.execute("SELECT MAX(x), MAX(y) FROM world_grid WHERE map_name = ?", (map_name,))
+            res = cursor.fetchone()
+            max_x, max_y = (res[0], res[1]) if res else (None, None)
+            if max_x is None:
+                # Map doesn't exist yet, return a clean default 32x32 grid
+                grid = [["0" for _ in range(32)] for _ in range(32)]
+                return {"grid": grid, "points": []}
             
             # Pre-allocate grid for performance
             grid = [["0" for _ in range(max_x + 1)] for _ in range(max_y + 1)]
-            cursor.execute("SELECT x, y, chunk_id FROM world_grid")
+            cursor.execute("SELECT x, y, chunk_id FROM world_grid WHERE map_name = ?", (map_name,))
             for x, y, cid in cursor.fetchall():
                 grid[y][x] = cid
             
             # Fetch points
             points = []
-            cursor.execute("SELECT data FROM world_points")
+            cursor.execute("SELECT data FROM world_points WHERE map_name = ?", (map_name,))
             for (p_json,) in cursor.fetchall():
                 points.append(json.loads(p_json))
                 
             world_data["grid"] = grid
             world_data["points"] = points
-            self._noisy_log(Colors.OKGREEN, f"SPATIAL SYNC SUCCESS: {len(grid)}x{len(grid[0])} grid restored.")
+            self._noisy_log(Colors.OKGREEN, f"SPATIAL SYNC SUCCESS: {len(grid)}x{len(grid[0])} grid restored for map {map_name}.")
             return world_data
         except Exception as e:
-            self._noisy_log(Colors.FAIL, f"SPATIAL SYNC FAILED: {e}. (SUNSETTED: Fallback deactivated)")
+            self._noisy_log(Colors.FAIL, f"SPATIAL SYNC FAILED for map {map_name}: {e}.")
             return {"grid": [["0" for _ in range(32)] for _ in range(32)], "points": []}
 
     def _fallback_json_load(self):
         """ DEACTIVATED: World Fallback Sunsetted """
         return {"grid": [["0" for _ in range(32)] for _ in range(32)], "points": []}
 
-    def save_world_state(self, world_data):
-        """ Atomic Spatial Commit (targets DB only per Scenario C) """
+    def save_world_state(self, world_data, map_name="WORLD"):
+        """ Atomic Spatial Commit for a specific map """
+        map_name = str(map_name).upper()
         try:
-            self._noisy_log(Colors.WARNING, "TRANSACTION: Committing global map updates...")
+            self._noisy_log(Colors.WARNING, f"TRANSACTION: Committing global map updates for map {map_name}...")
             cursor = self.conn.cursor()
             
             # Save Grid
             grid = world_data.get("grid", [])
             for r_idx, row in enumerate(grid):
                 for c_idx, cid in enumerate(row):
-                    cursor.execute("INSERT OR REPLACE INTO world_grid (x, y, chunk_id) VALUES (?, ?, ?)", 
-                                   (c_idx, r_idx, str(cid)))
+                    cursor.execute("INSERT OR REPLACE INTO world_grid (map_name, x, y, chunk_id) VALUES (?, ?, ?, ?)", 
+                                   (map_name, c_idx, r_idx, str(cid)))
             
             # Save Points
-            cursor.execute("DELETE FROM world_points") # Refresh POIs
+            cursor.execute("DELETE FROM world_points WHERE map_name = ?", (map_name,)) # Refresh POIs
             for p in world_data.get("points", []):
-                cursor.execute("INSERT OR REPLACE INTO world_points (id, x, y, data) VALUES (?, ?, ?, ?)", 
-                               (p.get("name", "POI"), p.get("x", 0), p.get("y", 0), json.dumps(p)))
+                cursor.execute("INSERT OR REPLACE INTO world_points (map_name, id, x, y, data) VALUES (?, ?, ?, ?, ?)", 
+                               (map_name, p.get("name", "POI"), p.get("x", 0), p.get("y", 0), json.dumps(p)))
                 
             self.conn.commit()
-            self._noisy_log(Colors.OKGREEN, "SPATIAL TRANSACTION COMMITTED.")
+            self._noisy_log(Colors.OKGREEN, f"SPATIAL TRANSACTION COMMITTED for map {map_name}.")
         except Exception as e:
-            self._noisy_log(Colors.FAIL, f"SPATIAL TRANSACTION FAILED: {e}")
+            self._noisy_log(Colors.FAIL, f"SPATIAL TRANSACTION FAILED for map {map_name}: {e}")
             if self.conn: self.conn.rollback()
+
 
     def close(self):
         if self.conn:

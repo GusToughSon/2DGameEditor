@@ -862,8 +862,8 @@ class WorldEditor:
 
 
     def save_world(self):
-        self.save_manager.save_world(self.world_data)
-        messagebox.showinfo("Success", "World Layout cached in memory pool.")
+        self.save_manager.save_world(self.world_data, self.current_map_name)
+
 
     def save_project_all(self):
         self.save_world()
@@ -972,9 +972,6 @@ class WorldEditor:
                 self.map_combo.set(self.map_list[0])
                 self._on_map_changed()
 
-    def save_world(self):
-        self.save_manager.save_world(self.world_data, self.current_map_name)
-        # We don't show the messagebox here to keep map switching fluid.
 
     def on_close(self):
         self.win.destroy()

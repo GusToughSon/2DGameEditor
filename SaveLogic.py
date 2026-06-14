@@ -472,7 +472,7 @@ Shop "General Store"
         
         # --- 1. DELEGATE TO SPATIAL MANAGER ---
         spatial_mgr = WorldDatabaseManager(self.project_path)
-        world_data = spatial_mgr.load_world_state()
+        world_data = spatial_mgr.load_world_state(map_name)
         
         if not world_data.get("grid"):
             DebugUtils.log("Spatial Load empty, fallback triggered...", level="WARNING")
@@ -484,7 +484,7 @@ Shop "General Store"
         if not self.project_path: return
         
         spatial_mgr = WorldDatabaseManager(self.project_path)
-        spatial_mgr.save_world_state(world_data)
+        spatial_mgr.save_world_state(world_data, map_name)
         self.mark_dirty()
 
     def _seed_tilesets(self, tile_size):
