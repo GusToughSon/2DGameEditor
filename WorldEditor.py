@@ -825,12 +825,30 @@ class WorldEditor:
         # Check if Control is held (state & 0x0004)
         if event.state & 0x0004:
             old_zoom = self.zoom
-            if event.delta > 0: self.zoom = round(self.zoom * 1.15, 2)
-            else: self.zoom = round(self.zoom / 1.15, 2)
+            
+            # Determine screen coordinates of the focus point (mouse position, or viewport center as fallback)
+            canvas_w = self.canvas.winfo_width()
+            canvas_h = self.canvas.winfo_height()
+            
+            focus_x = event.x if (0 <= event.x <= canvas_w) else (canvas_w / 2)
+            focus_y = event.y if (0 <= event.y <= canvas_h) else (canvas_h / 2)
+            
+            # Translate screen focus point to world coordinates before zoom changes
+            world_focus_x = (focus_x - self.pan_x) / old_zoom
+            world_focus_y = (focus_y - self.pan_y) / old_zoom
+            
+            if event.delta > 0: 
+                self.zoom = round(self.zoom * 1.15, 2)
+            else: 
+                self.zoom = round(self.zoom / 1.15, 2)
             
             self.zoom = max(0.05, min(self.zoom, 4.0))
             
             if self.zoom != old_zoom:
+                # Adjust pan_x/pan_y so that the focused world coordinate stays at the exact same screen coordinate
+                self.pan_x = focus_x - (world_focus_x * self.zoom)
+                self.pan_y = focus_y - (world_focus_y * self.zoom)
+                
                 # Full purge on zoom-change to prevent handle stacking.
                 self.photo_cache.clear()
                 self.tk_chunks = []
@@ -841,6 +859,7 @@ class WorldEditor:
             scroll_amount = (event.delta / 120) * 80 
             self.pan_y += scroll_amount
             self._draw_canvas()
+
 
     def save_world(self):
         self.save_manager.save_world(self.world_data)
