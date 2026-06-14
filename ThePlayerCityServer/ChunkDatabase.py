@@ -5,7 +5,7 @@ import json
 class ChunkDatabase:
     """
     Foundational Chunk Processor. 
-    Converts 16-byte source lines into full 16x16 Dransik-compatible Chunks.
+    Converts 16-byte source lines into full 16x16 game-compatible Chunks.
     """
     def __init__(self, project_path):
         self.project_path = project_path

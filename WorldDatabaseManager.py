@@ -27,7 +27,14 @@ class WorldDatabaseManager:
         return cls._instance
 
     def __init__(self, project_path):
-        if hasattr(self, '_initialized'): return
+        if hasattr(self, '_initialized'):
+            if self.project_path == project_path:
+                return
+            if self.conn:
+                try:
+                    self.conn.close()
+                except: pass
+                self.conn = None
         self.project_path = project_path
         self.json_path = os.path.join(project_path, "Maps", "World.json")
         self.db_path = os.path.join(project_path, "Maps", "World.db")

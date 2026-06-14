@@ -1,7 +1,7 @@
 # Codebase Understanding: 2DGameEditor
 
 ## 📖 High-Level Overview
-**2DGameEditor** is a specialized, production-ready suite for designing assets, databases, and map chunks for 2D RPGs (specifically targeting Ultima-style top-down engines like Dransik). It is built using **Python 3**, **Tkinter** for the desktop UI, and **Pillow (PIL)** for advanced image processing.
+**2DGameEditor** is a specialized, production-ready suite for designing assets, databases, and map chunks for 2D RPGs (specifically targeting Ultima-style top-down engines). It is built using **Python 3**, **Tkinter** for the desktop UI, and **Pillow (PIL)** for advanced image processing.
 
 The suite integrates graphic design, database structure, and scriptable logic (`.hry` scripts) into a unified, bi-directionally synchronized workflow.
 

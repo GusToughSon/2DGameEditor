@@ -133,7 +133,7 @@ class HairyEditor:
                     
                     f.write("// --- 3. WORLD MAPS ---\n")
                     f.write("#Define MAP_WORLD           0\n")
-                    f.write("#Define MAP_UNDERWORLD      1\n\n")
+                    f.write("#Define MAP_CAVE            1\n\n")
                     
                     f.write("// --- 4. UI MENUS ---\n")
                     menus = ["BLACKSMITH", "CARPENTER", "TINKER", "MASON", "ARTIST"]
