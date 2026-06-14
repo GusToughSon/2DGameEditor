@@ -50,6 +50,8 @@ class TilesetSelector:
         self.canvas.bind("<Button-1>", self._on_click)
         self.canvas.bind("<Double-Button-1>", self._on_double_click)
         self.canvas.bind("<MouseWheel>", self._on_mousewheel)
+        self.canvas.bind("<ButtonPress-2>", self._pan_start)
+        self.canvas.bind("<B2-Motion>", self._pan_move)
         
         # 3. Action Buttons (Bottom)
         btn_f = tk.Frame(self.win, bg=config.COLOR_BG, pady=10)

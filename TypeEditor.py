@@ -19,18 +19,48 @@ class TypeEditor:
         "World": "World", "Tiles": "World", "Ground": "World",
         "Npc": "Avatars", "Monster": "Avatars",
         "Weapon": "Items", "Armor": "Items", "Consumable": "Items",
-        "Item": "Items", "Trinket": "Items", "Object": "Objects"
+        "Item": "Items", "Trinket": "Items", "Object": "Objects",
+        "Obj": "Objects", "Helm": "Items", "Gaunts": "Items",
+        "Plate": "Items", "Shield": "Items", "Legs": "Items"
     }
 
     def _get_tileset_for_fam(self, f_name):
         """ Maps granular sub-families to their parent tilesets (Prefix-based). """
-        if not f_name: return "Items"
-        # 1. Exact Match
-        if f_name in self.FAM_TO_TS_MAP: return self.FAM_TO_TS_MAP[f_name]
-        # 2. Prefix Match (Recursive for granular families)
+        if not f_name:
+            return "Items"
+        
+        # Normalize input (uppercase, strip 'FAM_' prefix, replace spaces with underscores)
+        s = str(f_name).upper().strip()
+        if s.startswith("FAM_"):
+            s = s[4:]
+        s = s.replace(" ", "_")
+        
+        # 1. Objects tileset: family is Obj / Object
+        if s == "OBJ" or s == "OBJECT" or s.startswith("OBJ_") or s.startswith("OBJECT_"):
+            return "Objects"
+            
+        # 2. Avatars tileset: family is Monster / Npc
+        if s in ["NPC", "MONSTER"] or s.startswith("NPC_") or s.startswith("MONSTER_"):
+            return "Avatars"
+            
+        # 3. Items tileset: family is Helm / Gaunts / Plate / Shield / Legs / Trinket / Weapon / Armor / Consumable / Item
+        item_families = ["HELM", "GAUNTS", "PLATE", "SHIELD", "LEGS", "TRINKET", "WEAPON", "ARMOR", "CONSUMABLE", "ITEM"]
+        if s in item_families or any(s.startswith(x + "_") for x in item_families):
+            return "Items"
+            
+        # 4. World tileset: family is World / Tiles / Ground
+        world_families = ["WORLD", "TILES", "GROUND"]
+        if s in world_families or any(s.startswith(x + "_") for x in world_families):
+            return "World"
+            
+        # Fallback to exact / prefix match from FAM_TO_TS_MAP
         for key, ts in self.FAM_TO_TS_MAP.items():
-            if f_name.startswith(key): return ts
-        return "Items" # Default
+            key_upper = key.upper()
+            if s == key_upper or s.startswith(key_upper + "_"):
+                return ts
+                
+        return "Items" # Default fallback
+
 
     def __init__(self, parent, save_manager, main_app=None):
         self.parent = parent
