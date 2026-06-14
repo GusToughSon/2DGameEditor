@@ -190,3 +190,10 @@ class TilesetSelector:
         self._on_click(event)
         self._on_ok()
 
+    def _pan_start(self, event):
+        self.canvas.scan_mark(event.x, event.y)
+
+    def _pan_move(self, event):
+        self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+
