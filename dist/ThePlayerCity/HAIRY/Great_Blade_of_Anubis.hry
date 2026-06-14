@@ -1,0 +1,113 @@
+//====================================================================
+//
+// Great Blade of Anubis - AUTHENTIC SCRAPED DATA
+//
+//====================================================================
+
+DEFINE FAM_WEAPON                    // The logic family
+DEFINE LOCAL_HEALTH          100  // HP
+DEFINE LOCAL_STRENGTH        10   // Str
+DEFINE LOCAL_IS_USEABLE      1    // Interactive
+DEFINE WEAPON_TO_HIT      0
+DEFINE WEAPON_MIN_DMG     70
+DEFINE WEAPON_MAX_DMG     170
+DEFINE WEAPON_SPEED       1000
+DEFINE WEAPON_CLASS       "Sword"
+DEFINE WEAPON_REQ_LEVEL   125
+DEFINE WEAPON_REQ_STR     5
+DEFINE LOCAL_ATTACK_TICK     0
+// DEFINE LOCAL_REGEN_INTERVAL 5000
+
+DEFINE HasClicked            0
+DEFINE IsActivated           0
+
+DEFINE TILESET ITEMS
+DEFINE GRAPHIC 432, 512
+DEFINE SOLID TRUE
+
+Object "Great_Blade_of_Anubis"
+{
+    OnUse
+    {
+        Print "You used Great Blade of Anubis!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        Print "It is a Great Blade of Anubis.\n"
+    }
+
+    OnNew
+    {
+    }
+
+    OnSpawn
+    {
+    }
+
+    OnDeath
+    {
+        Print "The Great Blade of Anubis is gone!\n"
+    }
+
+    OnTalk
+    {
+    }
+
+    OnTouch
+    {
+    }
+
+    OnEnterContainer
+    {
+    }
+
+    OnRemoveFromContainer
+    {
+    }
+
+    OnEquip
+    {
+    }
+
+    OnUnEquip
+    {
+    }
+
+    OnDrop
+    {
+    }
+
+    OnDrag
+    {
+    }
+
+    OnMove
+    {
+    }
+
+    OnCollide
+    {
+    }
+
+    OnHit
+    {
+    }
+
+    OnCombat
+    {
+    }
+
+    OnAnimate
+    {
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+    }
+}
