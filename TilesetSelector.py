@@ -4,6 +4,9 @@ import os
 import config
 from EditorComponents import center_window
 
+# Global cache for preloaded/resized tileset images to avoid slow loading on subsequent opens
+_IMAGE_CACHE = {}
+
 class TilesetSelector:
     """
     A standalone tileset selection window.
@@ -16,6 +19,7 @@ class TilesetSelector:
         self.callback = callback
         
         self.win = tk.Toplevel(parent)
+        self.win.withdraw() # Hide window immediately to prevent blank white popup while loading
         self.win.title(f"Select Tile - {os.path.basename(tileset_path)}")
         self.win.configure(bg=config.COLOR_BG)
         self.win.transient(parent)
@@ -67,17 +71,47 @@ class TilesetSelector:
     def _load_tileset(self):
         if not os.path.exists(self.tileset_path):
             tk.Label(self.canvas, text="Tileset not found!", fg="red").pack()
+            self.win.deiconify()
             return
 
         try:
-            self.full_img = Image.open(self.tileset_path).convert("RGBA")
-            
-            # Dynamic window width based on image columns (displayed at 2x scale)
-            tw, th = self.full_img.size
+            mtime = os.path.getmtime(self.tileset_path)
             ts = self.tile_size
-            cols = tw // ts
             display_scale = 2
             sz = ts * display_scale
+            
+            # Check global cache first
+            if self.tileset_path in _IMAGE_CACHE and _IMAGE_CACHE[self.tileset_path]["mtime"] == mtime and _IMAGE_CACHE[self.tileset_path]["tile_size"] == ts:
+                entry = _IMAGE_CACHE[self.tileset_path]
+                self.full_img = entry["full_img"]
+                self.tk_img = entry["tk_img"]
+                self.display_sz = entry["display_sz"]
+                self.cols_in_source = entry["cols_in_source"]
+            else:
+                self.full_img = Image.open(self.tileset_path).convert("RGBA")
+                tw, th = self.full_img.size
+                cols = tw // ts
+                scaled_w = tw * display_scale
+                scaled_h = th * display_scale
+                
+                resized = self.full_img.resize((scaled_w, scaled_h), Image.NEAREST)
+                self.tk_img = ImageTk.PhotoImage(resized)
+                
+                self.display_sz = sz
+                self.cols_in_source = cols
+                
+                # Cache it
+                _IMAGE_CACHE[self.tileset_path] = {
+                    "mtime": mtime,
+                    "tile_size": ts,
+                    "full_img": self.full_img,
+                    "tk_img": self.tk_img,
+                    "display_sz": self.display_sz,
+                    "cols_in_source": self.cols_in_source
+                }
+            
+            tw, th = self.full_img.size
+            cols = tw // ts
             
             calc_w = cols * sz + 40
             screen_w = self.win.winfo_screenwidth()
@@ -86,8 +120,13 @@ class TilesetSelector:
             center_window(self.win, self.parent, w_width, 550)
             
             self._render_grid()
+            
+            # Pre-render completely and then reveal the window to prevent flashing/white screens
+            self.win.update_idletasks()
+            self.win.deiconify()
         except Exception as e:
             print(f"[ERROR] TilesetSelector failed to load: {e}")
+            self.win.deiconify()
 
     def _render_grid(self):
         self.canvas.delete("all")
@@ -102,8 +141,6 @@ class TilesetSelector:
         scaled_w = tw * display_scale
         scaled_h = th * display_scale
         
-        resized = self.full_img.resize((scaled_w, scaled_h), Image.NEAREST)
-        self.tk_img = ImageTk.PhotoImage(resized)
         self.photo_chunks.append(self.tk_img) # keep ref
         
         self.canvas.create_image(10, 10, image=self.tk_img, anchor="nw")
@@ -118,9 +155,7 @@ class TilesetSelector:
             
         full_h = scaled_h + 40
         self.canvas.config(scrollregion=(0, 0, scaled_w + 20, full_h))
-        
-        self.display_sz = sz
-        self.cols_in_source = cols
+
 
     def _on_click(self, event):
         cx, cy = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
