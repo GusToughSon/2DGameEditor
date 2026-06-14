@@ -170,7 +170,7 @@ class AnimationEditor:
             self.frame_data[idx] = [tx, ty, self.frame_data[idx][2]]
             self.refresh_slot_icon(idx)
             
-        tile_sz = getattr(self.save_manager, 'tile_size', 16)
+        tile_sz = self.save_manager.project_data.get("tile_size", 16) if (self.save_manager and hasattr(self.save_manager, "project_data") and self.save_manager.project_data) else 16
         TilesetSelector(self.win, ts_path, tile_size=tile_sz, callback=callback)
 
     def refresh_slot_icon(self, idx):
@@ -190,7 +190,7 @@ class AnimationEditor:
                 full = Image.open(ts_path).convert("RGBA")
                 _IMAGE_CACHE[ts_path] = {"mtime": mtime, "img": full}
             
-            tile_sz = getattr(self.save_manager, 'tile_size', 16)
+            tile_sz = self.save_manager.project_data.get("tile_size", 16) if (self.save_manager and hasattr(self.save_manager, "project_data") and self.save_manager.project_data) else 16
             crop = full.crop((tx*tile_sz, ty*tile_sz, (tx+1)*tile_sz, (ty+1)*tile_sz)).resize((40,40), Image.NEAREST)
             photo = ImageTk.PhotoImage(crop)
             self.photo_cache[f"slot_{idx}"] = photo # Prevent GC
@@ -229,7 +229,7 @@ class AnimationEditor:
                 full = Image.open(ts_path).convert("RGBA")
                 _IMAGE_CACHE[ts_path] = {"mtime": mtime, "img": full}
                 
-            tile_sz = getattr(self.save_manager, 'tile_size', 16)
+            tile_sz = self.save_manager.project_data.get("tile_size", 16) if (self.save_manager and hasattr(self.save_manager, "project_data") and self.save_manager.project_data) else 16
             crop = full.crop((tx*tile_sz, ty*tile_sz, (tx+1)*tile_sz, (ty+1)*tile_sz)).resize((128,128), Image.NEAREST)
             photo = ImageTk.PhotoImage(crop)
             self.preview_photos = [photo] # Keep reference

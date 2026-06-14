@@ -324,7 +324,7 @@ class TilesetPalette:
                 if hasattr(self, "types_data") and self.types_data:
                     ts_name = "OBJECTS" if mode == "OBJECT" else "ITEMS"
                     ts_path = os.path.join(self.project_path, "TILESET", f"{ts_name}_TILESET.png")
-                    ts_width = 16
+                    ts_width = max(1, 256 // self.tile_size)
                     if os.path.exists(ts_path):
                         try:
                             with Image.open(ts_path) as img:
@@ -568,7 +568,7 @@ class TilesetPalette:
                             found_tid = None
                             ts_name = "OBJECTS" if self.mode == "OBJECT" else "ITEMS"
                             ts_path = os.path.join(self.project_path, "TILESET", f"{ts_name}_TILESET.png")
-                            ts_width = 16
+                            ts_width = max(1, 256 // self.tile_size)
                             if os.path.exists(ts_path):
                                 try:
                                     with Image.open(ts_path) as img:
@@ -722,7 +722,7 @@ class TilesetPalette:
         # Pre-load tileset width to calculate 1D tile ID
         ts_name = "OBJECTS" if self.mode == "OBJECT" else "ITEMS"
         ts_path = os.path.join(self.project_path, "TILESET", f"{ts_name}_TILESET.png")
-        ts_width = 16 # fallback
+        ts_width = max(1, 256 // self.tile_size) # fallback
         if os.path.exists(ts_path):
             try:
                 with Image.open(ts_path) as img:

@@ -436,7 +436,7 @@ class GameEditor:
                 return
 
             try: tsize = int(size_var.get())
-            except: tsize = 16
+            except: tsize = 32
             
             # Check if this zip already exists in Saves/
             zip_check = os.path.join(self.save_manager._script_dir, config.SAVES_DIR, f"{name}.zip")
