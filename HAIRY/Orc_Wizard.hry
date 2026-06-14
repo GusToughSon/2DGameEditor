@@ -1,0 +1,110 @@
+//====================================================================
+//
+// Orc Wizard - AUTHENTIC SCRAPED DATA
+//
+//====================================================================
+
+DEFINE FAM_MONSTER                    // The logic family
+DEFINE LOCAL_HEALTH          1500  // HP
+DEFINE LOCAL_STRENGTH        10   // Str
+DEFINE LOCAL_IS_USEABLE      1    // Interactive
+DEFINE NPC_LEVEL          60
+DEFINE NPC_MIN_DMG        130
+DEFINE NPC_MAX_DMG        320
+DEFINE NPC_ATK_SPEED      800
+DEFINE LOCAL_ATTACK_TICK     800
+// DEFINE LOCAL_REGEN_INTERVAL 5000
+
+DEFINE HasClicked            0
+DEFINE IsActivated           0
+
+DEFINE TILESET AVATAR
+DEFINE GRAPHIC 560, 176
+DEFINE SOLID TRUE
+
+Object "Orc_Wizard"
+{
+    OnUse
+    {
+        Print "You used Orc Wizard!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        Print "It is a Orc Wizard.\n"
+    }
+
+    OnNew
+    {
+    }
+
+    OnSpawn
+    {
+    }
+
+    OnDeath
+    {
+        Print "The Orc Wizard is gone!\n"
+    }
+
+    OnTalk
+    {
+    }
+
+    OnTouch
+    {
+    }
+
+    OnEnterContainer
+    {
+    }
+
+    OnRemoveFromContainer
+    {
+    }
+
+    OnEquip
+    {
+    }
+
+    OnUnEquip
+    {
+    }
+
+    OnDrop
+    {
+    }
+
+    OnDrag
+    {
+    }
+
+    OnMove
+    {
+    }
+
+    OnCollide
+    {
+    }
+
+    OnHit
+    {
+    }
+
+    OnCombat
+    {
+    }
+
+    OnAnimate
+    {
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+    }
+}

@@ -423,7 +423,7 @@ class GameEditor:
         tk.Entry(self.new_win, textvariable=name_var, width=30).pack(padx=20)
 
         tk.Label(self.new_win, text="Tile Size (16, 32, 64):", bg=config.COLOR_BG).pack(pady=5)
-        size_var = tk.StringVar(value="16")
+        size_var = tk.StringVar(value="32")
         tk.Entry(self.new_win, textvariable=size_var, width=10).pack(padx=20)
 
         def confirm():

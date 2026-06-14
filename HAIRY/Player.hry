@@ -1,0 +1,205 @@
+//==============================================================================
+// PLAYER.HRY - MASTER PLAYER LOGIC
+//==============================================================================
+DEFINE FAM_PLR 
+
+// --- Combat Modifiers ---
+DEFINE PLR_CRIT_RATE        5        // Percentage chance to crit
+DEFINE PLR_DODGE_RATE       5        // Percentage chance to evade
+DEFINE PLR_ACCURACY         80       // Base hit rate
+
+
+Define PLR_MALE_WARRIOR     0     //  the sex of the player
+Define PLR_FEMALE_WARRIOR   1     //  the sex of the player
+
+DEFINE PLAYERSTART 300 300                                  // Start location of a Player entitiy
+
+                                            // The logic family (determines folder and editor behavior)
+// --- Economy ---
+DEFINE PLR_GOLD             500        // Player Start currency.
+
+
+DEFINE PLR_EXP              0        // Current Experience
+DEFINE PLR_NEXT_LEVEL_EXP   *%*      // server does math from the ExpTables
+
+
+
+
+DEFINE PLR_HEALTH           100                     // player health
+DEFINE PLR_MAX_HEALTH       100      // Ceiling for Heal commands
+
+DEFINE PLR_REGEN_INTERVAL 2000                         // (Optional) Recovery speed in ms. Enable to trigger regen loops.
+
+
+DEFINE PLR_STAMINA          100                     // player stamina
+
+DEFINE PLR_LEVEL          0                       // level of the player
+DEFINE PLR_STRENGTH       5                       // player strength
+DEFINE_PLR_CONSTITUTION 5                       // player constitution
+DEFINE_PLR_DEXTERITY    5                       // player dexterity
+DEFINE_PLR_INTELLIGENCE 5                       // player intelligence
+
+DEFINE_PLR_LUCK         0                       // player luck
+
+DEFINE PLR_ARMOR_COUNT             0             // player armor count Armor items can change this and stats accompanyed to the armor. Like attack speed toWeapon.
+DEFINE PLR_MIN_DMG        0                     // min damage player do when attacking
+DEFINE PLR_MAX_DMG        3                     // max damage player do when attacking
+DEFINE PLR_ATK_SPEED      700                   // player speed of attack Weapons can change this and stats accompanyed to the wep. Like armor count toArmor.
+
+// DEFINE LOCAL_REGEN_INTERVAL 5000
+
+
+
+DEFINE HasClicked            0    // Tracks how many times a player interacts with this
+DEFINE IsActivated           0    // Logical toggle (e.g. 0=Closed, 1=Open)
+
+DEFINE TILESET OBJECT            // Visual Asset Source (FAM_OBJ requires OBJECT tileset)
+DEFINE GRAPHIC 0, 0              // X, Y coordinate of the tile in the tileset
+DEFINE SOLID TRUE                // Physical state (TRUE = impassable, FALSE = walkthrough)
+
+// --- Syntax QuickRef ---
+// Math: Health += 10 | Health Plus 10
+// Choices: DEFINE IsActivated 0 | DEFINE HasClicked 0
+
+Object "My_Template_Object"
+{
+    OnUse
+    {
+        // Triggered when a player Double-Clicks this object.
+        Print "You triggered the Interaction Hook!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        // Triggered when a player Right-Clicks / Examines this object.
+        Print "It is a perfectly formed Template Object.\n"
+    }
+
+    OnNew
+    {
+        // Fires ONCE when this object is first created in the world.
+    }
+
+    OnSpawn
+    {
+        // Fires every time this object enters the world (map load/spawn).
+    }
+
+    OnDeath
+    {
+        // Fires when Health reaches 0. Ideal for drops or removal.
+        Print "The object has been destroyed!\n"
+    }
+
+    OnTalk
+    {
+        // Fires when a player initiates dialogue with this entity.
+    }
+
+    OnTouch
+    {
+        // Fires when a player or entity steps onto this object's tile.
+    }
+
+    OnEnterContainer
+    {
+        // Fires when this object is picked up / put into a bag.
+    }
+
+    OnRemoveFromContainer
+    {
+        // Fires when this object is taken out of a bag/container.
+    }
+
+    OnEquip
+    {
+        // Fires when this item is worn or held in an equipment slot.
+    }
+
+    OnUnEquip
+    {
+        // Fires when this item is removed from an equipment slot.
+    }
+
+    OnDrop
+    {
+        // Fires when this object is dropped onto the ground.
+    }
+
+    OnDrag
+    {
+        // Fires when a player clicks and drags this object UI.
+    }
+
+    OnMove
+    {
+        // Fires every time this object changes position in the world.
+    }
+
+    OnCollide
+    {
+        // Fires when a movement action results in a collision.
+    }
+
+    OnHit
+    {
+        // Fires when this object takes damage from an external source.
+    }
+
+    OnCombat
+    {
+        // Fires when this object enters the combat state.
+    }
+
+    OnAnimate
+    {
+        // Custom driver for sprite animations.
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+        // Periodic logic driven by LOCAL_ATTACK_TICK (0 = disabled).
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+        // Server-wide heartbeat pulse (Synchronized across all objects).
+    }
+}
+
+// *****************************************************************
+//   ENGINE COMMAND REFERENCE
+// *****************************************************************
+//
+// --- Object Lifecycle ---
+//   Create <type>              Create a new object in the world
+//   Destroy <object>            Remove object from world permanently
+//   Respawn <object>            Bring a dead creature back to life
+//   Kill <object>               Instantly kill a creature
+//   Resurrect <object>          Revive a dead player
+//
+// --- Health & Status ---
+//   Heal <target> <amount>      Restore health points
+//   GiveHealth <target> <amt>   Same as Heal
+//   GiveMana <target> <amount>  Restore mana points
+//   Poison <target> <level>     Apply poison effect
+//   Cure <target>               Remove poison
+//   Stasis <object> TRUE/FALSE  Freeze/unfreeze (cannot move)
+//
+// --- Movement & World ---
+//   Teleport <who> <map> <x> <y>   Move to coordinates
+//   Walk <object> <direction>       Force walk a direction
+//   Follow <object> <target>        Follow another object
+//   Flee <object>                   Run away from combat
+//   Sleep <ticks>                   Pause script execution
+//   GetDistance <a> <b>              Returns distance between
+//   CheckLineOfSight <a> <b>        Can A see B?
+//
+// --- Communication ---
+//   Print "text\n"              Display text to player
+//   Say 'text'                  Speak above head (visible)
+//   Whisper <target> 'text'     Private message
+//   Broadcast 'text'            Send to all players
+//   GetName <object>            Returns the object's name
+//

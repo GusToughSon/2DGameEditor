@@ -129,7 +129,6 @@ class TilesetEditor:
 
         tk.Frame(top_frame, width=20, bg=config.COLOR_TITLE_BAR).pack(side="left")
         tk.Button(top_frame, text="📥 New Tileset...", command=self.add_new_tileset, bg="#444", fg="lime", relief="raised", bd=1).pack(side="left", padx=5)
-        tk.Button(top_frame, text="🔄 Import/Swap...", command=self.import_tileset, bg=config.COLOR_BG, relief="raised", bd=1).pack(side="left", padx=5)
         tk.Button(top_frame, text="📤 Export PNG...", command=self.export_tileset, bg=config.COLOR_BG, relief="raised", bd=1).pack(side="left", padx=5)
         tk.Button(top_frame, text="📥 Import PNG", command=self.import_tile_png, bg=config.COLOR_BG, relief="raised", bd=1).pack(side="left", padx=5)
         
@@ -330,21 +329,25 @@ class TilesetEditor:
 
     def add_new_tileset(self):
         """ Allows the user to import a COMPLETELY NEW tileset to the project. """
-        src = filedialog.askopenfilename(title="Select PNG to Import as New Tileset", 
-                                         filetypes=[("PNG", "*.png")], parent=self.win)
-        if not src: return
-        
         name = simpledialog.askstring("New Tileset Name", "Enter a unique name for this tileset (e.g. Cave):", parent=self.win)
         if not name: return
         
         # Safe Naming
-        safe_name = re.sub(r'[^A-Za-z0-9]', '_', name).strip()
-        filename = f"{safe_name.upper()}_TILESET.png"
+        safe_name = re.sub(r'[^A-Za-z0-9]', '_', name).strip().upper()
+        if not safe_name:
+            messagebox.showwarning("Warning", "Invalid tileset name!", parent=self.win)
+            return
+            
+        filename = f"{safe_name}_TILESET.png"
         dest = os.path.join(self.tileset_dir, filename)
         
         if os.path.exists(dest):
             messagebox.showerror("Error", f"Tileset '{filename}' already exists!", parent=self.win)
             return
+
+        src = filedialog.askopenfilename(title=f"Select PNG Image for '{safe_name}' Tileset", 
+                                         filetypes=[("PNG", "*.png")], parent=self.win)
+        if not src: return
 
         try:
             with self.io_lock:
@@ -393,11 +396,28 @@ class TilesetEditor:
         try:
             with Image.open(src) as img:
                 img_data = img.convert("RGBA")
-                # Resize to fit the project tile size
-                resized_img = img_data.resize((self.tile_size, self.tile_size), Image_NEAREST)
+                w, h = img_data.size
+                
+                # 1. Size Validation: check if larger than the destination tile size
+                if w > self.tile_size or h > self.tile_size:
+                    messagebox.showerror("Error", f"You are trying to import too big of an image! The selected image is {w}x{h}, but the tile size is {self.tile_size}x{self.tile_size}.", parent=self.win)
+                    return
+                
+                # 2. Crisp Integer Scaling to avoid image deprecation/blurring
+                scale_factor = min(self.tile_size // w, self.tile_size // h)
+                new_w = w * scale_factor
+                new_h = h * scale_factor
+                
+                resized_img = img_data.resize((new_w, new_h), Image_NEAREST)
+                
+                # Center it on a transparent canvas of tile_size x tile_size
+                final_img = Image.new("RGBA", (self.tile_size, self.tile_size), (0, 0, 0, 0))
+                dx = (self.tile_size - new_w) // 2
+                dy = (self.tile_size - new_h) // 2
+                final_img.paste(resized_img, (dx, dy))
                 
             sc, sr = self.selected_tile
-            self._paste_at(sc, sr, resized_img)
+            self._paste_at(sc, sr, final_img)
             self.status_label.config(text=f"Imported tile to ({sc}, {sr}) successfully!", fg="blue")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to import tile PNG: {e}", parent=self.win)
