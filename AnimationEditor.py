@@ -5,6 +5,8 @@ import os
 import config
 from EditorComponents import center_window
 
+_IMAGE_CACHE = {}
+
 class AnimationEditor:
     """
     A professional, Win95-style Animation Editor for 2D assets.
@@ -181,7 +183,13 @@ class AnimationEditor:
         ts_path = os.path.join(self.save_manager.project_path, "TILESET", f"{ts}_TILESET.png")
         if os.path.exists(ts_path):
             from PIL import Image, ImageTk
-            full = Image.open(ts_path).convert("RGBA")
+            mtime = os.path.getmtime(ts_path)
+            if ts_path in _IMAGE_CACHE and _IMAGE_CACHE[ts_path]["mtime"] == mtime:
+                full = _IMAGE_CACHE[ts_path]["img"]
+            else:
+                full = Image.open(ts_path).convert("RGBA")
+                _IMAGE_CACHE[ts_path] = {"mtime": mtime, "img": full}
+            
             tile_sz = getattr(self.save_manager, 'tile_size', 16)
             crop = full.crop((tx*tile_sz, ty*tile_sz, (tx+1)*tile_sz, (ty+1)*tile_sz)).resize((40,40), Image.NEAREST)
             photo = ImageTk.PhotoImage(crop)
@@ -214,13 +222,20 @@ class AnimationEditor:
         
         if os.path.exists(ts_path):
             from PIL import Image, ImageTk
-            full = Image.open(ts_path).convert("RGBA")
+            mtime = os.path.getmtime(ts_path)
+            if ts_path in _IMAGE_CACHE and _IMAGE_CACHE[ts_path]["mtime"] == mtime:
+                full = _IMAGE_CACHE[ts_path]["img"]
+            else:
+                full = Image.open(ts_path).convert("RGBA")
+                _IMAGE_CACHE[ts_path] = {"mtime": mtime, "img": full}
+                
             tile_sz = getattr(self.save_manager, 'tile_size', 16)
             crop = full.crop((tx*tile_sz, ty*tile_sz, (tx+1)*tile_sz, (ty+1)*tile_sz)).resize((128,128), Image.NEAREST)
             photo = ImageTk.PhotoImage(crop)
             self.preview_photos = [photo] # Keep reference
             self.sample_canvas.delete("all")
             self.sample_canvas.create_image(64, 64, image=photo)
+
 
     def load_existing_anim_data(self):
         """ Hydrates the editor if called from an existing type. """
