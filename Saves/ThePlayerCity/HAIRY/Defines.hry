@@ -1,0 +1,54 @@
+// ==============================================================================
+// DEFINES.HRY - MASTER PROJECT CONFIGURATION & GLOBAL STATE
+// ==============================================================================
+// This file is the "Brain" of your world. It stores constants that are shared
+// across EVERY script in your project.
+//
+// SYNTAX: DEFINE [TYPE] [NAME] [VALUE]
+// ==============================================================================
+
+// --- 0. TILESET ASSIGNMENT RULES ---
+// These rules are followed by the engine when generating new scripts:
+//   FAM_OBJ                ->  DEFINE TILESET OBJECT
+//   FAM_NPC / FAM_MONSTER  ->  DEFINE TILESET AVATAR
+//   FAM_WEAPON / FAM_ARMOR ->  DEFINE TILESET ITEMS
+
+// --- 1. CONFIGURATION ---
+DEFINE SHOP_ITEM_FAMILIES        FAM_WEAPON, FAM_ARMOR, FAM_CONSUMABLE, FAM_OBJ
+
+// --- 2. OBJECT FAMILIES ---
+// All object-types must belong to exactly one Family.
+DEFINE FAM_NPC                 0
+DEFINE FAM_WEAPON              1
+DEFINE FAM_ARMOR               2
+DEFINE FAM_OBJ                 3
+DEFINE FAM_CONSUMABLE          4
+DEFINE FAM_TILE                5
+
+// --- 2. GLOBAL VARIABLES ---
+// These exist once for the entire world. Use them for quest-stages, weather, 
+// or economy. Any script can read or modify these.
+// Use 'GLOBAL_' prefix as a best-practice for clarity.
+DEFINE GLOBAL GLOBAL_QUEST_STAGE     0
+DEFINE GLOBAL GLOBAL_KILLS_TOTAL     0
+DEFINE GLOBAL GLOBAL_WEATHER_STATE   1
+
+// --- 3. GLOBAL TIMERS ---
+// These fire at a set interval (in milliseconds) for ALL objects listening.
+// Perfect for synchronized events like Day/Night cycles or server hearts.
+DEFINE GLOBAL_TIMER GLOBAL_WORLD_TICK 5000
+DEFINE GLOBAL_TIMER GLOBAL_DAY_CYCLE  60000
+
+// --- 4. MAPS ---
+DEFINE GLOBAL MAP_DRANSIK             0
+DEFINE GLOBAL MAP_OVERWORLD           1
+
+// --- 5. TILESETS ---
+DEFINE GLOBAL TILESET_WORLD           1
+DEFINE GLOBAL TILESET_ITEMS           2
+DEFINE GLOBAL TILESET_OBJECTS         3
+DEFINE GLOBAL TILESET_AVATARS         4
+
+// --- 6. LOGIC CONSTANTS ---
+DEFINE GLOBAL TRUE                    1
+DEFINE GLOBAL FALSE                   0

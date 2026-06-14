@@ -1,8 +1,6 @@
 __pycache__/
 *.pyc
 *.db
-/dist/
 PIL/
 pystray/
-.aider*
-Saves/
+

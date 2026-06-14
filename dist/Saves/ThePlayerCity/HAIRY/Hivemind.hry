@@ -1,0 +1,110 @@
+//====================================================================
+//
+// Hivemind - AUTHENTIC SCRAPED DATA
+//
+//====================================================================
+
+DEFINE FAM_MONSTER                    // The logic family
+DEFINE LOCAL_HEALTH          2000  // HP
+DEFINE LOCAL_STRENGTH        10   // Str
+DEFINE LOCAL_IS_USEABLE      1    // Interactive
+DEFINE NPC_LEVEL          70
+DEFINE NPC_MIN_DMG        275
+DEFINE NPC_MAX_DMG        525
+DEFINE NPC_ATK_SPEED      1000
+DEFINE LOCAL_ATTACK_TICK     1000
+// DEFINE LOCAL_REGEN_INTERVAL 5000
+
+DEFINE HasClicked            0
+DEFINE IsActivated           0
+
+DEFINE TILESET AVATAR
+DEFINE GRAPHIC 736, 592
+DEFINE SOLID TRUE
+
+Object "Hivemind"
+{
+    OnUse
+    {
+        Print "You used Hivemind!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        Print "It is a Hivemind.\n"
+    }
+
+    OnNew
+    {
+    }
+
+    OnSpawn
+    {
+    }
+
+    OnDeath
+    {
+        Print "The Hivemind is gone!\n"
+    }
+
+    OnTalk
+    {
+    }
+
+    OnTouch
+    {
+    }
+
+    OnEnterContainer
+    {
+    }
+
+    OnRemoveFromContainer
+    {
+    }
+
+    OnEquip
+    {
+    }
+
+    OnUnEquip
+    {
+    }
+
+    OnDrop
+    {
+    }
+
+    OnDrag
+    {
+    }
+
+    OnMove
+    {
+    }
+
+    OnCollide
+    {
+    }
+
+    OnHit
+    {
+    }
+
+    OnCombat
+    {
+    }
+
+    OnAnimate
+    {
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+    }
+}

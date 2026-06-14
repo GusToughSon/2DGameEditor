@@ -1,0 +1,109 @@
+//====================================================================
+//
+// Werewolf Skin - AUTHENTIC SCRAPED DATA
+//
+//====================================================================
+
+DEFINE FAM_ARMOR                    // The logic family
+DEFINE LOCAL_HEALTH          100  // HP
+DEFINE LOCAL_STRENGTH        10   // Str
+DEFINE LOCAL_IS_USEABLE      1    // Interactive
+DEFINE ARMOR_AC           55
+DEFINE ARMOR_REQ_LEVEL    50
+DEFINE ARMOR_REQ_STR      5
+DEFINE LOCAL_ATTACK_TICK     0
+// DEFINE LOCAL_REGEN_INTERVAL 5000
+
+DEFINE HasClicked            0
+DEFINE IsActivated           0
+
+DEFINE TILESET ITEMS
+DEFINE GRAPHIC 0, 896
+DEFINE SOLID TRUE
+
+Object "Werewolf_Skin"
+{
+    OnUse
+    {
+        Print "You used Werewolf Skin!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        Print "It is a Werewolf Skin.\n"
+    }
+
+    OnNew
+    {
+    }
+
+    OnSpawn
+    {
+    }
+
+    OnDeath
+    {
+        Print "The Werewolf Skin is gone!\n"
+    }
+
+    OnTalk
+    {
+    }
+
+    OnTouch
+    {
+    }
+
+    OnEnterContainer
+    {
+    }
+
+    OnRemoveFromContainer
+    {
+    }
+
+    OnEquip
+    {
+    }
+
+    OnUnEquip
+    {
+    }
+
+    OnDrop
+    {
+    }
+
+    OnDrag
+    {
+    }
+
+    OnMove
+    {
+    }
+
+    OnCollide
+    {
+    }
+
+    OnHit
+    {
+    }
+
+    OnCombat
+    {
+    }
+
+    OnAnimate
+    {
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+    }
+}
