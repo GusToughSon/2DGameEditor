@@ -694,7 +694,7 @@ class PixelEditor:
         cx, cy = self.side_canvas.canvasx(event.x), self.side_canvas.canvasy(event.y)
         
         gap = 4
-        sz = int(16 * self.sidebar_zoom)
+        sz = int(self.tile_size * self.sidebar_zoom)
         
         # FIX: Align click math with visual grid (use actual columns, not window width)
         items_per_row = ts_cols

@@ -17,7 +17,7 @@
         },
         "1,2": {
             "block_move": true,
-            "block_vis": false,
+            "block_vis": true,
             "block_fly": false,
             "block_proj": false,
             "block_magic": false,
@@ -25,8 +25,8 @@
             "light": false,
             "window": false,
             "slow": false,
-            "animated": false,
-            "occlusion": false,
+            "animated": true,
+            "occlusion": true,
             "occlusion_type": "-",
             "name": "Water"
         },
