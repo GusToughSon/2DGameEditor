@@ -708,7 +708,7 @@ class TypeEditor:
         def edit_stats():
             """ Context-sensitive data editor launcher. """
             fam = fam_var.get().upper()
-            import ArmorData, WeaponData, NPCData
+            import ArmorData, WeaponData, NPCData, UseableItemEditor, CollectableEditor, MonsterTypeEditor
             
             if fam == "FAM_ARMOR":
                 ArmorData.ArmorDataEditor(dlg, self.save_manager)
@@ -716,6 +716,12 @@ class TypeEditor:
                 WeaponData.WeaponDataEditor(dlg, self.save_manager)
             elif fam == "FAM_NPC":
                 NPCData.NPCDataEditor(dlg, self.save_manager)
+            elif fam == "FAM_USEABLE":
+                UseableItemEditor.UseableItemEditor(dlg, self.save_manager)
+            elif fam == "FAM_COLLECTABLE":
+                CollectableEditor.CollectableEditor(dlg, self.save_manager)
+            elif fam == "FAM_MONSTER":
+                MonsterTypeEditor.MonsterTypeEditor(dlg, self.save_manager)
             else:
                 messagebox.showinfo("Note", f"The family '{fam}' does not have a specialized statistical editor.", parent=dlg)
 

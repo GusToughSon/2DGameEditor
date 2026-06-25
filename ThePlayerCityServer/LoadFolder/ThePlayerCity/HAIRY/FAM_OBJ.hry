@@ -1,8 +1,0 @@
-//==============================================================================
-// FAM_OBJ.hry - AUTO-GENERATED FAMILY REGISTRY
-//==============================================================================
-
-#Define TYPE_FAM_OBJ_ABYSSAL_CORE           9336
-#Define TYPE_FAM_OBJ_BEGINNER_ITEM          9647
-#Define TYPE_FAM_OBJ_CHEST                  9000
-#Define TYPE_FAM_OBJ_MY_TEMPLATE_OBJECT     9648

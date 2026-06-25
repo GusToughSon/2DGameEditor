@@ -105,8 +105,7 @@ class HairyEditor:
     def setup_ui(self):
         # 0. Ensure Infrastructure (Self-Healing & Seeding)
         if self.save_manager and self.save_manager.project_path:
-            hairy_dir = os.path.join(self.save_manager.project_path, "HAIRY")
-            os.makedirs(hairy_dir, exist_ok=True)
+            hairy_dir = self.save_manager.hairy_dir
             
             # Seed Defines.hry if missing (Enhanced Starter Template)
             def_path = os.path.join(hairy_dir, "Defines.hry")

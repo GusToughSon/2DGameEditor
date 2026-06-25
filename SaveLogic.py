@@ -43,9 +43,15 @@ class SaveLogic:
                 ctypes.windll.kernel32.SetFileAttributesW(path, 2)
             except: pass
 
+    @property
+    def hairy_dir(self):
+        hdir = os.path.join(self._script_dir, "HAIRY")
+        os.makedirs(hdir, exist_ok=True)
+        return hdir
+
     def seed_defines(self):
         """ The master project configuration. Explains and defines Global Scopes. """
-        path = os.path.join(self.project_path, "HAIRY", "Defines.hry")
+        path = os.path.join(self.hairy_dir, "Defines.hry")
         content = """// ==============================================================================
 // DEFINES.HRY - MASTER PROJECT CONFIGURATION & GLOBAL STATE
 // ==============================================================================
@@ -108,7 +114,7 @@ DEFINE GLOBAL FALSE                   0
 
     def seed_player(self):
         """ Default Player.hry file with Full API Roadmap and Generic Player logic """
-        path = os.path.join(self.project_path, "HAIRY", "Player.hry")
+        path = os.path.join(self.hairy_dir, "Player.hry")
         content = f"""{self.MASTER_API_ROADMAP}
 Object "Plr_Male_Warrior" "Plr_Mage" "Plr_Rogue" 
 {{
@@ -131,7 +137,7 @@ Object "Plr_Male_Warrior" "Plr_Mage" "Plr_Rogue"
 
     def seed_skills(self):
         """ Seeds the massive hierarchical Skills.hry structure using modern DEFINE syntax """
-        path = os.path.join(self.project_path, "HAIRY", "Skills.hry")
+        path = os.path.join(self.hairy_dir, "Skills.hry")
         content = """// SKILLS.HRY - HIERARCHICAL SKILL TREE & PROGRESSION
 // Syntax: <Skill Name> [Table #]
 
@@ -170,7 +176,7 @@ Magery
 
     def seed_tables(self):
         """ Seeds the EXP progression tables into Tables.hry """
-        path = os.path.join(self.project_path, "HAIRY", "Tables.hry")
+        path = os.path.join(self.hairy_dir, "Tables.hry")
         content = """// TABLES.HRY - EXPERIENCE PROGRESSION DATA
 // Syntax: Table <Index> { LVL0_EXP, LVL1_EXP, LVL2_EXP, ... }
 
@@ -208,7 +214,7 @@ Table 5
 
     def seed_shops(self):
         """ The global Merchant Registry. Defines inventories and prices. """
-        path = os.path.join(self.project_path, "HAIRY", "Shops.hry")
+        path = os.path.join(self.hairy_dir, "Shops.hry")
         # Self-Heal Guard
         if os.path.exists(path): return
         
@@ -250,8 +256,7 @@ Shop "General Store"
         
         os.makedirs(self.project_path, exist_ok=True)
         
-        # 1. Initialize Native Folders
-        folders = ["TILESET", "Animations", "Maps", "Types", "HAIRY", "IMPORT"]
+        folders = ["TILESET", "Animations", "Maps", "Types", "IMPORT"]
         for f in folders:
             os.makedirs(os.path.join(self.project_path, f), exist_ok=True)
             
@@ -263,7 +268,7 @@ Shop "General Store"
         self.seed_shops()
 
         # 3. Seed Example Scripts (Existing API Template)
-        hairy_dir = os.path.join(self.project_path, "HAIRY")
+        hairy_dir = self.hairy_dir
         self._seed_template(hairy_dir)
         self._seed_beginner_example(hairy_dir)
 
@@ -396,7 +401,7 @@ Shop "General Store"
             for f in scripts_to_import:
                 src = os.path.join(import_dir, f)
                 name = os.path.splitext(f)[0]
-                dest = os.path.join(self.project_path, "HAIRY", f)
+                dest = os.path.join(self.hairy_dir, f)
                 self._process_script_import(src, dest, name)
                 self._manifest_ghost_type(name)
                 if os.path.exists(dest): os.remove(src)
@@ -760,8 +765,7 @@ Shop "General Store"
             except Exception as e:
                 DebugUtils.log(f"Database Handshake Failure: {e}", level="ERROR")
 
-            hairy_dir = os.path.join(self.project_path, "HAIRY")
-            os.makedirs(hairy_dir, exist_ok=True)
+            hairy_dir = self.hairy_dir
             
             # --- SELF HEAL: Shops.hry ---
             self.seed_shops()
@@ -808,7 +812,7 @@ Shop "General Store"
         if not self.project_path: return
         
         tileset_dir = os.path.join(self.project_path, "TILESET")
-        hairy_dir = os.path.join(self.project_path, "HAIRY")
+        hairy_dir = self.hairy_dir
         defines_path = os.path.join(hairy_dir, "Defines.hry")
         
         if not os.path.exists(tileset_dir) or not os.path.exists(defines_path): return

@@ -201,7 +201,16 @@ class GameEditor:
             self.editors_menu.add_command(label="Skills Editor", command=self.open_skill_editor)
             self.editors_menu.add_command(label="Shop Editor", command=self.open_shop_editor)
             self.editors_menu.add_command(label="Monster Spawn Editor", command=self.open_spawn_editor)
+            self.editors_menu.add_command(label="Monster Type Editor", command=self.open_monster_type_editor)
             self.editors_menu.add_command(label="ObjectSheet Editor", command=self.open_object_sheet_editor)
+            self.editors_menu.add_command(label="Safe Zone Editor", command=self.open_safe_zone_editor)
+            self.editors_menu.add_command(label="NPC Spawn Editor", command=self.open_npc_spawn_editor)
+            self.editors_menu.add_command(label="GM Control Console", command=self.open_admin_tool_editor)
+            self.editors_menu.add_separator()
+            self.editors_menu.add_command(label="Weapon Data Editor", command=self.open_weapon_data_editor)
+            self.editors_menu.add_command(label="Armor Data Editor", command=self.open_armor_data_editor)
+            self.editors_menu.add_command(label="Useable Item Editor", command=self.open_useable_item_editor)
+            self.editors_menu.add_command(label="Collectable Item Editor", command=self.open_collectable_item_editor)
 
         # Attach everything to the bar
         self.menubar.add_cascade(label="File", menu=self.file_menu)
@@ -834,6 +843,36 @@ class GameEditor:
         self.current_spawn_editor = MonsterSpawnEditor.MonsterSpawnEditor(self.root, self.save_manager)
         print("[DEBUG] Monster Spawn Editor launched.")
 
+    def open_monster_type_editor(self):
+        """ Launches the Monster Type Definition Editor. """
+        try:
+            if hasattr(self, 'current_monster_type_editor') and self.current_monster_type_editor and self.current_monster_type_editor.win.winfo_exists():
+                self.current_monster_type_editor.win.lift(); return
+        except: pass
+        import MonsterTypeEditor
+        self.current_monster_type_editor = MonsterTypeEditor.MonsterTypeDataEditor(self.root, self.save_manager)
+        print("[DEBUG] Monster Type Editor launched.")
+
+    def open_safe_zone_editor(self):
+        """ Launches the Safe Zone Configurator. """
+        try:
+            if hasattr(self, 'current_safe_zone_editor') and self.current_safe_zone_editor.win.winfo_exists():
+                self.current_safe_zone_editor.win.lift(); return
+        except: pass
+        import SafeZoneEditor
+        self.current_safe_zone_editor = SafeZoneEditor.SafeZoneEditor(self.root, self.save_manager)
+        print("[DEBUG] Safe Zone Editor launched.")
+
+    def open_npc_spawn_editor(self):
+        """ Launches the NPC Spawn Point Configurator. """
+        try:
+            if hasattr(self, 'current_npc_spawn_editor') and self.current_npc_spawn_editor and self.current_npc_spawn_editor.win.winfo_exists():
+                self.current_npc_spawn_editor.win.lift(); return
+        except: pass
+        import NPCSpawnEditor
+        self.current_npc_spawn_editor = NPCSpawnEditor.NPCSpawnEditor(self.root, self.save_manager)
+        print("[DEBUG] NPC Spawn Editor launched.")
+
     def open_npc_data_editor(self):
         """ Launches the NPC/Creature Stat Editor. """
         try:
@@ -863,6 +902,36 @@ class GameEditor:
         self.current_weapon_editor = WeaponData.WeaponDataEditor(self.root, self.save_manager)
         print("[DEBUG] Weapon Data Editor launched.")
 
+    def open_useable_item_editor(self):
+        """ Launches the Useable Item Stat Editor. """
+        try:
+            if hasattr(self, 'current_useable_editor') and self.current_useable_editor and self.current_useable_editor.win.winfo_exists():
+                self.current_useable_editor.win.lift(); return
+        except: pass
+        import UseableItemEditor
+        self.current_useable_editor = UseableItemEditor.UseableItemDataEditor(self.root, self.save_manager)
+        print("[DEBUG] Useable Item Editor launched.")
+
+    def open_collectable_item_editor(self):
+        """ Launches the Collectable Item Stat Editor. """
+        try:
+            if hasattr(self, 'current_collectable_editor') and self.current_collectable_editor and self.current_collectable_editor.win.winfo_exists():
+                self.current_collectable_editor.win.lift(); return
+        except: pass
+        import CollectableEditor
+        self.current_collectable_editor = CollectableEditor.CollectableItemDataEditor(self.root, self.save_manager)
+        print("[DEBUG] Collectable Item Editor launched.")
+
+    def open_admin_tool_editor(self):
+        """ Launches the Admin/GM Control Console. """
+        try:
+            if hasattr(self, 'current_admin_tool_editor') and self.current_admin_tool_editor and self.current_admin_tool_editor.win.winfo_exists():
+                self.current_admin_tool_editor.win.lift(); return
+        except: pass
+        import AdminToolEditor
+        self.current_admin_tool_editor = AdminToolEditor.AdminToolEditor(self.root, self.save_manager, main_app=self)
+        print("[DEBUG] GM Control Console launched.")
+
     def open_object_sheet_editor(self):
         """ Launches the Bulk Metadata Spreadsheet. """
         try:
@@ -880,10 +949,14 @@ class GameEditor:
             'current_tileset_editor', 'current_type_editor', 
             'current_anim_editor', 'current_npc_editor', 
             'current_armor_editor', 'current_weapon_editor',
+            'current_useable_editor', 'current_collectable_editor',
+            'current_monster_type_editor',
             'current_hairy_editor', 'current_world_editor', 
             'current_chunk_editor', 'current_skill_editor', 
             'current_shop_editor', 'current_spawn_editor', 
-            'current_object_sheet_editor', 'tileset_selector'
+            'current_object_sheet_editor', 'tileset_selector',
+            'current_safe_zone_editor', 'current_npc_spawn_editor',
+            'current_admin_tool_editor'
         ]
         
         for attr in editors_to_clear:

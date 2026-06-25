@@ -1,6 +1,11 @@
 import os
 import re
 
+def _get_hairy_dir():
+    hdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "HAIRY")
+    os.makedirs(hdir, exist_ok=True)
+    return hdir
+
 def parse_hairy_headers(filepath):
     """
     Scans a .hry file for the primary Type/Object declaration and its metadata.
@@ -104,7 +109,7 @@ def get_defines_from_script(project_path, prefix="FAM_"):
     Surgically extracts #Define [prefix] identifiers from Defines.hry.
     Returns a sorted list of pretty names (e.g. FAM_NPC -> Npc)
     """
-    defines_path = os.path.join(project_path, "HAIRY", "Defines.hry")
+    defines_path = os.path.join(_get_hairy_dir(), "Defines.hry")
     if not os.path.exists(defines_path):
         return []
 
@@ -167,7 +172,7 @@ def sync_all_types_to_hairy(project_path, types_data):
     Modular Refactor: Splits Types.hry into individual FAM_*.hry files.
     This improves project structure and allows for easier script indexing.
     """
-    hairy_dir = os.path.join(project_path, "HAIRY")
+    hairy_dir = _get_hairy_dir()
     try:
         # Group by family
         by_family = {}
@@ -290,7 +295,7 @@ def sync_defines_block(project_path, section_header, prefix, data_dict):
     """
     Surgically updates a specific section of Defines.hry with new DEFINE constants.
     """
-    defines_path = os.path.join(project_path, "HAIRY", "Defines.hry")
+    defines_path = os.path.join(_get_hairy_dir(), "Defines.hry")
     if not os.path.exists(defines_path): return
 
     try:
@@ -344,7 +349,7 @@ def parse_shops_hry(project_path):
     Parses Shops.hry to extract merchant data and meta-configuration.
     Returns: { 'ShopName': { ... }, '_META_FAMILIES': [...] }
     """
-    path = os.path.join(project_path, "HAIRY", "Shops.hry")
+    path = os.path.join(_get_hairy_dir(), "Shops.hry")
     shops = {}
     if not os.path.exists(path): return shops
     
@@ -384,7 +389,7 @@ def save_shops_hry(project_path, shops_data):
     """
     Writes the Shops.hry registry with provided data and meta-config.
     """
-    path = os.path.join(project_path, "HAIRY", "Shops.hry")
+    path = os.path.join(_get_hairy_dir(), "Shops.hry")
     try:
         content = [
             "// ==============================================================================",
@@ -421,7 +426,7 @@ def rename_hairy_file(project_path, old_name, new_name):
     Renames a .hry file when its parent Type is renamed.
     Returns True on success.
     """
-    hairy_dir = os.path.join(project_path, "HAIRY")
+    hairy_dir = _get_hairy_dir()
     old_file = os.path.join(hairy_dir, _hairy_filename(old_name))
     new_file = os.path.join(hairy_dir, _hairy_filename(new_name))
     
@@ -436,7 +441,7 @@ def sync_skills_logic(project_path):
     """
     Surgically extracts Skill names and IDs from Skills.hry and syncs to Defines.hry.
     """
-    skills_path = os.path.join(project_path, "HAIRY", "Skills.hry")
+    skills_path = os.path.join(_get_hairy_dir(), "Skills.hry")
     if not os.path.exists(skills_path): return
 
     try:
@@ -461,7 +466,7 @@ def harvest_project_globals(project_path):
     SCANS ALL .HRY FILES for 'DEFINE GLOBAL' and 'DEFINE GLOBAL_TIMER'.
     Consolidates them into Defines.hry.
     """
-    hairy_dir = os.path.join(project_path, "HAIRY")
+    hairy_dir = _get_hairy_dir()
     if not os.path.exists(hairy_dir): return
 
     global_vars = {}
@@ -508,8 +513,8 @@ def register_tile_define(project_path, all_props):
     Surgically rebuilds HAIRY/Tiles.hry based on named tiles in the property master.
     Uses nested structure: all_props[Tileset][CoordString]
     """
-    tiles_path = os.path.join(project_path, "HAIRY", "Tiles.hry")
-    defines_path = os.path.join(project_path, "HAIRY", "Defines.hry")
+    tiles_path = os.path.join(_get_hairy_dir(), "Tiles.hry")
+    defines_path = os.path.join(_get_hairy_dir(), "Defines.hry")
     
     # 2. Build the Tiles.hry content
     content = [
@@ -629,7 +634,7 @@ def get_shop_item_families(project_path):
     """
     Specifically looks for SHOP_ITEM_FAMILIES in Defines.hry.
     """
-    path = os.path.join(project_path, "HAIRY", "Defines.hry")
+    path = os.path.join(_get_hairy_dir(), "Defines.hry")
     defines = get_hairy_defines(path)
     val = defines.get("SHOP_ITEM_FAMILIES", "")
     if val:
@@ -655,7 +660,7 @@ def sync_metadata_to_hairy(project_path, type_name, metadata):
     Updates the script metadata headers using the streamlined syntax.
     Syntax: DEFINE FAM_XXX, DEFINE LOCAL_XXX
     """
-    hairy_dir = os.path.join(project_path, 'HAIRY')
+    hairy_dir = _get_hairy_dir()
     filename = type_name.replace(' ', '_') + '.hry'
     path = os.path.join(hairy_dir, filename)
     if not os.path.exists(path): return False
@@ -757,7 +762,7 @@ def load_all_types_with_metadata(project_path):
     Scans all Hairy scripts in HAIRY/ directory, extracting full metadata for each type.
     Returns: { tid: { name, family, tileset, tile_coords, properties, animation } }
     """
-    hairy_dir = os.path.join(project_path, "HAIRY")
+    hairy_dir = _get_hairy_dir()
     if not os.path.exists(hairy_dir): return {}
 
     # 1. Map Names to IDs based on Types.hry/FAM_*.hry modular files

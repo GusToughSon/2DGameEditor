@@ -31,6 +31,14 @@ class WorldEditor:
         self.selected_chunk_id = "C_0"
         self.selected_tile_id = 0
         
+        self.safe_zones = {}
+        self.selected_safe_zone_type = 1 # 1 = PvP Safe, 2 = No Combat
+        self._load_safe_zones()
+        
+        self.encounters = {} # id (int) -> dict
+        self.chunk_encounters = {} # (cx, cy) -> id (int)
+        self.selected_encounter_id = None
+        
         self.history = []            # Stack for Undo
         self.current_stroke_tiles = [] # Track TILE modifications during a stroke
         self.redo_stack = []         # Stack for Redo
@@ -113,7 +121,7 @@ class WorldEditor:
         mode_f.pack(side="left", padx=20)
         
         self.mode_var = tk.StringVar(value=self.mode)
-        tools = [("Chunk", "CHUNK"), ("Tile", "TILE"), ("Objects", "OBJECT"), ("Points", "POINT"), ("Sampler", "DROP")]
+        tools = [("Chunk", "CHUNK"), ("Tile", "TILE"), ("Objects", "OBJECT"), ("Points", "POINT"), ("Safe Zones", "SAFE_ZONE"), ("Encounters", "ENCOUNTER"), ("Sampler", "DROP")]
         for text, val in tools:
             tk.Radiobutton(mode_f, text=text, variable=self.mode_var, value=val, 
                           command=self._update_mode, bg=config.COLOR_BG).pack(side="left")
@@ -126,6 +134,11 @@ class WorldEditor:
         self.map_combo.pack(side="left", padx=5)
         self.map_combo.bind("<<ComboboxSelected>>", self._on_map_changed)
 
+        # Safe Zone Layer Toggle Checkbox
+        self.show_safe_zones_var = tk.BooleanVar(value=True)
+        tk.Checkbutton(toolbar, text="👁 Show Safe Zones", variable=self.show_safe_zones_var,
+                       command=self._draw_canvas, bg=config.COLOR_BG, fg="white", selectcolor="#222").pack(side="left", padx=10)
+
         # Single Unified Save
         tk.Button(toolbar, text="💾 Save Project & Map", command=self.save_project_all, 
                   bg="#228B22", fg="white", font=("Arial", 9, "bold")).pack(side="right", padx=10)
@@ -134,6 +147,77 @@ class WorldEditor:
         self.right_sidebar = tk.Frame(self.win, width=250, bg=config.COLOR_BG, bd=2, relief="sunken")
         self.right_sidebar.pack(fill="y", side="right", padx=5, pady=5)
         self.right_sidebar.pack_propagate(False)
+
+        # Safe Zone Controls (hidden by default)
+        self.sz_ctrl_frame = tk.Frame(self.right_sidebar, bg=config.COLOR_BG, pady=5)
+        tk.Label(self.sz_ctrl_frame, text="Safe Zone Type:", bg=config.COLOR_BG, fg="white", font=("Arial", 10, "bold")).pack(anchor="w", padx=5)
+        self.sz_type_var = tk.StringVar(value="PvP Safe")
+        sz_types = ["Erase (None)", "PvP Safe", "No Combat"]
+        self.sz_combo = ttk.Combobox(self.sz_ctrl_frame, textvariable=self.sz_type_var, values=sz_types, state="readonly")
+        self.sz_combo.pack(fill="x", pady=2, padx=5)
+        self.sz_combo.bind("<<ComboboxSelected>>", self._on_sz_type_changed)
+
+        # Spawn Encounter Controls (hidden by default)
+        self.enc_ctrl_frame = tk.Frame(self.right_sidebar, bg=config.COLOR_BG, pady=5)
+        
+        tk.Label(self.enc_ctrl_frame, text="Spawn Encounters", bg=config.COLOR_BG, fg="white", font=("Arial", 10, "bold")).pack(anchor="w", padx=5, pady=2)
+        
+        # Listbox for Encounters
+        lbl_list = tk.Label(self.enc_ctrl_frame, text="Active Encounters:", bg=config.COLOR_BG, fg="white", font=("Arial", 8))
+        lbl_list.pack(anchor="w", padx=5)
+        
+        self.enc_listbox = tk.Listbox(self.enc_ctrl_frame, font=("Arial", 8), bg="#333", fg="white", selectbackground="#555", height=6)
+        self.enc_listbox.pack(fill="x", padx=5, pady=2)
+        self.enc_listbox.bind("<<ListboxSelect>>", self._on_encounter_list_select)
+        
+        # Add / Delete Buttons
+        btn_f = tk.Frame(self.enc_ctrl_frame, bg=config.COLOR_BG)
+        btn_f.pack(fill="x", padx=5, pady=2)
+        tk.Button(btn_f, text="＋ Add", command=self._add_encounter, bg="#444", fg="white", font=("Arial", 8)).pack(side="left", expand=True, fill="x", padx=(0,2))
+        tk.Button(btn_f, text="－ Del", command=self._delete_encounter, bg="#444", fg="white", font=("Arial", 8)).pack(side="left", expand=True, fill="x", padx=(2,0))
+        
+        # Properties area
+        prop_f = tk.LabelFrame(self.enc_ctrl_frame, text="Encounter Properties", bg=config.COLOR_BG, fg="white", font=("Arial", 8, "bold"), pady=5)
+        prop_f.pack(fill="x", padx=5, pady=5)
+        
+        # Name
+        tk.Label(prop_f, text="Name:", bg=config.COLOR_BG, fg="white", font=("Arial", 8)).grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        self.enc_name_var = tk.StringVar()
+        self.enc_name_ent = tk.Entry(prop_f, textvariable=self.enc_name_var, font=("Arial", 8), bg="#222", fg="white")
+        self.enc_name_ent.grid(row=0, column=1, sticky="ew", padx=5, pady=2)
+        
+        # Species
+        tk.Label(prop_f, text="Species:", bg=config.COLOR_BG, fg="white", font=("Arial", 8)).grid(row=1, column=0, sticky="w", padx=5, pady=2)
+        self.enc_species_var = tk.StringVar()
+        self.enc_species_combo = ttk.Combobox(prop_f, textvariable=self.enc_species_var, font=("Arial", 8), state="readonly")
+        self.enc_species_combo.grid(row=1, column=1, sticky="ew", padx=5, pady=2)
+        
+        # Spawn Rate (seconds)
+        tk.Label(prop_f, text="Rate (sec):", bg=config.COLOR_BG, fg="white", font=("Arial", 8)).grid(row=2, column=0, sticky="w", padx=5, pady=2)
+        self.enc_rate_var = tk.StringVar(value="30")
+        self.enc_rate_ent = tk.Entry(prop_f, textvariable=self.enc_rate_var, font=("Arial", 8), bg="#222", fg="white", width=8)
+        self.enc_rate_ent.grid(row=2, column=1, sticky="w", padx=5, pady=2)
+        
+        # Treasure Type
+        tk.Label(prop_f, text="Treasure Table:", bg=config.COLOR_BG, fg="white", font=("Arial", 8)).grid(row=3, column=0, sticky="w", padx=5, pady=2)
+        self.enc_treasure_var = tk.StringVar(value="Default")
+        self.enc_treasure_ent = tk.Entry(prop_f, textvariable=self.enc_treasure_var, font=("Arial", 8), bg="#222", fg="white")
+        self.enc_treasure_ent.grid(row=3, column=1, sticky="ew", padx=5, pady=2)
+        
+        # Update Properties Button
+        tk.Button(prop_f, text="Update Encounter Data", command=self._update_encounter_properties, bg="#333", fg="white", font=("Arial", 8, "bold")).grid(row=4, column=0, columnspan=2, pady=5, padx=5, sticky="ew")
+        
+        prop_f.columnconfigure(1, weight=1)
+
+        # Load Encounters database
+        self._load_encounters()
+        try:
+            species_vals = self._load_hairy_species()
+            self.enc_species_combo.config(values=species_vals)
+            if species_vals:
+                self.enc_species_combo.set(species_vals[0])
+        except Exception as e:
+            print(f"[WARNING] Could not load HAIRY species list: {e}")
 
         ts_path = os.path.join(self.save_manager.project_path, "TILESET", "World_TILESET.png")
         self.tileset_palette = TilesetPalette(self.right_sidebar, ts_path, self.tile_size, self._on_asset_selected)
@@ -310,6 +394,27 @@ class WorldEditor:
         self.mode = new_mode
         self.canvas.config(cursor="crosshair" if self.mode == "POINT" else "")
         self.tileset_palette.set_mode(self.mode, render=False)
+        
+        # Show/Hide Safe Zone panel dynamically
+        if self.mode == "SAFE_ZONE":
+            self.sz_ctrl_frame.pack(fill="x", side="top", pady=5)
+            self.show_safe_zones_var.set(True)
+        else:
+            self.sz_ctrl_frame.pack_forget()
+
+        # Show/Hide Spawn Encounter panel dynamically
+        if self.mode == "ENCOUNTER":
+            self.enc_ctrl_frame.pack(fill="both", expand=True, side="top", pady=5)
+        else:
+            if hasattr(self, 'enc_ctrl_frame'):
+                self.enc_ctrl_frame.pack_forget()
+
+        # Toggle Tileset Palette visibility
+        if self.mode in ["TILE", "OBJECT", "ITEMS", "CHUNK"]:
+            self.tileset_palette.frame.pack(fill="both", expand=True)
+        else:
+            self.tileset_palette.frame.pack_forget()
+
         if self.mode == "OBJECT":
             obj_path = os.path.join(self.save_manager.project_path, "TILESET", "OBJECTS_TILESET.png")
             self.tileset_palette.load_tileset(obj_path)
@@ -409,6 +514,28 @@ class WorldEditor:
                             
                         self.tk_chunks.append(tk_o_img)
                         self.canvas.create_image(x, y, image=tk_o_img, anchor="nw", tags="chunk")
+
+                    # 3. Draw Safe Zone Overlay
+                    if self.show_safe_zones_var.get():
+                        sz_type = self.safe_zones.get((c, r), 0)
+                        if sz_type > 0:
+                            color = "lime" if sz_type == 1 else "cyan"
+                            label = "SAFE" if sz_type == 1 else "NO-PK"
+                            self.canvas.create_rectangle(x + 2, y + 2, x + chunk_px - 2, y + chunk_px - 2,
+                                                         outline=color, width=3, tags="chunk")
+                            self.canvas.create_text(x + 5, y + 5, text=label, fill=color,
+                                                   font=("Arial", int(9 * self.zoom), "bold"), anchor="nw", tags="chunk")
+
+                    # 4. Draw Spawn Encounter Overlay
+                    enc_id = self.chunk_encounters.get((c, r))
+                    if enc_id is not None and enc_id in self.encounters:
+                        enc = self.encounters[enc_id]
+                        color = "#FF4500" # OrangeRed
+                        label = f"ENC: {enc.get('name', 'Spawn')}"
+                        self.canvas.create_rectangle(x + 4, y + 4, x + chunk_px - 4, y + chunk_px - 4,
+                                                     outline=color, width=2, dash=(4, 4), tags="chunk")
+                        self.canvas.create_text(x + 5, y + chunk_px - 5, text=label, fill=color,
+                                               font=("Arial", int(8 * self.zoom), "bold"), anchor="sw", tags="chunk")
 
                     if ground_img or obj_img:
                         draw_count += 1
@@ -538,6 +665,12 @@ class WorldEditor:
                     self._invalidate_cache(target_cid)
                     self.save_manager.save_chunks(self.chunks, [target_cid])
             self.redo_stack.append(("TILE", redo_tiles))
+        elif isinstance(action, tuple) and action[0] == "SAFE_ZONE":
+            self.redo_stack.append(("SAFE_ZONE", copy.deepcopy(self.safe_zones)))
+            self.safe_zones = action[1]
+        elif isinstance(action, tuple) and action[0] == "ENCOUNTER":
+            self.redo_stack.append(("ENCOUNTER", copy.deepcopy(self.chunk_encounters)))
+            self.chunk_encounters = action[1]
         else:
             grid_data = action[1] if isinstance(action, tuple) else action
             self.redo_stack.append(("CHUNK", copy.deepcopy(self.world_data["grid"])))
@@ -562,6 +695,12 @@ class WorldEditor:
                     self._invalidate_cache(target_cid)
                     self.save_manager.save_chunks(self.chunks, [target_cid])
             self.history.append(("TILE", undo_tiles))
+        elif isinstance(action, tuple) and action[0] == "SAFE_ZONE":
+            self.history.append(("SAFE_ZONE", copy.deepcopy(self.safe_zones)))
+            self.safe_zones = action[1]
+        elif isinstance(action, tuple) and action[0] == "ENCOUNTER":
+            self.history.append(("ENCOUNTER", copy.deepcopy(self.chunk_encounters)))
+            self.chunk_encounters = action[1]
         else:
             grid_data = action[1] if isinstance(action, tuple) else action
             self.history.append(("CHUNK", copy.deepcopy(self.world_data["grid"])))
@@ -708,7 +847,13 @@ class WorldEditor:
             import copy
             self.redo_stack.clear()
             self.current_stroke_tiles = []
-            if self.mode not in ["TILE", "OBJECT", "ITEMS"]:
+            if self.mode == "SAFE_ZONE":
+                self.history.append(("SAFE_ZONE", copy.deepcopy(self.safe_zones)))
+                if len(self.history) > 50: self.history.pop(0)
+            elif self.mode == "ENCOUNTER":
+                self.history.append(("ENCOUNTER", copy.deepcopy(self.chunk_encounters)))
+                if len(self.history) > 50: self.history.pop(0)
+            elif self.mode not in ["TILE", "OBJECT", "ITEMS"]:
                 self.history.append(("CHUNK", copy.deepcopy(grid)))
                 if len(self.history) > 50: self.history.pop(0)
             self.last_grid_pos = pos
@@ -716,6 +861,21 @@ class WorldEditor:
             return # Don't repeat on same cell during motion
 
         self.last_grid_pos = pos
+
+        if self.mode == "SAFE_ZONE":
+            if self.safe_zones.get((ccol, crow), 0) != self.selected_safe_zone_type:
+                self.safe_zones[(ccol, crow)] = self.selected_safe_zone_type
+                self._draw_canvas()
+                self.save_manager.mark_dirty()
+            return
+
+        if self.mode == "ENCOUNTER":
+            if self.selected_encounter_id is not None:
+                if self.chunk_encounters.get((ccol, crow)) != self.selected_encounter_id:
+                    self.chunk_encounters[(ccol, crow)] = self.selected_encounter_id
+                    self._draw_canvas()
+                    self.save_manager.mark_dirty()
+            return
 
         if self.mode == "CHUNK":
             if grid[crow][ccol] != self.selected_chunk_id:
@@ -863,6 +1023,8 @@ class WorldEditor:
 
     def save_world(self):
         self.save_manager.save_world(self.world_data, self.current_map_name)
+        self._save_safe_zones()
+        self._save_encounters()
 
 
     def save_project_all(self):
@@ -883,6 +1045,8 @@ class WorldEditor:
         
         self.current_map_name = new_map
         self.world_data = self.save_manager.load_world(self.current_map_name)
+        self._load_safe_zones()
+        self._load_encounters()
         
         # Clear caches
         self.photo_cache.clear()
@@ -977,7 +1141,39 @@ class WorldEditor:
         self.win.destroy()
 
     def on_right_click(self, event):
-        if self.mode in ["OBJECT", "ITEMS"]:
+        if self.mode == "SAFE_ZONE":
+            chunk_px = (self.tile_size * config.CHUNK_SIZE) * self.zoom
+            world_x = (event.x - self.pan_x) / chunk_px
+            world_y = (event.y - self.pan_y) / chunk_px
+            ccol, crow = int(world_x), int(world_y)
+            grid = self.world_data.get("grid", [])
+            if not (0 <= crow < len(grid) and 0 <= ccol < len(grid[0])): return
+            
+            if self.safe_zones.get((ccol, crow), 0) != 0:
+                if event.type == tk.EventType.ButtonPress:
+                    import copy
+                    self.history.append(("SAFE_ZONE", copy.deepcopy(self.safe_zones)))
+                    if len(self.history) > 50: self.history.pop(0)
+                self.safe_zones[(ccol, crow)] = 0
+                self._draw_canvas()
+                self.save_manager.mark_dirty()
+        elif self.mode == "ENCOUNTER":
+            chunk_px = (self.tile_size * config.CHUNK_SIZE) * self.zoom
+            world_x = (event.x - self.pan_x) / chunk_px
+            world_y = (event.y - self.pan_y) / chunk_px
+            ccol, crow = int(world_x), int(world_y)
+            grid = self.world_data.get("grid", [])
+            if not (0 <= crow < len(grid) and 0 <= ccol < len(grid[0])): return
+            
+            if (ccol, crow) in self.chunk_encounters:
+                if event.type == tk.EventType.ButtonPress:
+                    import copy
+                    self.history.append(("ENCOUNTER", copy.deepcopy(self.chunk_encounters)))
+                    if len(self.history) > 50: self.history.pop(0)
+                self.chunk_encounters.pop((ccol, crow), None)
+                self._draw_canvas()
+                self.save_manager.mark_dirty()
+        elif self.mode in ["OBJECT", "ITEMS"]:
             self.erase_object_at(event)
         else:
             if event.type == tk.EventType.ButtonPress:
@@ -1040,3 +1236,249 @@ class WorldEditor:
             # Invalidate cache and redraw
             self._invalidate_cache(target_cid)
             self._draw_canvas()
+
+    def _on_sz_type_changed(self, event=None):
+        val = self.sz_type_var.get()
+        if val == "Erase (None)":
+            self.selected_safe_zone_type = 0
+        elif val == "PvP Safe":
+            self.selected_safe_zone_type = 1
+        elif val == "No Combat":
+            self.selected_safe_zone_type = 2
+
+    def _load_safe_zones(self):
+        self.safe_zones = {}
+        path = os.path.join(self.save_manager.project_path, "Maps", "SafeZones.json")
+        if os.path.exists(path):
+            try:
+                import json
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    for sz in data.get("safe_zones", []):
+                        sz_map = sz.get("map", "WORLD").upper()
+                        if sz_map == self.current_map_name.upper():
+                            cx = sz.get("x", 0)
+                            cy = sz.get("y", 0)
+                            self.safe_zones[(cx, cy)] = sz.get("type", 0)
+            except Exception as e:
+                print(f"[ERROR] Failed to load safe zones: {e}")
+
+    def _save_safe_zones(self):
+        path = os.path.join(self.save_manager.project_path, "Maps", "SafeZones.json")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        
+        # Load existing entries for other maps first
+        all_safe_zones = []
+        if os.path.exists(path):
+            try:
+                import json
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    for sz in data.get("safe_zones", []):
+                        if sz.get("map", "WORLD").upper() != self.current_map_name.upper():
+                            all_safe_zones.append(sz)
+            except Exception as e:
+                print(f"[WARNING] Could not read SafeZones.json during merge: {e}")
+
+        # Add current map's safe zones
+        for (cx, cy), sz_type in self.safe_zones.items():
+            if sz_type > 0:
+                all_safe_zones.append({
+                    "map": self.current_map_name.upper(),
+                    "x": cx,
+                    "y": cy,
+                    "type": sz_type
+                })
+                
+        try:
+            import json
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump({"safe_zones": all_safe_zones}, f, indent=4)
+            print(f"[DEBUG] Saved safe zones to {path}")
+        except Exception as e:
+            print(f"[ERROR] Failed to save safe zones: {e}")
+
+    def _load_encounters(self):
+        self.encounters = {}
+        self.chunk_encounters = {}
+        
+        # Load encounter definitions
+        enc_path = os.path.join(self.save_manager.project_path, "Maps", "Encounters.json")
+        if os.path.exists(enc_path):
+            try:
+                import json
+                with open(enc_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    for enc in data.get("encounters", []):
+                        eid = enc.get("id")
+                        if eid is not None:
+                            self.encounters[int(eid)] = enc
+            except Exception as e:
+                print(f"[ERROR] Failed to load encounters: {e}")
+                
+        # Load chunk-to-encounter assignments
+        chunk_enc_path = os.path.join(self.save_manager.project_path, "Maps", "ChunkEncounters.json")
+        if os.path.exists(chunk_enc_path):
+            try:
+                import json
+                with open(chunk_enc_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    for ce in data.get("chunk_encounters", []):
+                        if ce.get("map", "WORLD").upper() == self.current_map_name.upper():
+                            cx = ce.get("x", 0)
+                            cy = ce.get("y", 0)
+                            eid = ce.get("encounter_id")
+                            if eid is not None:
+                                self.chunk_encounters[(cx, cy)] = int(eid)
+            except Exception as e:
+                print(f"[ERROR] Failed to load chunk encounters: {e}")
+                
+        self._refresh_encounter_listbox()
+
+    def _save_encounters(self):
+        enc_path = os.path.join(self.save_manager.project_path, "Maps", "Encounters.json")
+        chunk_enc_path = os.path.join(self.save_manager.project_path, "Maps", "ChunkEncounters.json")
+        os.makedirs(os.path.dirname(enc_path), exist_ok=True)
+        
+        # Save encounter definitions
+        enc_list = list(self.encounters.values())
+        try:
+            import json
+            with open(enc_path, "w", encoding="utf-8") as f:
+                json.dump({"encounters": enc_list}, f, indent=4)
+        except Exception as e:
+            print(f"[ERROR] Failed to save encounters definitions: {e}")
+            
+        # Load existing assignments for other maps first
+        all_assignments = []
+        if os.path.exists(chunk_enc_path):
+            try:
+                import json
+                with open(chunk_enc_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    for ce in data.get("chunk_encounters", []):
+                        if ce.get("map", "WORLD").upper() != self.current_map_name.upper():
+                            all_assignments.append(ce)
+            except Exception as e:
+                print(f"[WARNING] Could not read ChunkEncounters.json: {e}")
+                
+        # Add current map's assignments
+        for (cx, cy), eid in self.chunk_encounters.items():
+            all_assignments.append({
+                "map": self.current_map_name.upper(),
+                "x": cx,
+                "y": cy,
+                "encounter_id": eid
+            })
+            
+        try:
+            import json
+            with open(chunk_enc_path, "w", encoding="utf-8") as f:
+                json.dump({"chunk_encounters": all_assignments}, f, indent=4)
+        except Exception as e:
+            print(f"[ERROR] Failed to save chunk assignments: {e}")
+
+    def _refresh_encounter_listbox(self):
+        if not hasattr(self, 'enc_listbox'): return
+        self.enc_listbox.delete(0, tk.END)
+        for eid in sorted(self.encounters.keys()):
+            enc = self.encounters[eid]
+            self.enc_listbox.insert(tk.END, f"{eid}: {enc.get('name', 'Spawn')}")
+            
+        # Reselect current selection if valid
+        if self.selected_encounter_id is not None:
+            for idx, item in enumerate(self.enc_listbox.get(0, tk.END)):
+                if int(item.split(":")[0]) == self.selected_encounter_id:
+                    self.enc_listbox.selection_set(idx)
+                    break
+        else:
+            self._clear_encounter_properties_ui()
+
+    def _on_encounter_list_select(self, event=None):
+        sel = self.enc_listbox.curselection()
+        if not sel: return
+        
+        item = self.enc_listbox.get(sel[0])
+        self.selected_encounter_id = int(item.split(":")[0])
+        
+        enc = self.encounters[self.selected_encounter_id]
+        self.enc_name_var.set(enc.get("name", ""))
+        self.enc_species_var.set(enc.get("mob_species", ""))
+        self.enc_rate_var.set(str(enc.get("spawn_rate", 30)))
+        self.enc_treasure_var.set(enc.get("treasure_type", "Default"))
+
+    def _clear_encounter_properties_ui(self):
+        self.enc_name_var.set("")
+        self.enc_species_var.set("")
+        self.enc_rate_var.set("30")
+        self.enc_treasure_var.set("Default")
+
+    def _add_encounter(self):
+        # Generate new unique ID
+        new_id = max(self.encounters.keys()) + 1 if self.encounters else 1
+        self.encounters[new_id] = {
+            "id": new_id,
+            "name": f"New Encounter {new_id}",
+            "mob_species": self.enc_species_combo.cget("values")[0] if self.enc_species_combo.cget("values") else "Goblin",
+            "spawn_rate": 30,
+            "treasure_type": "Default"
+        }
+        self.selected_encounter_id = new_id
+        self._refresh_encounter_listbox()
+        self.save_manager.mark_dirty()
+
+    def _delete_encounter(self):
+        if self.selected_encounter_id is None: return
+        if not messagebox.askyesno("Confirm Delete", f"Delete encounter {self.selected_encounter_id}?"): return
+        
+        # Remove from definitions
+        self.encounters.pop(self.selected_encounter_id, None)
+        
+        # Remove from assignments
+        to_remove = [k for k, v in self.chunk_encounters.items() if v == self.selected_encounter_id]
+        for k in to_remove:
+            self.chunk_encounters.pop(k, None)
+            
+        self.selected_encounter_id = None
+        self._refresh_encounter_listbox()
+        self._draw_canvas()
+        self.save_manager.mark_dirty()
+
+    def _update_encounter_properties(self):
+        if self.selected_encounter_id is None: return
+        
+        name = self.enc_name_var.get().strip()
+        species = self.enc_species_var.get().strip()
+        try:
+            rate = int(self.enc_rate_var.get())
+        except:
+            rate = 30
+            self.enc_rate_var.set("30")
+        treasure = self.enc_treasure_var.get().strip()
+        
+        self.encounters[self.selected_encounter_id].update({
+            "name": name,
+            "mob_species": species,
+            "spawn_rate": rate,
+            "treasure_type": treasure
+        })
+        self._refresh_encounter_listbox()
+        self._draw_canvas()
+        self.save_manager.mark_dirty()
+        messagebox.showinfo("Success", "Encounter updated successfully.")
+
+    def _load_hairy_species(self):
+        species_list = []
+        path = os.path.join(self.save_manager.project_path, "HAIRY", "Types.hry")
+        if os.path.exists(path):
+            try:
+                types_data = ScriptParser.parse_types_use_sync(path)
+                for tid, v in types_data.items():
+                    name = v.get("name", "")
+                    if name:
+                        species_list.append(name)
+            except Exception as e:
+                print(f"[ERROR] Failed to load hairy species: {e}")
+        if not species_list:
+            species_list = ["Goblin", "Orc", "Skeleton", "Zombie", "Spider", "Dragon", "Troll"]
+        return sorted(list(set(species_list)))
