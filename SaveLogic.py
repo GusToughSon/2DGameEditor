@@ -256,7 +256,7 @@ Shop "General Store"
         
         os.makedirs(self.project_path, exist_ok=True)
         
-        folders = ["TILESET", "Animations", "Maps", "Types", "IMPORT"]
+        folders = ["TILESET", "Maps", "Types", "IMPORT"]
         for f in folders:
             os.makedirs(os.path.join(self.project_path, f), exist_ok=True)
             
