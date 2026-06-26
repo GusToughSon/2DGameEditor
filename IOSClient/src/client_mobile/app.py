@@ -20,6 +20,7 @@ class PlayerCityClient(toga.App):
         return self.main_window
 
     def startup(self):
+        self.last_register_time = 0.0
         self.main_window = toga.MainWindow(title=self.formal_name)
         self.show_login_screen()
 
@@ -123,6 +124,16 @@ class PlayerCityClient(toga.App):
             self.update_status(f"Connection failed: {e}", "#f38ba8")
 
     def handle_register(self, widget, **kwargs):
+        import time
+        from client.constants_loader import get_registration_timeout
+        current_time = time.time()
+        timeout = get_registration_timeout()
+        if current_time - getattr(self, 'last_register_time', 0.0) < timeout:
+            remaining = int(timeout - (current_time - getattr(self, 'last_register_time', 0.0)))
+            self.status_label.text = f"Please wait {remaining}s to register again."
+            self.status_label.style.color = "#f38ba8"
+            return
+
         server_ip = self.ip_input.value.strip()
         username = self.user_input.value.strip()
         password = self.pass_input.value.strip()
@@ -131,6 +142,7 @@ class PlayerCityClient(toga.App):
             self.status_label.text = "Fields cannot be empty"
             return
 
+        self.last_register_time = current_time
         self.status_label.text = "Registering..."
         self.status_label.style.color = "#89b4fa"
 

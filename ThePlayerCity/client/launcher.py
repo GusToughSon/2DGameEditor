@@ -24,6 +24,7 @@ class ClientLauncher:
         self.style.configure('TButton', background='#89b4fa', foreground='#11111b', font=('Segoe UI', 10, 'bold'), borderwidth=0)
         self.style.map('TButton', background=[('active', '#b4befe')])
         
+        self.last_register_time = 0.0
         self.setup_ui()
 
     def setup_ui(self):
@@ -105,12 +106,23 @@ class ClientLauncher:
             messagebox.showerror("Error", f"Failed to connect to server: {e}")
 
     def attempt_register(self):
+        import time
+        from client.constants_loader import get_registration_timeout
+        current_time = time.time()
+        timeout = get_registration_timeout()
+        if current_time - self.last_register_time < timeout:
+            remaining = int(timeout - (current_time - self.last_register_time))
+            print(f"[CLIENT] Registration rate-limited. Please wait {remaining} more seconds.")
+            return
+            
         username = self.entry_user.get().strip()
         password = self.entry_pass.get().strip()
         
         if not username or not password:
             messagebox.showerror("Error", "Fields cannot be empty")
             return
+            
+        self.last_register_time = current_time
             
         try:
             print(f"[CLIENT] Attempting connection to 127.0.0.1:1338 for registration...")

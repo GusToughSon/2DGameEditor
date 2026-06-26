@@ -289,6 +289,7 @@ class GameServer:
                                 "success": False,
                                 "error": "Username already exists."
                             }
+                            print(f"Register failed: account already exists for {username}")
                         else:
                             try:
                                 self.db.sqlite_db.create_account(username, password)
