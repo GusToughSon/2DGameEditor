@@ -22,7 +22,7 @@ def generate_hry(target_dir, stats, family, tileset):
     with open(path, 'w', encoding='utf-8') as f:
         f.write("//====================================================================\n")
         f.write("//\n")
-        f.write("// " + name + " - AUTHENTIC SCRAPED DATA\n")
+        f.write("// " + name + "\n")
         f.write("//\n")
         f.write("//====================================================================\n\n")
         
