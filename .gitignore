@@ -3,3 +3,15 @@ __pycache__/
 *.db
 PIL/
 pystray/
+
+# Build and project files
+build/
+dist/
+*.egg-info/
+.DS_Store
+.pytest_cache/
+.mypy_cache/
+
+# IOS Client specific build and logs
+IOSClient/build/
+IOSClient/logs/
