@@ -1,0 +1,25 @@
+[tool.briefcase]
+project_name = "2D Game Editor"
+bundle = "com.gustoughson"
+version = "0.1.0"
+url = "https://gustoughson.com/editor"
+license = "BSD-3-Clause"
+author = "GusToughSon"
+author_email = "support@gustoughson.com"
+
+[tool.briefcase.app.editor-mobile]
+formal_name = "2D Game Editor"
+description = "A professional 2D Game Engine suite for iOS."
+icon = "resources/editor-mobile"
+sources = ["src/editor_mobile"]
+requires = [
+    "toga-ios",
+    "pillow",
+]
+
+[tool.briefcase.app.editor-mobile.macOS]
+
+[tool.briefcase.app.editor-mobile.ios]
+# Set the deployment target to ensure compatibility with iOS 17 even when building on Xcode 26
+deployment_target = "17.0"
+supported_devices = ["iPhone", "iPad"]

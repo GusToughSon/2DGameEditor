@@ -1,0 +1,110 @@
+//====================================================================
+//
+// Dragon Spire - AUTHENTIC SCRAPED DATA
+//
+//====================================================================
+
+DEFINE FAM_MONSTER                    // The logic family
+DEFINE LOCAL_HEALTH          53392  // HP
+DEFINE LOCAL_STRENGTH        10   // Str
+DEFINE LOCAL_IS_USEABLE      1    // Interactive
+DEFINE NPC_LEVEL          80
+DEFINE NPC_MIN_DMG        200
+DEFINE NPC_MAX_DMG        250
+DEFINE NPC_ATK_SPEED      600
+DEFINE LOCAL_ATTACK_TICK     600
+// DEFINE LOCAL_REGEN_INTERVAL 5000
+
+DEFINE HasClicked            0
+DEFINE IsActivated           0
+
+DEFINE TILESET AVATAR
+DEFINE GRAPHIC 1008, 512
+DEFINE SOLID TRUE
+
+Object "Dragon_Spire"
+{
+    OnUse
+    {
+        Print "You used Dragon Spire!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        Print "It is a Dragon Spire.\n"
+    }
+
+    OnNew
+    {
+    }
+
+    OnSpawn
+    {
+    }
+
+    OnDeath
+    {
+        Print "The Dragon Spire is gone!\n"
+    }
+
+    OnTalk
+    {
+    }
+
+    OnTouch
+    {
+    }
+
+    OnEnterContainer
+    {
+    }
+
+    OnRemoveFromContainer
+    {
+    }
+
+    OnEquip
+    {
+    }
+
+    OnUnEquip
+    {
+    }
+
+    OnDrop
+    {
+    }
+
+    OnDrag
+    {
+    }
+
+    OnMove
+    {
+    }
+
+    OnCollide
+    {
+    }
+
+    OnHit
+    {
+    }
+
+    OnCombat
+    {
+    }
+
+    OnAnimate
+    {
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+    }
+}

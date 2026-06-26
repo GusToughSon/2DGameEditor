@@ -1,0 +1,110 @@
+//====================================================================
+//
+// Orc - AUTHENTIC SCRAPED DATA
+//
+//====================================================================
+
+DEFINE FAM_MONSTER                    // The logic family
+DEFINE LOCAL_HEALTH          120  // HP
+DEFINE LOCAL_STRENGTH        10   // Str
+DEFINE LOCAL_IS_USEABLE      1    // Interactive
+DEFINE NPC_LEVEL          10
+DEFINE NPC_MIN_DMG        6
+DEFINE NPC_MAX_DMG        28
+DEFINE NPC_ATK_SPEED      600
+DEFINE LOCAL_ATTACK_TICK     600
+// DEFINE LOCAL_REGEN_INTERVAL 5000
+
+DEFINE HasClicked            0
+DEFINE IsActivated           0
+
+DEFINE TILESET AVATAR
+DEFINE GRAPHIC 496, 192
+DEFINE SOLID TRUE
+
+Object "Orc"
+{
+    OnUse
+    {
+        Print "You used Orc!\n"
+        HasClicked += 1
+    }
+
+    OnLook
+    {
+        Print "It is a Orc.\n"
+    }
+
+    OnNew
+    {
+    }
+
+    OnSpawn
+    {
+    }
+
+    OnDeath
+    {
+        Print "The Orc is gone!\n"
+    }
+
+    OnTalk
+    {
+    }
+
+    OnTouch
+    {
+    }
+
+    OnEnterContainer
+    {
+    }
+
+    OnRemoveFromContainer
+    {
+    }
+
+    OnEquip
+    {
+    }
+
+    OnUnEquip
+    {
+    }
+
+    OnDrop
+    {
+    }
+
+    OnDrag
+    {
+    }
+
+    OnMove
+    {
+    }
+
+    OnCollide
+    {
+    }
+
+    OnHit
+    {
+    }
+
+    OnCombat
+    {
+    }
+
+    OnAnimate
+    {
+    }
+
+    OnTimer LOCAL_ATTACK_TICK
+    {
+    }
+
+    OnTimer GLOBAL_WORLD_TICK
+    {
+    }
+}

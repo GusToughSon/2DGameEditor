@@ -1,0 +1,24 @@
+[tool.briefcase]
+project_name = "ThePlayerCity Client"
+bundle = "com.gustoughson"
+version = "0.1.2"
+url = "https://gustoughson.com/client"
+license = "BSD-3-Clause"
+author = "GusToughSon"
+author_email = "support@gustoughson.com"
+
+[tool.briefcase.app.client-mobile]
+formal_name = "ThePlayerCity Client"
+description = "Mobile client for ThePlayerCity."
+icon = "resources/client-mobile"
+sources = ["src/client_mobile"]
+requires = [
+    "toga-ios",
+    "pillow",
+]
+
+[tool.briefcase.app.client-mobile.macOS]
+
+[tool.briefcase.app.client-mobile.ios]
+deployment_target = "17.0"
+supported_devices = ["iPhone", "iPad"]

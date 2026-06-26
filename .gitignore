@@ -3,7 +3,3 @@ __pycache__/
 *.db
 PIL/
 pystray/
-.DS_Store
-2DEditor/
-IOS/
-Saves/MyNewProject/

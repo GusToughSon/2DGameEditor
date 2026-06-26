@@ -1,0 +1,11 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/kylebishop/Library/Mobile Documents/com~apple~CloudDocs/2DGameEditor/IOSClient/build/client-mobile/ios/xcode/build/Debug-iphoneos/ThePlayerCity Client.app/ThePlayerCity Client'
+relocations:
+  - { offset: 0x6056E, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100004000, symSize: 0x1650 }
+  - { offset: 0x60596, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100004000, symSize: 0x1650 }
+  - { offset: 0x6078C, size: 0x8, addend: 0x0, symName: _crash_dialog, symObjAddr: 0x1650, symBinAddr: 0x100005650, symSize: 0x1E0 }
+  - { offset: 0x607E6, size: 0x8, addend: 0x0, symName: _PyType_HasFeature, symObjAddr: 0x1830, symBinAddr: 0x100005830, symSize: 0x30 }
+  - { offset: 0x60832, size: 0x8, addend: 0x0, symName: _Py_TYPE, symObjAddr: 0x1860, symBinAddr: 0x100005860, symSize: 0x18 }
+  - { offset: 0x60897, size: 0x8, addend: 0x0, symName: _format_traceback, symObjAddr: 0x1878, symBinAddr: 0x100005878, symSize: 0x310 }
+...
