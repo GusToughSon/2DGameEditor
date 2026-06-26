@@ -2,7 +2,7 @@
 import os
 from PIL import Image
 
-GF_BMP_DIR = r"E:\Vorila\VorliaGraphicsConverter\gf_bmp"
+GF_BMP_DIR = r"E:\2DGameEditor\Assets"
 TILESET_DIR = r"E:\2DGameEditor\Saves\ThePlayerCity\TILESET"
 
 def convert():

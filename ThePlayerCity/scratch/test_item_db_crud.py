@@ -9,7 +9,7 @@ from core.items import ItemInstance, ItemFamily
 from server.item_database import ItemDatabaseManager
 
 def test_db():
-    db_path = r"e:\Vorila\ThePlayerCity\scratch\test_items.db"
+    db_path = r"e:\2DGameEditor\ThePlayerCity\scratch\test_items.db"
     if os.path.exists(db_path):
         os.remove(db_path)
         

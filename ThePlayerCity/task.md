@@ -30,7 +30,7 @@
 - [x] `SafeZoneEditor.py`, `NPCSpawnEditor.py` [NEW]
 
 ## Cleanup
-- [x] Remove unused legacy directories (no legacy Memoria folder exists)
+- [x] Remove unused legacy directories (no legacy folder exists)
 - [x] Remove git push-to-origin references
 - [x] Copy editor implementation plan to `e:\2DGameEditor\`
 

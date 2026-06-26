@@ -1,5 +1,4 @@
-# core/creatures.py — Monster, NPC, and Body System for ThePlayerCity Python Port
-# Ported from Memoria C++ Monsters.h / Client.h / main.h
+# Ported from legacy C++ Monsters.h / Client.h / main.h
 from enum import IntEnum
 from dataclasses import dataclass, field
 from typing import List, Optional

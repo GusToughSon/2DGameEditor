@@ -35,13 +35,13 @@ for r in range(CHUNK_SIZE):
                 tile = ts.crop((tx, ty, tx + TILE_SIZE, ty + TILE_SIZE))
                 img.paste(tile, (c_idx * TILE_SIZE, r * TILE_SIZE), tile)
 
-out_path = r'e:\Vorila\ThePlayerCity\scratch\chunk_1598_rendered.png'
+out_path = r'e:\2DGameEditor\ThePlayerCity\scratch\chunk_1598_rendered.png'
 img.save(out_path)
 print(f"Saved: {out_path}")
 
 # Also render scaled up 4x for easy viewing
 img_big = img.resize((full_sz * 4, full_sz * 4), Image.NEAREST)
-out_big = r'e:\Vorila\ThePlayerCity\scratch\chunk_1598_4x.png'
+out_big = r'e:\2DGameEditor\ThePlayerCity\scratch\chunk_1598_4x.png'
 img_big.save(out_big)
 print(f"Saved 4x: {out_big}")
 

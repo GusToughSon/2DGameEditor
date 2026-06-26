@@ -1,5 +1,4 @@
-# core/items.py — Item System for ThePlayerCity Python Port
-# Ported from Memoria C++ Items.h / Monsters.h
+# Ported from legacy C++ Items.h / Monsters.h
 from enum import IntEnum
 from dataclasses import dataclass, field
 from typing import List, Optional

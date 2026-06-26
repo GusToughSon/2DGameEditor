@@ -1,6 +1,6 @@
 # 🕹️✨ 2D Game Editor & ThePlayerCity Engine v2.1 ✨🕹️
 
-Welcome to the ultimate repository containing the **2D Game Editor** (content creation suite) and the **ThePlayerCity** (multiplayer retro RPG engine). This project marks the successful C++-to-Python migration of the legacy *Memoria* MMO engine into a modular, clean, and modern codebase.
+Welcome to the ultimate repository containing the **2D Game Editor** (content creation suite) and **ThePlayerCity** (a multiplayer retro RPG engine). This project houses a fully modernized, clean, and modular Python-based MMO engine codebase designed for extensible game development and content creation.
 
 ---
 
@@ -52,13 +52,13 @@ graph TD
 * **Collision Painter**: Paint physical properties directly onto tiles (solid, passable, water, etc.) which write structural metadata readable by the engine.
 
 ### 🏷️ Unified Databases & Type Editors
-* **Weapon & Armor Editors** ([WeaponData.py](file:///e:/2DGameEditor/WeaponData.py), [ArmorData.py](file:///e:/2DGameEditor/ArmorData.py)): Full stat modifiers, level requirements, durability, and graphic assignments.
-* **Useable & Collectable Items** ([UseableItemEditor.py](file:///e:/2DGameEditor/UseableItemEditor.py), [CollectableEditor.py](file:///e:/2DGameEditor/CollectableEditor.py)): Design potions, quest tokens, mining picks, and crafting items.
-* **Monster & NPC Definition Editors** ([MonsterTypeEditor.py](file:///e:/2DGameEditor/MonsterTypeEditor.py), [NPCData.py](file:///e:/2DGameEditor/NPCData.py)): Configure HP, MP, base stats, attack speed, movement timers, and dynamic loot drop tables.
+* **Weapon & Armor Editors** ([WeaponData.py](WeaponData.py), [ArmorData.py](ArmorData.py)): Full stat modifiers, level requirements, durability, and graphic assignments.
+* **Useable & Collectable Items** ([UseableItemEditor.py](UseableItemEditor.py), [CollectableEditor.py](CollectableEditor.py)): Design potions, quest tokens, mining picks, and crafting items.
+* **Monster & NPC Definition Editors** ([MonsterTypeEditor.py](MonsterTypeEditor.py), [NPCData.py](NPCData.py)): Configure HP, MP, base stats, attack speed, movement timers, and dynamic loot drop tables.
 
 ### 🧱 Prefabs & World Painting
-* **Chunk Editor** ([ChunkEditor.py](file:///e:/2DGameEditor/ChunkEditor.py)): Combine standard tiles into reusable 16x16 structures (such as houses, ruins, or specific foliage clusters).
-* **World Editor** ([WorldEditor.py](file:///e:/2DGameEditor/WorldEditor.py)): A layered map editor supporting background tile placement, spawn zones, safe zones, and warp points (POI).
+* **Chunk Editor** ([ChunkEditor.py](ChunkEditor.py)): Combine standard tiles into reusable 16x16 structures (such as houses, ruins, or specific foliage clusters).
+* **World Editor** ([WorldEditor.py](WorldEditor.py)): A layered map editor supporting background tile placement, spawn zones, safe zones, and warp points (POI).
 * **Visual Helpers**: Features copy/paste block matrices, grid alignments, category filters, and live-rendered animation frames.
 
 ### 📜 Hairy Script Editor (IDE)
@@ -74,20 +74,20 @@ graph TD
 ## 🚀 2. ThePlayerCity Multiplayer Engine
 
 ### ⚙️ Game Server Architecture
-* **Asyncio Network Hub** ([server/network.py](file:///e:/2DGameEditor/ThePlayerCity/server/network.py)): An asynchronous, TCP socket server handling multiple simultaneous connections.
-* **Salted Encryption Protocol** ([core/crypto.py](file:///e:/2DGameEditor/ThePlayerCity/core/crypto.py)): Uses a custom XOR encryption protocol. The master key (`TCPKEY`) is declared in [server/constants.md](file:///e:/2DGameEditor/ThePlayerCity/server/constants.md) and can be rotated server-side dynamically without code modifications.
+* **Asyncio Network Hub** ([server/network.py](ThePlayerCity/server/network.py)): An asynchronous, TCP socket server handling multiple simultaneous connections.
+* **Salted Encryption Protocol** ([core/crypto.py](ThePlayerCity/core/crypto.py)): Uses a custom XOR encryption protocol. The master key (`TCPKEY`) is declared in [server/constants.md](ThePlayerCity/server/constants.md) and can be rotated server-side dynamically without code modifications.
 * **State Persistence**: 
   - `accounts.db`: SQLite database managing player registration, login authentication, credentials, and ban flags.
-  - `items.db` ([server/item_database.py](file:///e:/2DGameEditor/ThePlayerCity/server/item_database.py)): Dedicated SQLite database storing item instances, durability, owners, and locations (worn, bank, ground, backpack).
-* **Server Tick Loop** ([server/game_loop.py](file:///e:/2DGameEditor/ThePlayerCity/server/game_loop.py)): Processes combat queues, natural health/mana regeneration, monster AI paths, spawner timers, and server-wide autosaves.
+  - `items.db` ([server/item_database.py](ThePlayerCity/server/item_database.py)): Dedicated SQLite database storing item instances, durability, owners, and locations (worn, bank, ground, backpack).
+* **Server Tick Loop** ([server/game_loop.py](ThePlayerCity/server/game_loop.py)): Processes combat queues, natural health/mana regeneration, monster AI paths, spawner timers, and server-wide autosaves.
 * **Subsystems**:
-  - **Combat** ([server/combat.py](file:///e:/2DGameEditor/ThePlayerCity/server/combat.py)): Calculates damage formulas, level adjustments, death penalties, and corpse generation.
-  - **Tradeskills** ([server/tradeskills.py](file:///e:/2DGameEditor/ThePlayerCity/server/tradeskills.py)): Handles resource nodes, mining actions, smelting raw ore, and blacksmithing equipment.
-  - **Socials** ([server/chat.py](file:///e:/2DGameEditor/ThePlayerCity/server/chat.py) / [server/guilds.py](file:///e:/2DGameEditor/ThePlayerCity/server/guilds.py) / [server/trade.py](file:///e:/2DGameEditor/ThePlayerCity/server/trade.py)): Whisper, global, and guild chat routing, guild creation, and locked double-agree P2P secure trading.
+  - **Combat** ([server/combat.py](ThePlayerCity/server/combat.py)): Calculates damage formulas, level adjustments, death penalties, and corpse generation.
+  - **Tradeskills** ([server/tradeskills.py](ThePlayerCity/server/tradeskills.py)): Handles resource nodes, mining actions, smelting raw ore, and blacksmithing equipment.
+  - **Socials** ([server/chat.py](ThePlayerCity/server/chat.py) / [server/guilds.py](ThePlayerCity/server/guilds.py) / [server/trade.py](ThePlayerCity/server/trade.py)): Whisper, global, and guild chat routing, guild creation, and locked double-agree P2P secure trading.
 
 ### 🎮 Pygame Game Client
-* **Game Launcher** ([client/launcher.py](file:///e:/2DGameEditor/ThePlayerCity/client/launcher.py)): Features an authentic login, register, and character-creation/race-selection interface.
-* **World Renderer** ([client/renderer.py](file:///e:/2DGameEditor/ThePlayerCity/client/renderer.py)): A hardware-accelerated Pygame screen displaying tiles, dynamic player/NPC movement updates, animated terrain (water, campfires), and other players online.
+* **Game Launcher** ([client/launcher.py](ThePlayerCity/client/launcher.py)): Features an authentic login, register, and character-creation/race-selection interface.
+* **World Renderer** ([client/renderer.py](ThePlayerCity/client/renderer.py)): A hardware-accelerated Pygame screen displaying tiles, dynamic player/NPC movement updates, animated terrain (water, campfires), and other players online.
 * **HUD Overlay**:
   - **Backpack & Equipment Panels**: Interactive grid slots displaying item tooltips and full mouse drag-and-drop support.
   - **Chat Console & Log**: Tracks combat messages, global shouts, local whispers, and guild chat.
@@ -97,13 +97,13 @@ graph TD
 
 ## 🛠️ 3. Administrative & GM Tools
 
-* **Server Dashboard GUI** ([server/gui.py](file:///e:/2DGameEditor/ThePlayerCity/server/gui.py)): A Tkinter dashboard monitoring system logs, listing accounts, and allowing manual account creation, bans, or saves.
-* **Win95 GM Tool** ([AdminToolEditor.py](file:///e:/2DGameEditor/AdminToolEditor.py)): Integrated directly into the main Game Editor. Allows GMs to connect remotely via a secure TCP channel (packet ID 125) to:
+* **Server Dashboard GUI** ([server/gui.py](ThePlayerCity/server/gui.py)): A Tkinter dashboard monitoring system logs, listing accounts, and allowing manual account creation, bans, or saves.
+* **Win95 GM Tool** ([AdminToolEditor.py](AdminToolEditor.py)): Integrated directly into the main Game Editor. Allows GMs to connect remotely via a secure TCP channel (packet ID 125) to:
   - List online players, browse accounts, and inspect character profiles.
   - Modify character stats (Strength, Constitution, level, coordinates, HP/MP max).
   - Search items across all player inventories, bank slots, and ground containers.
   - Send global system announcements or trigger emergency server-wide saves.
-* **CLI Admin Tool** ([editor/admin_tool.py](file:///e:/2DGameEditor/ThePlayerCity/editor/admin_tool.py)): Command-line implementation of the remote GM management utility.
+* **CLI Admin Tool** ([editor/admin_tool.py](ThePlayerCity/editor/admin_tool.py)): Command-line implementation of the remote GM management utility.
 
 ---
 

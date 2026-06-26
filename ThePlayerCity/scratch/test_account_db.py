@@ -11,8 +11,8 @@ from server.item_database import ItemDatabaseManager
 
 def run_tests():
     # Set up temp databases for testing
-    test_acc_db_path = r"e:\Vorila\ThePlayerCity\test_accounts.db"
-    test_item_db_path = r"e:\Vorila\ThePlayerCity\test_items.db"
+    test_acc_db_path = r"e:\2DGameEditor\ThePlayerCity\test_accounts.db"
+    test_item_db_path = r"e:\2DGameEditor\ThePlayerCity\test_items.db"
     
     # Clean up existing test databases if present
     if os.path.exists(test_acc_db_path):

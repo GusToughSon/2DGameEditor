@@ -11,7 +11,7 @@ from server.database import DatabaseManager
 from server.network import GameServer
 
 async def run_register_test():
-    test_acc_db_path = r"e:\Vorila\ThePlayerCity\test_register_accounts.db"
+    test_acc_db_path = r"e:\2DGameEditor\ThePlayerCity\test_register_accounts.db"
     if os.path.exists(test_acc_db_path):
         os.remove(test_acc_db_path)
         

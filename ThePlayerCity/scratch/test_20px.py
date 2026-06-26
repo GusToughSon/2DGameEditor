@@ -43,7 +43,7 @@ for r in range(CHUNK_SIZE):
                 tile_scaled = tile.resize((DRAW_TILE_SIZE, DRAW_TILE_SIZE), Image.NEAREST)
                 img.paste(tile_scaled, (c_idx * DRAW_TILE_SIZE, r * DRAW_TILE_SIZE), tile_scaled)
 
-out = r'e:\Vorila\ThePlayerCity\scratch\chunk_1598_20px_4x.png'
+out = r'e:\2DGameEditor\ThePlayerCity\scratch\chunk_1598_20px_4x.png'
 img_big = img.resize((full_sz * 4, full_sz * 4), Image.NEAREST)
 img_big.save(out)
 print(f"Saved: {out}")

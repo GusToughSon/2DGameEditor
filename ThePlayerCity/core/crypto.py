@@ -3,7 +3,7 @@ import os
 
 def get_tcp_key() -> bytes:
     """Reads TCPKEY from server/constants.md. Falls back to a default key if not found."""
-    # Find path relative to this file: e:\Vorila\ThePlayerCity\core\crypto.py -> e:\Vorila\ThePlayerCity\server\constants.md
+    # Find path relative to this file: ThePlayerCity/core/crypto.py -> ThePlayerCity/server/constants.md
     path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'server', 'constants.md')
     if not os.path.exists(path):
         # Also check relative to CWD just in case
