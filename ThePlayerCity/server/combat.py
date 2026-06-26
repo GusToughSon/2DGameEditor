@@ -1,6 +1,7 @@
 # server/combat.py
 import random
 import os
+import time
 from server.client_state import ClientState
 from core.creatures import MonsterInstance
 from server.progression import grant_experience

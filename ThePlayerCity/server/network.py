@@ -735,7 +735,6 @@ class GameServer:
                                 }
                                 for client in self.clients.values():
                                     client.send_packet(death_msg)
-
                 elif packet_type == "item_move":
                     if active_client:
                         from_list = packet.get("from_list")
@@ -743,20 +742,30 @@ class GameServer:
                         from_slot = packet.get("from_slot")
                         to_slot = packet.get("to_slot")
                         amount = packet.get("amount", 1)
-                        from server.items import execute_move_item
-                        success = execute_move_item(active_client, from_list, to_list, from_slot, to_slot, amount)
-                        if success:
-                            self.send_inventory(active_client)
                         
-                        response = {
-                            "type": "item_move_response",
-                            "success": success,
-                            "from_list": from_list,
-                            "to_list": to_list,
-                            "from_slot": from_slot,
-                            "to_slot": to_slot
-                        }
-                        active_client.send_packet(response)
+                        if (from_list is not None and to_list is not None and 
+                                from_slot is not None and to_slot is not None):
+                            from server.items import execute_move_item
+                            success = execute_move_item(
+                                active_client, 
+                                int(from_list), 
+                                int(to_list), 
+                                int(from_slot), 
+                                int(to_slot), 
+                                int(amount) if amount is not None else 1
+                            )
+                            if success:
+                                self.send_inventory(active_client)
+                            
+                            response = {
+                                "type": "item_move_response",
+                                "success": success,
+                                "from_list": from_list,
+                                "to_list": to_list,
+                                "from_slot": from_slot,
+                                "to_slot": to_slot
+                            }
+                            active_client.send_packet(response)
 
                 elif packet_type == "interact_object":
                     if active_client:
