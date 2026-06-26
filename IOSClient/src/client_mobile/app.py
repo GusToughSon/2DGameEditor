@@ -114,8 +114,12 @@ class PlayerCityClient(toga.App):
                 if resp.get("success", False):
                     slots = resp.get("slots", {})
                     classes = resp.get("classes", ["Plr_Male_Warrior", "Plr_Mage", "Plr_Rogue"])
-                    # Transition to slot selector on main thread
-                    self.add_background_task(lambda app, **kwargs: self.show_char_select(server_ip, username, password, slots, classes))
+                    has_chars = any(slots.get("used", []))
+                    # Transition to slot selector or creation on main thread
+                    if not has_chars:
+                        self.add_background_task(lambda app, **kwargs: self.show_char_creation(server_ip, username, password, 0, classes))
+                    else:
+                        self.add_background_task(lambda app, **kwargs: self.show_char_select(server_ip, username, password, slots, classes))
                 else:
                     self.update_status("Invalid username or password.", "#f38ba8")
             else:
