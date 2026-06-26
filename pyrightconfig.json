@@ -1,5 +1,7 @@
 {
   "extraPaths": [
-    "${workspaceFolder}"
+    ".",
+    "ThePlayerCity",
+    "IOSClient/src/client_mobile"
   ]
 }

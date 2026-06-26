@@ -34,7 +34,7 @@ class PlayerCityClient(toga.App):
         # Server IP Address Input (Crucial for mobile client testing!)
         ip_box = toga.Box(style=Pack(direction=COLUMN, padding=(5, 0)))
         ip_box.add(toga.Label("Server IP Address:", style=Pack(color="#cdd6f4", font_size=12)))
-        self.ip_input = toga.TextInput(value="127.0.0.1", style=Pack(background_color="#313244", color="#cdd6f4", padding=(5, 0)))
+        self.ip_input = toga.TextInput(value="192.168.1.47", style=Pack(background_color="#313244", color="#cdd6f4", padding=(5, 0)))
         ip_box.add(self.ip_input)
 
         # Username Input

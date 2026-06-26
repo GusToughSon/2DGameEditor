@@ -73,10 +73,10 @@ def main():
     # 3. Check if Briefcase Xcode project exists, create or update it
     if not os.path.exists(XCODE_PROJ_PATH):
         print("Xcode project not found. Running 'briefcase create ios'...")
-        run_command([sys.executable, "-m", "briefcase", "create", "ios"], cwd=IOS_CLIENT_DIR)
+        run_command([sys.executable, "-m", "briefcase", "create", "ios", "--no-input"], cwd=IOS_CLIENT_DIR)
     else:
         print("Xcode project found. Running 'briefcase update ios' to sync latest changes...")
-        run_command([sys.executable, "-m", "briefcase", "update", "ios"], cwd=IOS_CLIENT_DIR)
+        run_command([sys.executable, "-m", "briefcase", "update", "ios", "--no-input"], cwd=IOS_CLIENT_DIR)
 
     # 3.5 Fix Briefcase path-with-spaces bug in project.pbxproj
     pbxproj_path = os.path.join(
