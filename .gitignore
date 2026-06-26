@@ -5,6 +5,8 @@ PIL/
 pystray/
 
 # Build and project files
+build/
+dist/
 *.egg-info/
 .DS_Store
 .pytest_cache/
