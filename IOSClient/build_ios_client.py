@@ -6,8 +6,8 @@ import sys
 import zipfile
 
 # Set up paths
-WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
-IOS_CLIENT_DIR = os.path.join(WORKSPACE_DIR, "IOSClient")
+IOS_CLIENT_DIR = os.path.dirname(os.path.abspath(__file__))
+WORKSPACE_DIR = os.path.dirname(IOS_CLIENT_DIR)
 DIST_DIR = os.path.join(WORKSPACE_DIR, "dist")
 OUTPUT_DIR = os.path.join(DIST_DIR, "IOSClient")
 XCODE_PROJ_PATH = os.path.join(
@@ -65,7 +65,7 @@ def main():
     
     # 0. Sync latest code and assets from 2DGameEditor root
     print("Syncing game resources to IOSClient...")
-    rebuild_script = os.path.join(IOS_CLIENT_DIR, "rebuildIOS.py")
+    rebuild_script = os.path.join(IOS_CLIENT_DIR, "RebuildAssets.py")
     run_command([sys.executable, rebuild_script])
     
     # 1. Increment version in pyproject.toml
