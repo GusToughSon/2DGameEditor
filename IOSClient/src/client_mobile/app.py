@@ -14,6 +14,11 @@ from core.packets import VERSION, pack_json, read_packet_sync
 import client.network
 
 class PlayerCityClient(toga.App):
+    @property
+    def main_win(self) -> toga.MainWindow:
+        assert isinstance(self.main_window, toga.MainWindow)
+        return self.main_window
+
     def startup(self):
         self.main_window = toga.MainWindow(title=self.formal_name)
         self.show_login_screen()
@@ -70,10 +75,10 @@ class PlayerCityClient(toga.App):
         main_box.add(btn_box)
         main_box.add(self.status_label)
 
-        self.main_window.content = main_box
-        self.main_window.show()
+        self.main_win.content = main_box
+        self.main_win.show()
 
-    def handle_login(self, widget):
+    def handle_login(self, widget, **kwargs):
         server_ip = self.ip_input.value.strip()
         username = self.user_input.value.strip()
         password = self.pass_input.value.strip()
@@ -109,7 +114,7 @@ class PlayerCityClient(toga.App):
                     slots = resp.get("slots", {})
                     classes = resp.get("classes", ["Plr_Male_Warrior", "Plr_Mage", "Plr_Rogue"])
                     # Transition to slot selector on main thread
-                    self.add_background_task(lambda app: self.show_char_select(server_ip, username, password, slots, classes))
+                    self.add_background_task(lambda app, **kwargs: self.show_char_select(server_ip, username, password, slots, classes))
                 else:
                     self.update_status("Invalid username or password.", "#f38ba8")
             else:
@@ -117,7 +122,7 @@ class PlayerCityClient(toga.App):
         except Exception as e:
             self.update_status(f"Connection failed: {e}", "#f38ba8")
 
-    def handle_register(self, widget):
+    def handle_register(self, widget, **kwargs):
         server_ip = self.ip_input.value.strip()
         username = self.user_input.value.strip()
         password = self.pass_input.value.strip()
@@ -158,7 +163,7 @@ class PlayerCityClient(toga.App):
             self.update_status(f"Connection failed: {e}", "#f38ba8")
 
     def update_status(self, text, color):
-        def _update(app):
+        def _update(app, **kwargs):
             self.status_label.text = text
             self.status_label.style.color = color
         self.add_background_task(_update)
@@ -196,7 +201,7 @@ class PlayerCityClient(toga.App):
 
                 # Set closure play action
                 def make_play_handler(slot_idx=i):
-                    return lambda w: self.launch_game(server_ip, username, password, slot_idx)
+                    return lambda widget, **kwargs: self.launch_game(server_ip, username, password, slot_idx)
 
                 play_btn = toga.Button("Play", on_press=make_play_handler(i), style=Pack(padding=(5, 0)))
                 slot_box.add(play_btn)
@@ -205,7 +210,7 @@ class PlayerCityClient(toga.App):
                 slot_box.add(info_label)
 
                 def make_create_handler(slot_idx=i):
-                    return lambda w: self.show_char_creation(server_ip, username, password, slot_idx, classes)
+                    return lambda widget, **kwargs: self.show_char_creation(server_ip, username, password, slot_idx, classes)
 
                 create_btn = toga.Button("Create", on_press=make_create_handler(i), style=Pack(padding=(5, 0)))
                 slot_box.add(create_btn)
@@ -213,10 +218,10 @@ class PlayerCityClient(toga.App):
             main_box.add(slot_box)
             main_box.add(toga.Box(style=Pack(height=15)))
 
-        back_btn = toga.Button("Back to Login", on_press=lambda w: self.show_login_screen(), style=Pack(padding=(10, 0)))
+        back_btn = toga.Button("Back to Login", on_press=lambda widget, **kwargs: self.show_login_screen(), style=Pack(padding=(10, 0)))
         main_box.add(back_btn)
 
-        self.main_window.content = main_box
+        self.main_win.content = main_box
 
     def show_char_creation(self, server_ip, username, password, slot, classes):
         main_box = toga.Box(style=Pack(direction=COLUMN, padding=20, background_color='#1e1e2e'))
@@ -236,7 +241,7 @@ class PlayerCityClient(toga.App):
         self.class_input = toga.Selection(items=classes, style=Pack(padding=(5, 0)))
         class_box.add(self.class_input)
 
-        def create_submit(widget):
+        def create_submit(widget, **kwargs):
             char_name = self.char_name_input.value.strip()
             selected_class = self.class_input.value
             if not char_name:
@@ -250,7 +255,7 @@ class PlayerCityClient(toga.App):
         
         self.char_status = toga.Label("", style=Pack(padding=(10, 0), color="#f38ba8", font_size=12, text_align="center"))
 
-        def cancel_create(widget):
+        def cancel_create(widget, **kwargs):
             self.status_label.text = ""
             # Re-fetch character slots to refresh the select view
             self.handle_login(None)
@@ -264,7 +269,7 @@ class PlayerCityClient(toga.App):
         main_box.add(self.char_status)
         main_box.add(cancel_btn)
 
-        self.main_window.content = main_box
+        self.main_win.content = main_box
 
     def _async_create_char(self, server_ip, username, password, char_name, selected_class, slot):
         try:
@@ -285,12 +290,12 @@ class PlayerCityClient(toga.App):
             
             if resp and resp.get("type") == "create_character_response" and resp.get("success"):
                 # If successfully created, boot directly into the game
-                self.add_background_task(lambda app: self.launch_game(server_ip, username, password, slot))
+                self.add_background_task(lambda app, **kwargs: self.launch_game(server_ip, username, password, slot))
             else:
                 err = resp.get("error", "Failed to create character.") if resp else "Server disconnected."
-                self.add_background_task(lambda app: setattr(self.char_status, "text", err))
+                self.add_background_task(lambda app, **kwargs: setattr(self.char_status, "text", err))
         except Exception as e:
-            self.add_background_task(lambda app: setattr(self.char_status, "text", f"Error: {e}"))
+            self.add_background_task(lambda app, **kwargs: setattr(self.char_status, "text", f"Error: {e}"))
 
     def launch_game(self, server_ip, username, password, slot_idx):
         print(f"[LAUNCHER] Launching client game engine for {username} in slot {slot_idx}...")
@@ -300,7 +305,7 @@ class PlayerCityClient(toga.App):
         client.network.GameClientNetwork.__init__ = lambda self, host=server_ip, port=1338: orig_init(self, host, port)
 
         # Hide Toga main window
-        self.main_window.hide()
+        self.main_win.hide()
 
         # Run Pygame in a background thread so Toga remains active in main thread
         def run_pygame():
@@ -315,7 +320,7 @@ class PlayerCityClient(toga.App):
                 print(f"[PYGAME ERROR] {e}")
             finally:
                 # Once Pygame loop finishes, return back to selection/login screen on main thread
-                self.add_background_task(lambda app: self.main_window.show())
+                self.add_background_task(lambda app, **kwargs: self.main_win.show())
 
         threading.Thread(target=run_pygame, daemon=True).start()
 

@@ -63,6 +63,11 @@ def increment_version():
 def main():
     print("=== Starting TrollStore .tipa build pipeline ===")
     
+    # 0. Sync latest code and assets from 2DGameEditor root
+    print("Syncing game resources to IOSClient...")
+    rebuild_script = os.path.join(IOS_CLIENT_DIR, "rebuildIOS.py")
+    run_command([sys.executable, rebuild_script])
+    
     # 1. Increment version in pyproject.toml
     version = increment_version()
     print(f"Iterated version to: {version}")
