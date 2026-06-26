@@ -1,95 +1,219 @@
-# 🕹️✨ 2D Game Editor v2.1 ✨🕹️
+# 🕹️✨ 2D Game Editor & ThePlayerCity Engine v2.1 ✨🕹️
 
-Hello there, game maker! 🌸 Welcome to the **2D Game Editor**! This is a magical toolbox 🧰 that helps you create your very own retro 2D RPG games! ⚔️🛡️ 
-
-Normally, making a game is hard because you have to draw pictures 🎨, design maps 🗺️, write databases 📊, and code code code 📜. But here, everything is linked together like magic! ✨ If you change a script file, the editor updates automatically! 🔄 And if you click buttons in the editor, your scripts update too! No messy setups! 🎀
+Welcome to the ultimate repository containing the **2D Game Editor** (content creation suite) and the **ThePlayerCity** (multiplayer retro RPG engine). This project marks the successful C++-to-Python migration of the legacy *Memoria* MMO engine into a modular, clean, and modern codebase.
 
 ---
 
-## 🌟 Super Fun Features 🌟
+## 🗺️ Architectural Ecosystem Overview
 
-### ⚡ Speedy Loading (No More Freezy Windows!) 🚀🌸
-* **Soft & Smooth Transitions** 🍃: Before, when you clicked to open a window, the program would sometimes freeze and say "Not Responding" 😢. Now, the heavy stuff (loading files and images from your hard drive) is done secretly in the background by tiny helper threads! 🧵 The windows pop open immediately and smoothly! 🐇
-* **Pre-Caching Magic** 🧠✨: The program starts loaded types in the background as soon as you open a project, making sure everything is ready to go when you are! ⏰
-* **Background Image Loading** 🖼️💨: Huge tileset sheets are read in the background, so your tabs switch instantly with zero lag! 🏎️
+The workspace is divided into two primary sub-systems:
+1. **2D Game Editor**: A comprehensive desktop toolset designed for creating assets, maps, scripts, items, and NPCs. It maintains a Win95 aesthetic while utilizing background threading, atomic save systems, and live reload watchers.
+2. **ThePlayerCity Engine**: A production-ready Python multiplayer client-server implementation. It implements a custom encrypted TCP protocol, SQLite database architecture, tick-based server loops, combat systems, and a fully featured Pygame-based client interface.
 
-### 🗺️ Smart World Editor Menu (Show Me the Real Items!) 🎒⚔️
-* **Hairy Types Display** 🧸: When you are designing your maps and want to place a chest, tree, or sword, you don't just see a grid of nameless squares anymore! Now, the sidebar shows the actual **Names** (like "Longsword" or "Red Tree") and their icons! 🌲🗡️
-* **Perfect Category Filters** 📂🌈:
-  * **Objects Tab** 🪵: Shows all of your placeable obstacles, doors, chests, and scenery! 🗝️
-  * **Items Tab** 🍎: Shows all of your cool gear! This includes Armor 🛡️, Gauntlets 🥊, Helmets 🪖, Leggings 👖, Plates 🔩, Shields 🛡️, Trinkets 💍, Weapons 🗡️, Consumables 🍞, and generic Items 🔑!
-* **Moving Pictures (Animations!)** 🎬🍿: If your object has a moving sprite (like a flickering campfire 🔥), the sidebar will show the animation frame so you know exactly what it looks like in action! 🎬
-* **Hidden Math Converter** 🔢🪄: When you click a cute item, the editor automatically converts it to its technical index number behind the scenes. This keeps your save files clean and working perfectly! 💾
+```mermaid
+graph TD
+    subgraph 2DGameEditor [2D Game Editor Suite]
+        GE[GameEditor.py - Main GUI] --> TE[TypeEditor.py - Items/Enemies]
+        GE --> WE[WorldEditor.py - Map Paint]
+        GE --> PE[PixelEditor.py - Sprite Paint]
+        GE --> HE[Hairy.py - Script IDE]
+        GE --> AE[AdminToolEditor.py - Win95 GM Panel]
+        SL[SaveLogic.py] -.->|Manages ZIP / .sav| GE
+    end
 
-### 🖌️ Cute Pixel Editor 🎨👾
-* **Paint Like a Pro** 🖍️: Use the Pencil ✏️, Eraser 🧼, Eyedropper 👁️, and Paint Bucket 🪣 to draw custom 16x16 pixel sprites!
-* **Mistake Protector** 🔄: Made a mistake? Just hit Undo ↩️ to go back in time! Or Redo ↪️ to go forward!
-* **Fast Start** ⚡: Double-click any tile on your tileset sheet to pop open the drawing window instantly! 🚪
+    subgraph ThePlayerCityServer [ThePlayerCity Server]
+        NET[server/network.py - Asyncio TCP] --> GL[server/game_loop.py - Server Tick]
+        GL --> CMB[server/combat.py - Attack Calculations]
+        GL --> TS[server/tradeskills.py - Crafting/Mining]
+        NET --> ADB[server/account_database.py - Accounts]
+        NET --> IDB[server/item_database.py - SQLite Items]
+        NET --> ADM[server/admin.py - GM Protocols]
+        GUI[server/gui.py - Tkinter Dashboard] --> NET
+    end
 
-### 📜 Hairy Script Editor (The Game Brain) 🧠✍️
-* **Template Generator** 📄🌱: Starting a new script? The editor spawns a template script file containing all the event hooks (like `OnUse`, `OnLook`, `OnTalk`) ready for you to customize! 🛠️
-* **Simple Math & Words** ➕🗣️: Write scripts using normal signs (`+`, `-`) or easy words (`Plus`, `Random`, `GreaterThan`) so anyone can learn to code!
-* **Rainbow Colors** 🌈: Your scripts are color-coded (syntax highlighted) so variables, commands, and comments are easy to read! 🎨
+    subgraph ThePlayerCityClient [ThePlayerCity Client]
+        CL[client/launcher.py - Login UI] --> CN[client/network.py - TCP Socket]
+        CN --> CR[client/renderer.py - Pygame Engine]
+    end
 
-### 🧩 Prefabs & Map Grid 🧱🗺️
-* **Chunk Maker** 🧱: Glue tiles together to make reusable 16x16 prefabs (like houses 🏠 or ponds 🐟) so you don't have to place tiles one by one!
-* **Copy & Paste Grid** 📋: Copy blocks of tiles and paste them with a live outline helper showing where they will land! 🎯
-* **Multi-Map Support** 🗺️🌐: Create huge Overworlds 🌲, dark Dungeons 💀, or cosy shop interiors 🏪 and swap between them instantly!
-* **Points of Interest (POI)** 📍: Click to place warp points or spawn points, and refer to them in scripts instantly (e.g., `Teleport(ME, POI_TOWN_SQUARE)`)! 🌌
-
-### 🛡️ Safe & Secure Saving 🔒💾
-* **Central Lock System** 🔑: Multiple editors can be open at the same time without overwriting each other's work!
-* **Atomic File Swapping** ⚛️: Saves are written to temporary sidecars first, so if your power cuts out, your main files are never corrupted! 🛡️
-* **Cute `.sav` Files** 🎁: Your project packs up neatly into a single `.sav` file (which is actually a friendly `.zip` file in disguise if you want to open it manually)! 📦
+    HE -.->|Writes .hry scripts| ThePlayerCityServer
+    TE -.->|Generates game defines| ThePlayerCityServer
+    AE -.->|Connects to port 125| ADM
+    CN -.->|Connects to port 8000| NET
+```
 
 ---
 
-## 🚀 How to Run the App! 🚀
+## 🎨 1. 2D Game Editor Features
 
-### 🎒 What you need first
-1. **Python 3** installed on your computer 🐍
-2. The pillow library for handling images 🖼️:
-   ```bash
-   pip install Pillow pystray
-   ```
+### 🖌️ Pixel Editor & Tileset Management
+* **Dual-Editor Design**: Double-click any tile on your tileset sheet to open a dedicated 16x16 pixel editor.
+* **Full Toolset**: Features a Pencil, Eraser, Eyedropper, Paint Bucket, and full Undo/Redo historical queues.
+* **Collision Painter**: Paint physical properties directly onto tiles (solid, passable, water, etc.) which write structural metadata readable by the engine.
 
-### 🏁 Starting up
-#### Windows Users (Super Easy!) 💻
-* Just double-click the **`run.bat`** file! It finds Python, checks everything, and launches the app! 🚀
+### 🏷️ Unified Databases & Type Editors
+* **Weapon & Armor Editors** ([WeaponData.py](file:///e:/2DGameEditor/WeaponData.py), [ArmorData.py](file:///e:/2DGameEditor/ArmorData.py)): Full stat modifiers, level requirements, durability, and graphic assignments.
+* **Useable & Collectable Items** ([UseableItemEditor.py](file:///e:/2DGameEditor/UseableItemEditor.py), [CollectableEditor.py](file:///e:/2DGameEditor/CollectableEditor.py)): Design potions, quest tokens, mining picks, and crafting items.
+* **Monster & NPC Definition Editors** ([MonsterTypeEditor.py](file:///e:/2DGameEditor/MonsterTypeEditor.py), [NPCData.py](file:///e:/2DGameEditor/NPCData.py)): Configure HP, MP, base stats, attack speed, movement timers, and dynamic loot drop tables.
 
-#### macOS & Linux Users 🐧🍎
-* Open your terminal and type:
+### 🧱 Prefabs & World Painting
+* **Chunk Editor** ([ChunkEditor.py](file:///e:/2DGameEditor/ChunkEditor.py)): Combine standard tiles into reusable 16x16 structures (such as houses, ruins, or specific foliage clusters).
+* **World Editor** ([WorldEditor.py](file:///e:/2DGameEditor/WorldEditor.py)): A layered map editor supporting background tile placement, spawn zones, safe zones, and warp points (POI).
+* **Visual Helpers**: Features copy/paste block matrices, grid alignments, category filters, and live-rendered animation frames.
+
+### 📜 Hairy Script Editor (IDE)
+* **Double-Bridge Syncing**: Creating items, creatures, or variables automatically inserts `#Define` declarations into the script files. Editing script files automatically updates placeable types inside the World Editor.
+* **Syntax Highlighting**: Supports color-coding for event hooks (`OnUse`, `OnTalk`, `OnTick`), operators, variables, and commands.
+
+### 🛡️ Safety & Threading
+* **Background Threading**: Image caching and database indexing are processed in background worker threads so the user interface never freezes.
+* **Atomic Save System**: Writes to temporary sidecars first, swapping them atomically upon completion to guarantee your `.sav` projects are never corrupted.
+
+---
+
+## 🚀 2. ThePlayerCity Multiplayer Engine
+
+### ⚙️ Game Server Architecture
+* **Asyncio Network Hub** ([server/network.py](file:///e:/2DGameEditor/ThePlayerCity/server/network.py)): An asynchronous, TCP socket server handling multiple simultaneous connections.
+* **Salted Encryption Protocol** ([core/crypto.py](file:///e:/2DGameEditor/ThePlayerCity/core/crypto.py)): Uses a custom XOR encryption protocol. The master key (`TCPKEY`) is declared in [server/constants.md](file:///e:/2DGameEditor/ThePlayerCity/server/constants.md) and can be rotated server-side dynamically without code modifications.
+* **State Persistence**: 
+  - `accounts.db`: SQLite database managing player registration, login authentication, credentials, and ban flags.
+  - `items.db` ([server/item_database.py](file:///e:/2DGameEditor/ThePlayerCity/server/item_database.py)): Dedicated SQLite database storing item instances, durability, owners, and locations (worn, bank, ground, backpack).
+* **Server Tick Loop** ([server/game_loop.py](file:///e:/2DGameEditor/ThePlayerCity/server/game_loop.py)): Processes combat queues, natural health/mana regeneration, monster AI paths, spawner timers, and server-wide autosaves.
+* **Subsystems**:
+  - **Combat** ([server/combat.py](file:///e:/2DGameEditor/ThePlayerCity/server/combat.py)): Calculates damage formulas, level adjustments, death penalties, and corpse generation.
+  - **Tradeskills** ([server/tradeskills.py](file:///e:/2DGameEditor/ThePlayerCity/server/tradeskills.py)): Handles resource nodes, mining actions, smelting raw ore, and blacksmithing equipment.
+  - **Socials** ([server/chat.py](file:///e:/2DGameEditor/ThePlayerCity/server/chat.py) / [server/guilds.py](file:///e:/2DGameEditor/ThePlayerCity/server/guilds.py) / [server/trade.py](file:///e:/2DGameEditor/ThePlayerCity/server/trade.py)): Whisper, global, and guild chat routing, guild creation, and locked double-agree P2P secure trading.
+
+### 🎮 Pygame Game Client
+* **Game Launcher** ([client/launcher.py](file:///e:/2DGameEditor/ThePlayerCity/client/launcher.py)): Features an authentic login, register, and character-creation/race-selection interface.
+* **World Renderer** ([client/renderer.py](file:///e:/2DGameEditor/ThePlayerCity/client/renderer.py)): A hardware-accelerated Pygame screen displaying tiles, dynamic player/NPC movement updates, animated terrain (water, campfires), and other players online.
+* **HUD Overlay**:
+  - **Backpack & Equipment Panels**: Interactive grid slots displaying item tooltips and full mouse drag-and-drop support.
+  - **Chat Console & Log**: Tracks combat messages, global shouts, local whispers, and guild chat.
+  - **Minimap**: Automatically updates a scaled radar view of the local area.
+
+---
+
+## 🛠️ 3. Administrative & GM Tools
+
+* **Server Dashboard GUI** ([server/gui.py](file:///e:/2DGameEditor/ThePlayerCity/server/gui.py)): A Tkinter dashboard monitoring system logs, listing accounts, and allowing manual account creation, bans, or saves.
+* **Win95 GM Tool** ([AdminToolEditor.py](file:///e:/2DGameEditor/AdminToolEditor.py)): Integrated directly into the main Game Editor. Allows GMs to connect remotely via a secure TCP channel (packet ID 125) to:
+  - List online players, browse accounts, and inspect character profiles.
+  - Modify character stats (Strength, Constitution, level, coordinates, HP/MP max).
+  - Search items across all player inventories, bank slots, and ground containers.
+  - Send global system announcements or trigger emergency server-wide saves.
+* **CLI Admin Tool** ([editor/admin_tool.py](file:///e:/2DGameEditor/ThePlayerCity/editor/admin_tool.py)): Command-line implementation of the remote GM management utility.
+
+---
+
+## 📂 File Directory Map
+
+```
+2DGameEditor/
+│
+├── 📂 ThePlayerCity/                   # The MMO Game Files
+│   ├── 📄 main.py                      # Starts Server + Tkinter Dashboard
+│   ├── 📄 run_server.bat               # Starts Server directly
+│   ├── 📄 run_client.bat               # Starts Launcher directly
+│   │
+│   ├── 📂 core/                        # Shared Client-Server Logic
+│   │   ├── config.py                   # HryParser reads HAIRY config scripts
+│   │   ├── creatures.py                # NPC/Monster templates
+│   │   ├── crypto.py                   # XOR packet cryptographer
+│   │   ├── items.py                    # Weapon/Armor enums and bases
+│   │   ├── maps.py                     # Map chunking, passability, SQLite bindings
+│   │   ├── models.py                   # Character, Account, Guild, Skill models
+│   │   └── packets.py                  # Network packet formats
+│   │
+│   ├── 📂 server/                      # Server-Only Modules
+│   │   ├── network.py                  # TCP asyncio listener
+│   │   ├── game_loop.py                # Main clock, AI, regen
+│   │   ├── combat.py                   # Damage, death penalties, PVP rules
+│   │   ├── items.py                    # Ground drops, splitting, inventory moves
+│   │   ├── tradeskills.py              # Mining, smelting, forging mechanics
+│   │   ├── guilds.py                   # Guild registers, ranks, rosters
+│   │   ├── trade.py                    # Locked trading slots
+│   │   ├── chat.py                     # Chat channels (say, whisper, shout, guild)
+│   │   ├── admin.py                    # GM authorization & packet handler
+│   │   ├── gui.py                      # Tkinter server console
+│   │   ├── database.py                 # Core database coordinator
+│   │   ├── account_database.py         # Account persistence
+│   │   └── item_database.py            # SQLite item CRUD
+│   │
+│   ├── 📂 client/                      # Pygame Client Code
+│   │   ├── launcher.py                 # Launcher, login UI
+│   │   ├── network.py                  # Client socket receiver
+│   │   └── renderer.py                 # Pygame render loop & HUD panels
+│   └── 📂 editor/                      # Command-line admin interface
+│
+├── 📂 Assets/                          # Sprite sheets, items, audio assets
+├── 📂 HAIRY/                           # .hry script configurations
+├── 📂 Saves/                           # Editor project workspaces (.sav)
+├── 📄 GameEditor.py                    # Main Desktop Editor launcher
+├── 📄 run.bat                          # Starts Editor Suite on Windows
+│
+├── 📂 [Editors]                        # Component editors called by GameEditor
+│   ├── PixelEditor.py                  # Sprite drawing editor
+│   ├── TilesetEditor.py                # Asset properties painter
+│   ├── WorldEditor.py                  # Map constructor
+│   ├── ChunkEditor.py                  # Prefabs creator
+│   ├── TypeEditor.py                   # Database properties Editor
+│   ├── WeaponData.py / ArmorData.py    # Item databases
+│   ├── UseableItemEditor.py            # Potion/Tool editor
+│   ├── CollectableEditor.py            # Materials editor
+│   ├── MonsterTypeEditor.py            # Monster stats editor
+│   ├── MonsterSpawnEditor.py           # Spawns paint tool
+│   ├── NPCSpawnEditor.py               # NPC spawner paint tool
+│   ├── SafeZoneEditor.py               # Safe zone painter
+│   ├── ObjectSheetEditor.py            # Interactable object configs
+│   ├── ShopEditor.py                   # Shopkeeper vendor stock
+│   ├── SkillEditor.py                  # Skill stats config
+│   └── AdminToolEditor.py              # GM admin panel
+│
+└── 📂 [Core Editor Libs]
+    ├── SaveLogic.py                    # ZIP / pool atomic saves manager
+    ├── Hairy.py                        # Script parser UI
+    ├── ScriptParser.py                 # AST compile parser
+    ├── DatabaseManager.py              # Metadata database controller
+    └── WorldDatabaseManager.py         # World loader controller
+```
+
+---
+
+## 🚀 How to Run
+
+### Prerequisite Dependencies
+Ensure you have **Python 3.10+** installed. Install the necessary packages via terminal/cmd:
+```bash
+pip install Pillow pystray pygame
+```
+
+### 1. Launching the 2D Game Editor
+* **Windows**: Double-click **`run.bat`** in the root folder.
+* **Mac / Linux**: Open terminal in the root folder and run:
   ```bash
   python GameEditor.py
   ```
 
----
+### 2. Running the Multiplayer Game
 
-## 🏗️ Inside the Magic Toolbox (File Structure) 🏗️
+#### Step A: Run the Server
+1. Navigate into the `ThePlayerCity` folder.
+2. Double-click **`run_server.bat`** (Windows) or execute:
+   ```bash
+   python main.py
+   ```
+3. The server Tkinter console will open. Verify that the database loaded.
 
-* 🎮 **`GameEditor.py`**: The big boss window that manages all the other tools! It controls the window lifecycle, tray minimization, and handles editor-switching logic.
-* 🎨 **`TilesetEditor.py`**: Manage your sprite sheets and tag solid/passable zones! It writes structural metadata for coordinates on the sheets.
-* 🖌️ **`PixelEditor.py`**: Your custom pixel drawing board! Edits sprite sheets pixel by pixel.
-* 🏷️ **`TypeEditor.py`**: Win95-style database manager for all your items and enemies! Rebuilds object templates and triggers file generation.
-* 📜 **`Hairy.py`**: The cute text editor where you write your game logic!
-* 🧱 **`ChunkEditor.py`**: The prefabs room where you assemble 16x16 map chunks!
-* 💾 **`SaveLogic.py`**: The brain that compresses and packages files safely! It coordinates disk writing, file locks, and async background thread database pre-loading.
-* 📊 **`SkillsEditor.py`**: Define stats, experience curves, and level-ups!
-* 🧩 **`ScriptParser.py`**: The script engine that parses `.hry` syntax trees and extracts metadata for game objects (names, tilesets, coords, animations).
-
-### ⚙️ How the Magic Gears Turn Behind the Scenes (Deep Architecture) ⚙️
-
-1. **Bi-Directional Sync (The Double-Bridge) 🌉**:
-   When you create a new game object in the **Type Editor** 🏷️, it automatically writes a `#Define` constant inside the modular `HAIRY/FAM_*.hry` script files. Conversely, if you write a new script file manually on disk, the editor reads it, extracts headers, and registers it as a placeable game object in the **World Editor** 🗺️. No database mismatch ever!
-
-2. **Asynchronous Threading Pipeline (The Speedy Helper) 🧵**:
-   To prevent freezing, the application relies on lightweight daemon threads. The main GUI runs on the Tkinter event loop. When a heavy task occurs (like parsing 50 script files or loading massive 2K image textures), a background thread is spawned. Once the data is parsed, it schedules a repaint on the GUI thread using Tkinter's thread-safe `.after(0, callback)` method.
-
-3. **High-Speed Binary Databases (The Fast Files) 🗄️**:
-   Map files (`Chunks.json` and `World.json`) can get extremely large. The engine uses custom managers (`DatabaseManager` and `WorldDatabaseManager`) to index maps and prefabs using optimized layouts. Files are compressed dynamically inside a hidden directory (`EditingPool`) for speed during live sessions.
-
-4. **Surgical Script Compiling 📜**:
-   The engine reads Hairy script statements, filters comments, and compiles definitions into a lookup structure. This is how warp points (`Teleport`) and dialog strings (`Say`) are parsed and mapped to map coordinates.
+#### Step B: Run the Client
+1. Navigate into the `ThePlayerCity` folder.
+2. Double-click **`run_client.bat`** (Windows) or execute:
+   ```bash
+   python -m client.launcher
+   ```
+3. Enter account details or register a new character to log in and play!
 
 ---
-Have fun building your dream worlds! 🌸✨ Let's make some games! 🕹️🎉
+
+Enjoy editing and building your custom retro RPG worlds! 🎮✨
