@@ -16,3 +16,6 @@ dist/
 IOSClient/build/
 IOSClient/logs/
 IOSClient/src/HAIRY/
+IOSClient/src/Saves/
+IOSClient/src/client_mobile/client/
+IOSClient/src/client_mobile/core/
