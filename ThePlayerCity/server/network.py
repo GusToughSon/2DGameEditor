@@ -348,7 +348,7 @@ class GameServer:
                                         if a.data.acc_name == username:
                                             acc = a
                                             break
-                                    
+                                    assert acc is not None
                                     used = [c.used for c in acc.chars] + [False, False]
                                     names = [c.name for c in acc.chars] + ["", ""]
                                     levels = [c.level for c in acc.chars] + [0, 0]
@@ -655,44 +655,46 @@ class GameServer:
                 elif packet_type == "drop_item":
                     if active_client:
                         item_id = packet.get("item_id")
-                        x = active_client.char_data.x
-                        y = active_client.char_data.y
-                        from server.ground_items import drop_item_to_ground
-                        success = drop_item_to_ground(active_client, item_id, x, y)
-                        active_client.send_packet({
-                            "type": "drop_item_response",
-                            "success": success,
-                            "item_id": item_id
-                        })
-                        if success:
-                            self.send_inventory(active_client)
-                            drop_broadcast = {
-                                "type": "ground_item_spawn",
-                                "item_id": item_id,
-                                "x": x,
-                                "y": y
-                            }
-                            for client in self.clients.values():
-                                client.send_packet(drop_broadcast)
+                        if item_id is not None:
+                            x = active_client.char_data.x
+                            y = active_client.char_data.y
+                            from server.ground_items import drop_item_to_ground
+                            success = drop_item_to_ground(active_client, int(item_id), x, y)
+                            active_client.send_packet({
+                                "type": "drop_item_response",
+                                "success": success,
+                                "item_id": item_id
+                            })
+                            if success:
+                                self.send_inventory(active_client)
+                                drop_broadcast = {
+                                    "type": "ground_item_spawn",
+                                    "item_id": item_id,
+                                    "x": x,
+                                    "y": y
+                                }
+                                for client in self.clients.values():
+                                    client.send_packet(drop_broadcast)
 
                 elif packet_type == "pickup_item":
                     if active_client:
                         item_id = packet.get("item_id")
-                        from server.ground_items import pickup_item_from_ground
-                        success = pickup_item_from_ground(active_client, item_id)
-                        active_client.send_packet({
-                            "type": "pickup_item_response",
-                            "success": success,
-                            "item_id": item_id
-                        })
-                        if success:
-                            self.send_inventory(active_client)
-                            pickup_broadcast = {
-                                "type": "ground_item_despawn",
+                        if item_id is not None:
+                            from server.ground_items import pickup_item_from_ground
+                            success = pickup_item_from_ground(active_client, int(item_id))
+                            active_client.send_packet({
+                                "type": "pickup_item_response",
+                                "success": success,
                                 "item_id": item_id
-                            }
-                            for client in self.clients.values():
-                                client.send_packet(pickup_broadcast)
+                            })
+                            if success:
+                                self.send_inventory(active_client)
+                                pickup_broadcast = {
+                                    "type": "ground_item_despawn",
+                                    "item_id": item_id
+                                }
+                                for client in self.clients.values():
+                                    client.send_packet(pickup_broadcast)
 
                 elif packet_type == "attack":
                     if active_client:
@@ -741,7 +743,7 @@ class GameServer:
                         from_slot = packet.get("from_slot")
                         to_slot = packet.get("to_slot")
                         amount = packet.get("amount", 1)
-                        
+                        from server.items import execute_move_item
                         success = execute_move_item(active_client, from_list, to_list, from_slot, to_slot, amount)
                         if success:
                             self.send_inventory(active_client)
@@ -763,7 +765,7 @@ class GameServer:
                         char = active_client.char_data
                         
                         # Validate adjacency (must be within 1 tile)
-                        if abs(char.x - ox) <= 1 and abs(char.y - oy) <= 1:
+                        if ox is not None and oy is not None and abs(char.x - ox) <= 1 and abs(char.y - oy) <= 1:
                             obj = None
                             for o in self.map_db.map_objects:
                                 if o.x == ox and o.y == oy:
@@ -875,13 +877,20 @@ class GameServer:
                     acc_id = packet.get("account_id")
                     field = packet.get("field")
                     value = packet.get("value")
-                    from server.admin import edit_account_field
-                    success, msg = edit_account_field(self, acc_id, field, value)
-                    writer.write(pack_json({
-                        "type": "admin_edit_account_response",
-                        "success": success,
-                        "message": msg
-                    }))
+                    if acc_id is not None and field is not None:
+                        from server.admin import edit_account_field
+                        success, msg = edit_account_field(self, int(acc_id), str(field), value)
+                        writer.write(pack_json({
+                            "type": "admin_edit_account_response",
+                            "success": success,
+                            "message": msg
+                        }))
+                    else:
+                        writer.write(pack_json({
+                            "type": "admin_edit_account_response",
+                            "success": False,
+                            "message": "Missing account_id or field."
+                        }))
                     await writer.drain()
 
                 elif packet_type == "admin_edit_character":
@@ -892,13 +901,20 @@ class GameServer:
                     char_id = packet.get("character_id")
                     field = packet.get("field")
                     value = packet.get("value")
-                    from server.admin import edit_character_field
-                    success, msg = edit_character_field(self, char_id, field, value)
-                    writer.write(pack_json({
-                        "type": "admin_edit_character_response",
-                        "success": success,
-                        "message": msg
-                    }))
+                    if char_id is not None and field is not None:
+                        from server.admin import edit_character_field
+                        success, msg = edit_character_field(self, int(char_id), str(field), value)
+                        writer.write(pack_json({
+                            "type": "admin_edit_character_response",
+                            "success": success,
+                            "message": msg
+                        }))
+                    else:
+                        writer.write(pack_json({
+                            "type": "admin_edit_character_response",
+                            "success": False,
+                            "message": "Missing character_id or field."
+                        }))
                     await writer.drain()
 
                 elif packet_type == "admin_search_item":
@@ -908,12 +924,18 @@ class GameServer:
                         continue
                     item_type = packet.get("item_type")
                     item_id = packet.get("item_id")
-                    from server.admin import search_item_in_db
-                    results = search_item_in_db(self, item_type, item_id)
-                    writer.write(pack_json({
-                        "type": "admin_search_item_response",
-                        "results": results
-                    }))
+                    if item_type is not None and item_id is not None:
+                        from server.admin import search_item_in_db
+                        results = search_item_in_db(self, int(item_type), int(item_id))
+                        writer.write(pack_json({
+                            "type": "admin_search_item_response",
+                            "results": results
+                        }))
+                    else:
+                        writer.write(pack_json({
+                            "type": "admin_search_item_response",
+                            "results": []
+                        }))
                     await writer.drain()
 
                 elif packet_type == "admin_server_message":
@@ -922,12 +944,18 @@ class GameServer:
                         await writer.drain()
                         continue
                     message = packet.get("message")
-                    from server.admin import broadcast_system_message
-                    broadcast_system_message(self, message)
-                    writer.write(pack_json({
-                        "type": "admin_server_message_response",
-                        "success": True
-                    }))
+                    if message is not None:
+                        from server.admin import broadcast_system_message
+                        broadcast_system_message(self, str(message))
+                        writer.write(pack_json({
+                            "type": "admin_server_message_response",
+                            "success": True
+                        }))
+                    else:
+                        writer.write(pack_json({
+                            "type": "admin_server_message_response",
+                            "success": False
+                        }))
                     await writer.drain()
 
                 elif packet_type == "admin_forced_save":

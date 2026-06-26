@@ -262,3 +262,66 @@ def attempt_monster_attack_player(monster: MonsterInstance, monster_type: dict, 
         "damage": damage,
         "killed": killed
     }
+
+def attempt_attack(attacker: ClientState, target: ClientState) -> dict:
+    """Attempts an attack from one player to another player (PvP)."""
+    attacker_dex = attacker.temp_data.dex
+    target_dex = target.temp_data.dex
+    
+    # Check hit accuracy
+    acc_chance = 50 + (attacker_dex - target_dex)
+    acc_chance = max(10, min(95, acc_chance))
+    
+    if random.randint(0, 100) > acc_chance:
+        return {"hit": False, "damage": 0, "killed": False}
+        
+    # Calculate damage: attacker STR vs target AC
+    attacker_str = attacker.temp_data.str
+    base_dmg = random.randint(attacker_str // 5 + 1, attacker_str // 2 + 5)
+    target_ac = target.temp_data.ac
+    damage = max(1, base_dmg - (target_ac // 2))
+    
+    target.char_data.hp_left = max(0, target.char_data.hp_left - damage)
+    
+    killed = False
+    if target.char_data.hp_left <= 0:
+        killed = True
+        target.char_data.hp_left = 0
+        target.char_data.overall_deaths_player += 1
+        attacker.char_data.overall_player_kills += 1
+        
+        # Teleport dead player to start shrine (10, 10)
+        target.char_data.x = 10
+        target.char_data.y = 10
+        
+        target.send_packet({
+            "type": "chat_broadcast",
+            "sender": "System",
+            "message": "You have been slain in PvP! Respawning at start shrine."
+        })
+        target.send_packet({
+            "type": "stats_update",
+            "hp": target.char_data.hp_left,
+            "hp_max": target.temp_data.hp_max,
+            "mana": target.char_data.mana_left
+        })
+        target.send_packet({
+            "type": "move_response",
+            "success": True,
+            "x": 10,
+            "y": 10
+        })
+    else:
+        target.send_packet({
+            "type": "stats_update",
+            "hp": target.char_data.hp_left,
+            "hp_max": target.temp_data.hp_max,
+            "mana": target.char_data.mana_left
+        })
+        
+    return {
+        "hit": True,
+        "damage": damage,
+        "killed": killed
+    }
+
