@@ -1,7 +1,7 @@
 [tool.briefcase]
 project_name = "ThePlayerCity Client"
 bundle = "com.gustoughson"
-version = "0.1.5"
+version = "0.1.6"
 url = "https://gustoughson.com/client"
 license = "BSD-3-Clause"
 author = "GusToughSon"
