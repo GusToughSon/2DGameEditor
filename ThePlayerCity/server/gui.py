@@ -45,6 +45,7 @@ class ServerGUI:
         
         # Start queue processing
         self.root.after(100, self.process_logs)
+        self.root.after(1000, self.auto_refresh_accounts)
         
         print("== ThePlayerCity Server GUI Initialized ==")
         print(f"Loaded {len(self.db.accounts)} accounts from database.")
@@ -182,6 +183,17 @@ class ServerGUI:
             dialog.destroy()
             
         ttk.Button(dialog, text="Create", command=save).pack(pady=15)
+
+    def auto_refresh_accounts(self):
+        # Auto-refresh account database display if the database count changes
+        try:
+            current_tree_count = len(self.tree.get_children())
+            current_db_count = len(self.db.accounts)
+            if current_tree_count != current_db_count:
+                self.refresh_tree()
+        except Exception:
+            pass # Avoid crash if GUI window is closed
+        self.root.after(1000, self.auto_refresh_accounts)
 
 def run_gui():
     root = tk.Tk()
