@@ -212,7 +212,8 @@ class ClientLauncher:
                     # Launch client renderer with updated character slot coordinates
                     import subprocess
                     import sys
-                    subprocess.Popen([sys.executable, "-m", "client.renderer", username, password or "", str(slot)])
+                    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    subprocess.Popen([sys.executable, "-m", "client.renderer", username, password or "", str(slot)], cwd=root_dir)
                     self.root.destroy()
                 else:
                     err = resp.get("error", "Failed to create character.") if resp else "Server disconnected."
@@ -281,7 +282,8 @@ class ClientLauncher:
         import subprocess
         import sys
         print(f"[LAUNCHER] Launching client.renderer for {username} in slot {slot_idx}...")
-        subprocess.Popen([sys.executable, "-m", "client.renderer", username, password, str(slot_idx)])
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        subprocess.Popen([sys.executable, "-m", "client.renderer", username, password, str(slot_idx)], cwd=root_dir)
         self.root.destroy()
 
 

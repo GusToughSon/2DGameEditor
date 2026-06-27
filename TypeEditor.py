@@ -794,15 +794,8 @@ class TypeEditor:
         right_col = tk.Frame(cols_f, bg="#C0C0C0")
         right_col.pack(side="right", fill="both", expand=True)
 
-        # Numeric Fields Setup
-        num_labels = [("weight", "Weight"), ("mass", "Mass"), ("use_delay", "Use delay"), ("brightness", "Brightness"), ("radius", "Illumination radius")]
-        for p_key, label in num_labels:
-            f = tk.Frame(right_col, bg="#C0C0C0")
-            f.pack(fill="x", pady=2)
-            tk.Label(f, text=f"{label}:", bg="#C0C0C0", font=self.ui_font, width=16, anchor="e").pack(side="left")
-            var = tk.StringVar(value=str(data["properties"].get(p_key, 0)))
-            num_vars[p_key] = var
-            tk.Entry(f, textvariable=var, width=5, bg="white", relief="sunken").pack(side="left", padx=5)
+        # Dynamic Field Dictionaries
+        str_vars = {}
 
         def _rebuild_property_grid(family):
             # Clear existing items in Left and Right columns
@@ -810,47 +803,54 @@ class TypeEditor:
             for w in right_col.winfo_children(): w.destroy()
             check_vars.clear()
             num_vars.clear()
+            str_vars.clear()
 
             is_gr = (family == "Ground")
-            if is_gr:
-                c_labels = [
-                    ("block_move", "Blocked"), ("block_vis", "VisBlocked"), ("block_fly", "Can't Fly"),
-                    ("block_proj", "BlockProjectiles"), ("block_magic", "BlockMagic"), ("sailable", "CanSail"),
-                    ("light", "Light"), ("window", "Is Window"), ("slow", "Slow"), ("animated", "Animated"),
-                    ("occlusion", "Occlusion")
-                ]
-                ts_k = data.get("tileset", "World")
-                t_co = data.get("tile_coords", [0,0])
-                # Shift to 1-indexed "Row,Col" keys for alignment with JSON schema
-                tid_c = f"{t_co[1]+1},{t_co[0]+1}"
-                src_props = self.tileset_props.get(ts_k, {}).get(tid_c, {})
+            
+            # --- DYNAMIC PROPERTY LOADING ---
+            current_name = data.get("name", "Unnamed")
+            use_filename = ScriptParser._hairy_filename(current_name)
+            hairy_dir = os.path.join(self.project_path, "HAIRY")
+            script_path = os.path.join(hairy_dir, use_filename)
+            
+            raw_defines = ScriptParser.get_hairy_defines(script_path)
+            
+            # Filter out engine-reserved headers that have their own UI controls
+            reserved = {"TILESET", "GRAPHIC", "ANIM_MODE", "ANIM_SPEED", "ANIM_FRAMES", "ANIM_RAND_SPEED", "ANIM_SEQUENCE", "TILE_COORDS", "SOLID"}
+            filtered_defines = {}
+            for k, v in raw_defines.items():
+                if k not in reserved and not k.startswith("FAM_"):
+                    filtered_defines[k] = v
+            
+            if not filtered_defines:
+                tk.Label(right_col, text="No extra variables defined in script.", fg="gray", bg="#C0C0C0").pack(pady=20)
+            
+            # Auto-generate UI controls based on value types
+            for key, val in sorted(filtered_defines.items()):
+                # Determine type
+                val_upper = str(val).strip().upper()
+                is_bool = val_upper in ["0", "1", "TRUE", "FALSE"]
                 
-                # Ground doesn't usually use numeric properties in this engine
-                tk.Label(right_col, text="(Map Properties)", fg="gray", bg="#C0C0C0").pack(pady=20)
-            else:
-                c_labels = [
-                    ("not_moveable", "Not Moveable"), ("solid", "Solid"), 
-                    ("is_container", "Is Container"), ("collectable", "Collectable"),
-                    ("is_treasure", "Is a Treasure"), ("can_reach_over", "Can reach over"),
-                    ("illuminates", "Illuminates")
-                ]
-                src_props = data["properties"]
-                
-                # Standard numeric properties
-                n_labels = [("weight", "Weight"), ("mass", "Mass"), ("use_delay", "Use delay"), ("brightness", "Brightness"), ("radius", "Illumination radius")]
-                for p_key, lbl in n_labels:
+                if is_bool:
+                    # Checkbox
+                    b_val = val_upper in ["1", "TRUE"]
+                    v = tk.BooleanVar(value=b_val)
+                    check_vars[key] = v
+                    tk.Checkbutton(left_col, text=key.replace("LOCAL_", "").replace("_", " ").title(), variable=v, bg="#C0C0C0", font=self.ui_font, activebackground="#C0C0C0").pack(anchor="w")
+                else:
+                    # Text/Number Entry
                     f = tk.Frame(right_col, bg="#C0C0C0")
                     f.pack(fill="x", pady=2)
+                    lbl = key.replace("LOCAL_", "").replace("_", " ").title()
                     tk.Label(f, text=f"{lbl}:", bg="#C0C0C0", font=self.ui_font, width=16, anchor="e").pack(side="left")
-                    v = tk.StringVar(value=str(src_props.get(p_key, 0)))
-                    num_vars[p_key] = v
-                    tk.Entry(f, textvariable=v, width=5, bg="white", relief="sunken").pack(side="left", padx=5)
-
-            # Re-create Checkboxes
-            for p_key, lbl in c_labels:
-                v = tk.BooleanVar(value=src_props.get(p_key, False))
-                check_vars[p_key] = v
-                tk.Checkbutton(left_col, text=lbl, variable=v, bg="#C0C0C0", font=self.ui_font, activebackground="#C0C0C0").pack(anchor="w")
+                    
+                    if val_upper.isdigit() or (val_upper.startswith("-") and val_upper[1:].isdigit()):
+                        v = tk.StringVar(value=str(val))
+                        num_vars[key] = v
+                    else:
+                        v = tk.StringVar(value=str(val))
+                        str_vars[key] = v
+                    tk.Entry(f, textvariable=v, width=12, bg="white", relief="sunken").pack(side="left", padx=5)
 
             # Store current context for apply_changes
             self._current_is_ground = is_gr
@@ -895,6 +895,19 @@ class TypeEditor:
                 for k, v in num_vars.items():
                     try: data["properties"][k] = int(v.get())
                     except: data["properties"][k] = 0
+                for k, v in str_vars.items():
+                    data["properties"][k] = v.get()
+            
+            # --- DYNAMIC DEFINES SYNC ---
+            # Collect all defines to update
+            hairy_dir = os.path.join(self.project_path, "HAIRY")
+            script_path = os.path.join(hairy_dir, ScriptParser._hairy_filename(old_name if old_name else final_name))
+            new_defines = {}
+            for k, v in check_vars.items(): new_defines[k] = 1 if v.get() else 0
+            for k, v in num_vars.items(): new_defines[k] = v.get()
+            for k, v in str_vars.items(): new_defines[k] = v.get()
+            if new_defines:
+                ScriptParser.update_hairy_defines(script_path, new_defines)
             
             # HAIRY SYNC: Rename file if name changed, then trigger global sync via _save_types
             if old_name and old_name != final_name:

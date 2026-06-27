@@ -15,7 +15,7 @@ if %errorlevel% neq 0 (
 )
 
 echo [1/1] Launching Launcher UI...
-cd /d "%~dp0"
+cd /d "%~dp0.."
 python -m client.launcher
 
 pause

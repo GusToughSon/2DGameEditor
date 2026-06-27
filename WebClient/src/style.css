@@ -1,0 +1,164 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #c0c0c0; /* Win95 Gray */
+  font-family: "MS Sans Serif", "Arial", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#game-container {
+  position: relative;
+  border: 2px solid #808080;
+  border-right-color: #ffffff;
+  border-bottom-color: #ffffff;
+  padding: 2px;
+  background-color: #080808;
+}
+
+#game-canvas {
+  display: block;
+  image-rendering: pixelated; /* Crisp 2D tiles */
+}
+
+/* Virtual D-Pad (Shown on Mobile) */
+#virtual-dpad {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 150px;
+  height: 150px;
+}
+
+.dpad-btn {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: #c0c0c0;
+  border: 2px solid #ffffff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  font-size: 24px;
+  font-weight: bold;
+  user-select: none;
+  cursor: pointer;
+}
+
+.dpad-btn:active {
+  border: 2px solid #808080;
+  border-right-color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+#dpad-up { top: 0; left: 50px; }
+#dpad-down { bottom: 0; left: 50px; }
+#dpad-left { top: 50px; left: 0; }
+#dpad-right { top: 50px; right: 0; }
+
+/* ─── Launcher Overlays ─────────────────────────────────────────────── */
+#launcher-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 800px;
+  height: 600px;
+  background-color: #1e1e2e;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.launcher-panel {
+  width: 400px;
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+  padding: 20px;
+  text-align: center;
+}
+
+.launcher-panel h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.input-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  flex: 0 0 120px;
+  text-align: left;
+}
+
+.input-group input, .input-group select {
+  flex: 1;
+  padding: 5px;
+  background-color: #313244;
+  border: 1px solid #45475a;
+  color: #cdd6f4;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 25px;
+}
+
+button {
+  background-color: #89b4fa;
+  color: #11111b;
+  border: none;
+  padding: 8px 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #b4befe;
+}
+
+/* Character Slots */
+#char-slots-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.char-slot {
+  flex: 1;
+  background-color: #181825;
+  border: 1px solid #45475a;
+  padding: 15px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.char-slot h3 {
+  margin: 0 0 10px 0;
+  color: #cdd6f4;
+}
+
+.char-slot p {
+  margin: 0;
+  color: #bac2de;
+}
+
+.char-slot button {
+  margin-top: 15px;
+}

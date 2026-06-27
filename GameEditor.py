@@ -1036,6 +1036,20 @@ class GameEditor:
             self.root.destroy()
 
 if __name__ == "__main__":
+    import argparse
+    import LiveServerClient
+    
+    parser = argparse.ArgumentParser(description="2DGameEditor")
+    parser.add_argument("--live-mode", action="store_true", help="Enable Live Edit mode")
+    parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
+    parser.add_argument("--port", type=str, default="1338", help="Server port")
+    parser.add_argument("--auth", type=str, default="admin", help="Authentication token")
+    args = parser.parse_args()
+    
+    if args.live_mode:
+        LiveServerClient.initialize(args.host, args.port, args.auth)
+        DebugUtils.log(f"Live Mode Active - Syncing to {args.host}:{args.port}")
+
     app = None
     try:
         root = tk.Tk()

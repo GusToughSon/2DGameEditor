@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>2DGameClient (Web)</title>
+    <link rel="stylesheet" href="./src/style.css">
+  </head>
+  <body>
+    <div id="game-container">
+      <canvas id="game-canvas" width="800" height="600"></canvas>
+      
+      <!-- Virtual D-Pad for Mobile -->
+      <div id="virtual-dpad" style="display: none;">
+        <button id="dpad-up" class="dpad-btn">↑</button>
+        <button id="dpad-left" class="dpad-btn">←</button>
+        <button id="dpad-right" class="dpad-btn">→</button>
+        <button id="dpad-down" class="dpad-btn">↓</button>
+      </div>
+
+      <!-- Launcher Overlay -->
+      <div id="launcher-overlay">
+        
+        <!-- Login Screen -->
+        <div id="login-screen" class="launcher-panel">
+          <h2>ThePlayerCity Launcher</h2>
+          
+          <div class="input-group">
+            <label>Username:</label>
+            <input type="text" id="login-user" />
+          </div>
+          
+          <div class="input-group">
+            <label>Password:</label>
+            <input type="password" id="login-pass" />
+          </div>
+
+          <div class="btn-group">
+            <button id="btn-login">Login</button>
+            <button id="btn-register">Register</button>
+          </div>
+        </div>
+
+        <!-- Character Select Screen -->
+        <div id="char-select-screen" class="launcher-panel" style="display: none;">
+          <h2>Select Your Character</h2>
+          <div id="char-slots-container">
+            <!-- Populated via TS -->
+          </div>
+          <div class="btn-group" style="margin-top: 20px;">
+            <button id="btn-back-login">Back to Login</button>
+          </div>
+        </div>
+
+        <!-- Character Create Screen -->
+        <div id="char-create-screen" class="launcher-panel" style="display: none;">
+          <h2 id="create-title">Create Character</h2>
+          
+          <div class="input-group">
+            <label>Character Name:</label>
+            <input type="text" id="create-name" />
+          </div>
+          
+          <div class="input-group">
+            <label>Choose Class:</label>
+            <select id="create-class"></select>
+          </div>
+
+          <div class="btn-group">
+            <button id="btn-create-char">Create Character</button>
+            <button id="btn-back-select">Back</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

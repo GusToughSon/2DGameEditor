@@ -1,10 +1,66 @@
 # server/network.py
 import asyncio
 import os
+import websockets
 from core.packets import read_packet_async, pack_json
 from server.client_state import ClientState
 from server.game_loop import GameLoop
 from core.maps import MapDatabase
+
+class WsStreamReader:
+    def __init__(self, ws):
+        self.ws = ws
+        self.buffer = b""
+        
+    async def readexactly(self, n):
+        while len(self.buffer) < n:
+            try:
+                msg = await self.ws.recv()
+                self.buffer += msg
+            except Exception:
+                raise ConnectionResetError()
+        data = self.buffer[:n]
+        self.buffer = self.buffer[n:]
+        return data
+
+class WsStreamWriter:
+    def __init__(self, ws):
+        self.ws = ws
+        self.loop = asyncio.get_running_loop()
+        self.queue = asyncio.Queue()
+        self.worker = self.loop.create_task(self._send_worker())
+        
+    async def _send_worker(self):
+        try:
+            while True:
+                data = await self.queue.get()
+                if data is None:
+                    break
+                await self.ws.send(data)
+        except Exception:
+            pass
+            
+    def write(self, data):
+        self.queue.put_nowait(data)
+        
+    async def drain(self):
+        pass
+        
+    def close(self):
+        # Gracefully stop the send worker
+        self.queue.put_nowait(None)
+        
+    async def wait_closed(self):
+        # Wait for worker to finish
+        try:
+            await asyncio.wait_for(self.worker, timeout=2.0)
+        except asyncio.TimeoutError:
+            pass
+        
+    def get_extra_info(self, name):
+        if name == 'peername':
+            return self.ws.remote_address
+        return None
 
 class GameServer:
     def __init__(self, db_manager, port=1338):
@@ -160,12 +216,23 @@ class GameServer:
                     "body_id": body["id"]
                 })
 
+    async def handle_websocket_client(self, websocket):
+        reader = WsStreamReader(websocket)
+        writer = WsStreamWriter(websocket)
+        await self.handle_client(reader, writer)
+
     async def start(self):
         self.game_loop.start()
         self.server = await asyncio.start_server(
             self.handle_client, '0.0.0.0', self.port
         )
         print(f"Async Socket Server listening on port {self.port}...")
+        
+        # websockets.serve returns a server object that runs in the background.
+        self.ws_server = await websockets.serve(
+            self.handle_websocket_client, '0.0.0.0', 1339
+        )
+        print(f"WebSocket Server listening on port 1339...")
         
         async with self.server:
             await self.server.serve_forever()
@@ -422,6 +489,21 @@ class GameServer:
                         await writer.drain()
                         
                         self.send_inventory(active_client)
+                        
+                        # Send map data (WebClient needs this)
+                        chunks_payload = {}
+                        for cid, chunk_def in self.maps.chunks.items():
+                            c_data = chunk_def.get("data")
+                            if isinstance(c_data, dict):
+                                chunks_payload[cid] = c_data.get("ground", [])
+                            elif isinstance(c_data, list):
+                                chunks_payload[cid] = c_data
+                                
+                        active_client.send_packet({
+                            "type": "map_data",
+                            "grid": self.maps.grid,
+                            "chunks": chunks_payload
+                        })
                         
                         # Tell others about this player, and tell this player about others (if nearby)
                         for other_name, other_client in self.clients.items():

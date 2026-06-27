@@ -77,6 +77,7 @@ class ServerGUI:
         ttk.Button(actions_frame, text="Reload Database", command=self.reload_db).pack(fill=tk.X, pady=5)
         ttk.Button(actions_frame, text="Save Database", command=self.save_db).pack(fill=tk.X, pady=5)
         ttk.Button(actions_frame, text="Create Account", command=self.create_account_dialog).pack(fill=tk.X, pady=5)
+        ttk.Button(actions_frame, text="Launch Map Editor", command=self.launch_editor).pack(fill=tk.X, pady=5)
         
         # Right Panel (Tabs for Console / Account View)
         right_panel = ttk.Frame(self.root, padding=10)
@@ -183,6 +184,20 @@ class ServerGUI:
             dialog.destroy()
             
         ttk.Button(dialog, text="Create", command=save).pack(pady=15)
+
+    def launch_editor(self):
+        import subprocess
+        import os
+        import sys
+        # The editor is in the parent directory of ThePlayerCity
+        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        editor_script = os.path.join(root_dir, "GameEditor.py")
+        if os.path.exists(editor_script):
+            print(f"Launching Map Editor: {editor_script}")
+            subprocess.Popen([sys.executable, "GameEditor.py"], cwd=root_dir)
+        else:
+            print(f"Error: GameEditor.py not found in {root_dir}")
+            messagebox.showerror("Error", "GameEditor.py not found!")
 
     def auto_refresh_accounts(self):
         # Auto-refresh account database display if the database count changes

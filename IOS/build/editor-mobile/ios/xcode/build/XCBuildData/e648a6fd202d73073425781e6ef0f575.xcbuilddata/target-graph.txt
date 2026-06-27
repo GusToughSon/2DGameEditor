@@ -1,2 +1,0 @@
-Target dependency graph (1 target)
-Target '2D Game Editor' in project '2D Game Editor' (no dependencies)

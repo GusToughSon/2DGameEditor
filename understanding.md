@@ -7,6 +7,41 @@ The suite integrates graphic design, database structure, and scriptable logic (`
 
 ---
 
+## 🗺️ Interactive Visual Node Reference
+
+You can explore the entire codebase visually! Graphify has generated an interactive 3D node-graph map of the codebase architecture.
+👉 **[Open the Visual Graph](file:///e:/2DGameEditor/graphify-out/graph.html)** (Click to open `graph.html` in your web browser)
+
+---
+
+## 🏛️ Graphify Architectural Insights (Auto-Generated)
+
+Based on the knowledge graph extraction via [Graphify](https://github.com/safishamsi/graphify), the architecture exhibits highly cohesive communities with several dominant coordinator modules (God Nodes).
+
+### 🌌 God Nodes & Central Coordinators
+These are the most highly-connected files and form the backbone of the application architecture:
+1. **`GameEditor.py` (62 edges):** The master orchestrator. Bridging almost all UI features (Tileset Editor, World Editor, Pixel Editor).
+2. **`TilesetEditor.py` (59 edges):** The primary asset coordinator and visual manager. 
+3. **`WorldEditor.py` (53 edges):** Handles the massive spatial canvas and layout interactions.
+4. **`PixelEditor.py` (49 edges):** Advanced graphics suite heavily reliant on sub-components.
+5. **`center_window()` (48 edges):** A globally utilized UI helper representing high component interdependence.
+6. **`ChunkEditor.py` (44 edges)**
+7. **`TilesetPalette` (35 edges)**
+8. **`SaveLogic.py` (34 edges):** The persistence bridge between memory and the file system.
+
+### 🌉 Cross-Community Bridges
+- **`GameEditor`** acts as a bridge spanning across 25 different logical communities, orchestrating initialization, windows, background saves, and component launching.
+- **`TilesetEditor`** spans across 10 distinct communities handling graphics rendering, metadata application, and database loading.
+- **`center_window()`** is highly central, connecting UI windows spanning across the entire suite (Type Editors, Map Selectors, Notifications).
+
+### 🔍 Hidden & Inferred Connections (Design Insights)
+Graphify inferred several non-explicit architectural couplings:
+- **`ChunkEditor`** heavily relies on **`TilesetPalette`** implicitly within `EditorComponents.py`.
+- **`SaveLogic`** and **`WorldEditor`** are tightly coupled with **`DatabaseManager`** to execute atomic writes and large spatial array operations.
+- The **`DebugUtils`** module acts as a shadow-dependency across multiple editors (`GameEditor`, `PixelEditor`) for tracer benchmarking.
+
+---
+
 ## 🏛️ Core Architecture and Design Patterns
 
 ### 💾 Project Persistence (The "Editing Pool")
@@ -30,88 +65,30 @@ Maintains strict consistency between game assets and logic scripts:
 
 ---
 
-## 🗂️ Complete Directory & File-by-File Breakdown
-
-Below is a detailed log of every file in the workspace directory and its inner workings:
+## 🗂️ Module & Component Breakdown
 
 ### 🎮 Startup, Configuration & Automation Scripts
-* **[GameEditor.py](GameEditor.py)**:
-  * The main entry point and coordinator. It builds the primary application workspace window, handles global menus, configures taskbar/window icons (using `ctypes` on Windows), and orchestrates background saves.
-  * Spawns all sub-editor windows and integrates a system tray icon via `pystray`.
-* **[config.py](config.py)**:
-  * Central configuration repository. Defines standard colors (Win95 silver, blue titles), classic fonts (`MS Sans Serif`), app versioning (`VERSION`), default chunk sizes, and the persistent tracking value for the last active project (`LAST_PROJECT`).
-* **[EditorColors.py](EditorColors.py)**:
-  * UI palette token system. Defines syntax-highlighting theme colors for comments, keywords, directives, brackets, and brackets in Hairy files, plus light/dark bezel shades.
-* **[run.bat](run.bat)**:
-  * Robust Windows bootstrap launcher. Automatically locates Python, installs missing libraries (`Pillow`, `pystray`), prevents active engine instance collision via `taskkill`, and safely runs `GameEditor.py`.
-* **[build_exe.bat](build_exe.bat)**:
-  * Production compiler using `PyInstaller`. Dynamically increments project version, embeds window resources, packages all sub-folders into a single standalone `.exe`, and clean-ups auxiliary build files.
-* **[increment_version.py](increment_version.py)**:
-  * Regex-based script that automatically increments the patch or minor version number in `config.py` as part of the PyInstaller build sequence.
-
----
+* **`GameEditor.py`**: The main entry point and coordinator. Builds the primary application workspace window, handles global menus, and orchestrates background saves.
+* **`config.py`**: Central configuration repository. Defines standard colors, classic fonts (`MS Sans Serif`), app versioning (`VERSION`).
+* **`run.bat` & `build_exe.bat`**: Windows bootstrap launcher and PyInstaller compiler script.
+* **`increment_version.py`**: Automatic version incrementer script for the PyInstaller build sequence.
 
 ### 🛠️ Specialized UI Editors
-* **[TilesetEditor.py](TilesetEditor.py)**:
-  * Manages the pixel coordinates, grid sizes, and physical collision/passability properties (e.g. solid, block magic, window, occlusion) of master tileset sheets.
-  * Supports importing external PNG images directly into selected highlighted grid blocks and exporting updated sheets.
-* **[TypeEditor.py](TypeEditor.py)**:
-  * Win95-style metadata editor for designing item types.
-  * Links type names to script families, custom characteristics (weight, mass, solid), animation timelines, and base tileset coordinates.
-* **[PixelEditor.py](PixelEditor.py)**:
-  * A retro-style 16x16 tile painter. Features grid view, color pickers, pencil, eraser, paint bucket tools, and multi-step Undo/Redo histories.
-* **[AnimationEditor.py](AnimationEditor.py)**:
-  * Visual timeline tool for sequencing multi-frame animations. Allows defining frame coordinates, playback durations, looping patterns, and real-time previews.
-* **[WorldEditor.py](WorldEditor.py)**:
-  * Large-scale map landscape painter. Orchestrates maps (Overworld, Dungeons) with coordinates, zoom/pan, culling, and Point of Interest (POI) management.
-* **[ChunkEditor.py](ChunkEditor.py)**:
-  * Prefab constructor for drafting 16x16 land modules. Allows copying, pasting, rotating, and stamp-painting pre-arranged layouts.
-* **[Hairy.py](Hairy.py)**:
-  * Built-in code IDE for Hairy (`.hry`) script writing. Features double-buffered text editors, custom line numbers, compile-checking, and syntax-based colorization.
-* **[SkillEditor.py](SkillEditor.py)**:
-  * Utility for establishing player character leveling paths, experience formulas, and unlockable abilities.
-* **[ShopEditor.py](ShopEditor.py)**:
-  * Visual editor for setting merchant stock lists, restock timers, buy/sell rate modifiers, and currency triggers.
-* **[MonsterSpawnEditor.py](MonsterSpawnEditor.py)**:
-  * Editor for setting monster spawns, spawn rates, boundaries, and maps.
-* **[ObjectSheetEditor.py](ObjectSheetEditor.py)**:
-  * Spreadsheet-style bulk list editor for rapid coordinate, text, and parameter adjustments across hundreds of items.
-* **[LootEditor.py](LootEditor.py)**:
-  * Configures loot drops, percentage chances, reward tiers, and dungeon chest spawners.
-
----
+* **`TilesetEditor.py`**: Manages pixel coordinates, grid sizes, and physical properties (solid, occlusion).
+* **`TypeEditor.py`**: Win95-style metadata editor for designing item types.
+* **`PixelEditor.py`**: Retro-style 16x16 tile painter with multi-step Undo/Redo histories.
+* **`WorldEditor.py` & `ChunkEditor.py`**: Map landscape painters and prefab constructors.
+* **`AnimationEditor.py`**: Visual timeline tool for sequencing multi-frame animations.
+* **`SkillEditor.py`, `ShopEditor.py`, `MonsterSpawnEditor.py`, `LootEditor.py`**: Editors for establishing player progression, economy, mob spawns, and rewards.
 
 ### 🗃️ Engine Logic, Databases & Serialization
-* **[SaveLogic.py](SaveLogic.py)**:
-  * Engine orchestrator for unpacking/compressing project files, syncing changes atomically, backing up active files, and pre-loading types databases on startup.
-* **[ScriptParser.py](ScriptParser.py)**:
-  * The syntax parser. Resolves script constants, extracts structured data from `.hry` files, and generates defines mappings for variables in the engine.
-* **[DatabaseManager.py](DatabaseManager.py)**:
-  * Read/write manager for storing 16x16 tile chunk packages in space-efficient formats.
-* **[WorldDatabaseManager.py](WorldDatabaseManager.py)**:
-  * Dedicated spatial data manager for reading and writing large world maps.
-* **[BinaryDriver.py](BinaryDriver.py)**:
-  * High-performance binary codec that serializes raw game assets, coordinates, and properties directly to custom byte streams.
-* **[ChunkDatabase.py](ChunkDatabase.py)**:
-  * Command-line processor that ingests raw CSV coordinates, maps ground/object tiles, and converts them into standardized 16x16 database structures.
-* **[clean_types.py](clean_types.py)**:
-  * Data hygiene tool that strips deprecated fields, normalizes family names, sorts alphabetically, and formats `Types.json`.
-
----
+* **`SaveLogic.py`**: Engine orchestrator for unpacking/compressing project files and syncing changes atomically.
+* **`ScriptParser.py` & `Hairy.py`**: Built-in IDE and parser for `.hry` logic scripts.
+* **`DatabaseManager.py` & `WorldDatabaseManager.py`**: Read/write managers for 16x16 chunk packages and large world maps.
+* **`BinaryDriver.py`**: High-performance binary codec that serializes raw game assets.
 
 ### 🛡️ Specialized Stat Sheets & Utilities
-* **[NPCData.py](NPCData.py)**:
-  * Creature statistics editor. Links combat statistics, levels, activities, and alignment properties directly to Hairy code defines.
-* **[WeaponData.py](WeaponData.py)**:
-  * Weapon statistics editor. Links class-based properties, damage bounds, and item requirements to Hairy code defines.
-* **[ArmorData.py](ArmorData.py)**:
-  * Shield and armor editor. Links durability parameters, magic modifiers, and skill requirements to Hairy code defines.
-* **[TilesetSelector.py](TilesetSelector.py)**:
-  * Sub-palette pop-up selector. Renders a single overlayed grid view of the tileset sheet, optimizing performance and eliminating rendering lag.
-* **[EditorComponents.py](EditorComponents.py)**:
-  * Common shared widgets. Includes `GameStatusBar`, `TilesetPalette`, `LoginNotification`, and window positioning helpers.
-* **[DebugUtils.py](DebugUtils.py)**:
-  * Console tracer with high-precision timestamping and context managers for performance benchmarking.
-* **[SecurityUtils.py](SecurityUtils.py)**:
-  * Security helpers. Generates SHA256 checksums and appends small random noise blocks to binary files to bypass antivirus heuristic false positives.
-
+* **`NPCData.py`, `WeaponData.py`, `ArmorData.py`**: Creature and equipment statistics editors.
+* **`TilesetSelector.py`**: Sub-palette pop-up selector rendering optimized grid views of tileset sheets.
+* **`EditorComponents.py`**: Common shared widgets (e.g. `GameStatusBar`, `TilesetPalette`).
+* **`SecurityUtils.py` & `DebugUtils.py`**: Security checks, hashing, and console performance tracing.

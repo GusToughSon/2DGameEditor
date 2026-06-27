@@ -6,6 +6,9 @@ import os
 import config
 from PIL import Image, ImageTk, ImageDraw
 NEAREST_FILTER = getattr(getattr(Image, "Resampling", Image), "NEAREST")
+import json
+import collections
+import LiveServerClient
 from EditorComponents import center_window, TilesetPalette
 import ScriptParser
 
@@ -259,6 +262,9 @@ class WorldEditor:
         self.canvas.bind("<ButtonRelease-3>", self.end_stroke)
         self.canvas.bind("<MouseWheel>", self.on_zoom)
 
+        # Real-time Live Entity Sync
+        self.live_entities_cache = {}
+        self.win.after(100, self._live_update_tick)
         
         # Inherit Global Cursor
         # GameEditor's _set_app_cursor manages this.
@@ -557,6 +563,22 @@ class WorldEditor:
                 py = self.pan_y + (p["y"] * self.zoom)
                 self.canvas.create_oval(px-5, py-5, px+5, py+5, fill=p.get("color", "lime"), outline="white", tags="chunk")
                 self.canvas.create_text(px, py-10, text=p["name"], fill="white", font=("Arial", 8, "bold"), tags="chunk")
+
+            # --- RENDER LIVE ENTITIES ---
+            if hasattr(self, 'live_entities_cache') and self.live_entities_cache:
+                for eid, data in self.live_entities_cache.items():
+                    x = data.get("x", 0)
+                    y = data.get("y", 0)
+                    name = data.get("name", "Unknown")
+                    etype = data.get("type", "player")
+                    
+                    ex = self.pan_x + (x * chunk_px)
+                    ey = self.pan_y + (y * chunk_px)
+                    
+                    color = "#4E79A7" if etype == "player" else "#E15759"
+                    
+                    self.canvas.create_oval(ex-5, ey-5, ex+5, ey+5, fill=color, outline="white", tags="chunk")
+                    self.canvas.create_text(ex, ey-12, text=name, fill="white", font=("Arial", int(8*self.zoom), "bold"), tags="chunk")
 
         finally:
             self.is_drawing = False
@@ -882,6 +904,13 @@ class WorldEditor:
                 grid[crow][ccol] = self.selected_chunk_id
                 self._draw_canvas()
                 self.save_manager.mark_dirty()
+                if LiveServerClient.is_active():
+                    LiveServerClient.send("UPDATE_CHUNK", {
+                        "map": self.current_map_name,
+                        "x": ccol,
+                        "y": crow,
+                        "chunk_id": self.selected_chunk_id
+                    })
         elif self.mode in ["TILE", "OBJECT", "ITEMS"]:
             # TILE/OBJECT MODE: Direct edit of the chunk at this location
             # Normalize CID for registry lookup
@@ -946,6 +975,17 @@ class WorldEditor:
                 self._invalidate_cache(target_cid)
                 
                 self._draw_canvas()
+                self.save_manager.mark_dirty()
+                if LiveServerClient.is_active():
+                    LiveServerClient.send("UPDATE_TILE", {
+                        "map": self.current_map_name,
+                        "x": ccol,
+                        "y": crow,
+                        "sm_x": sm_x,
+                        "sm_y": sm_y,
+                        "layer": layer_name if 'layer_name' in locals() else "objects" if self.mode in ["OBJECT", "ITEMS"] else "ground",
+                        "tile_id": self.selected_tile_id
+                    })
         elif self.mode == "POINT":
             # Add a POI at coordinates
             # Screen -> World (unscaled)
@@ -1140,7 +1180,39 @@ class WorldEditor:
     def on_close(self):
         self.win.destroy()
 
+    def _live_update_tick(self):
+        if not self.win.winfo_exists(): return
+        if LiveServerClient.is_active():
+            new_entities = LiveServerClient.get_entities(self.current_map_name)
+            if new_entities != self.live_entities_cache:
+                self.live_entities_cache = new_entities
+                self._draw_canvas()
+        self.win.after(100, self._live_update_tick)
+
+    def _show_god_mode_menu(self, event, entity_id, entity_name):
+        menu = tk.Menu(self.win, tearoff=0)
+        menu.add_command(label=f"God Actions for {entity_name}", state="disabled")
+        menu.add_separator()
+        menu.add_command(label="Kick Player", command=lambda: LiveServerClient.send("GOD_ACTION", {"target_id": entity_id, "command": "kick"}))
+        menu.add_command(label="Teleport to Me", command=lambda: LiveServerClient.send("GOD_ACTION", {"target_id": entity_id, "command": "teleport"}))
+        menu.add_command(label="Kill Entity", command=lambda: LiveServerClient.send("GOD_ACTION", {"target_id": entity_id, "command": "kill"}))
+        menu.post(event.x_root, event.y_root)
+
     def on_right_click(self, event):
+        # 1. God-Mode Live Entity Check
+        if hasattr(self, 'live_entities_cache') and self.live_entities_cache and event.type == tk.EventType.ButtonPress:
+            chunk_px = (self.tile_size * config.CHUNK_SIZE) * self.zoom
+            world_x = (event.x - self.pan_x) / chunk_px
+            world_y = (event.y - self.pan_y) / chunk_px
+            
+            # Simple bounding box hit detection (approximate 0.5 radius)
+            for eid, data in self.live_entities_cache.items():
+                x = data.get("x", 0)
+                y = data.get("y", 0)
+                if abs(world_x - x) < 0.5 and abs(world_y - y) < 0.5:
+                    self._show_god_mode_menu(event, eid, data.get("name", "Unknown"))
+                    return
+
         if self.mode == "SAFE_ZONE":
             chunk_px = (self.tile_size * config.CHUNK_SIZE) * self.zoom
             world_x = (event.x - self.pan_x) / chunk_px

@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw
 from DebugUtils import DebugUtils
 from DatabaseManager import DatabaseManager
 from WorldDatabaseManager import WorldDatabaseManager
+import LiveServerClient
 
 class SaveLogic:
     """
@@ -719,6 +720,10 @@ Shop "General Store"
                             
                 print(f"[DEBUG] Project '{self.project_name}' Saved Locally: {self.project_path}")
                 self.is_dirty = False
+                
+                if LiveServerClient.is_active():
+                    LiveServerClient.send("FLUSH_TO_DISK", {"project": self.project_name})
+                    
                 return (True, None)
             except Exception as e:
                 print(f"[ERROR] Save failed: {e}")
